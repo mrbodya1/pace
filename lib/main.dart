@@ -849,6 +849,16 @@ class _PaceHomeState extends State<PaceHome>
     final displayedPace = pace > 0
         ? pace
         : (km > 0 ? elapsed.inSeconds / km : 0.0);
+    final displayedRoute = route.isNotEmpty
+        ? route
+            .map((position) => RoutePoint(
+                  latitude: position.latitude,
+                  longitude: position.longitude,
+                ))
+            .toList(growable: false)
+        : (workoutFinished && workouts.isNotEmpty
+            ? workouts.first.route
+            : const <RoutePoint>[]);
 
     return ListView(
       padding: const EdgeInsets.all(20),
@@ -1079,34 +1089,45 @@ class _PaceHomeState extends State<PaceHome>
             color: panel,
             borderRadius: BorderRadius.circular(20),
           ),
-          child: Center(
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                const Icon(
-                  Icons.route_rounded,
-                  color: lime,
-                  size: 34,
-                ),
-                const SizedBox(height: 9),
-                Text(
-                  route.isEmpty
-                      ? (workoutFinished
-                          ? 'Маршрут завершён. Начни новую тренировку для новой записи.'
-                          : 'Маршрут появится после получения GPS')
-                      : 'Записано GPS-точек: ${route.length}',
-                  style: const TextStyle(color: muted, fontSize: 12),
-                ),
-                if (route.isNotEmpty) ...[
-                  const SizedBox(height: 5),
-                  Text(
-                    'Точность последней точки: ${lastAccuracy.toStringAsFixed(0)} м',
-                    style: const TextStyle(color: muted, fontSize: 10),
+          child: displayedRoute.length >= 2
+              ? Padding(
+                  padding: const EdgeInsets.all(12),
+                  child: Column(
+                    children: [
+                      Expanded(
+                        child: CustomPaint(
+                          painter: RoutePainter(displayedRoute),
+                          child: const SizedBox.expand(),
+                        ),
+                      ),
+                      const SizedBox(height: 5),
+                      Text(
+                        workoutFinished
+                            ? 'Маршрут последней тренировки · ${displayedRoute.length} точек'
+                            : 'Записано GPS-точек: ${displayedRoute.length}',
+                        style: const TextStyle(color: muted, fontSize: 10),
+                      ),
+                    ],
                   ),
-                ],
-              ],
-            ),
-          ),
+                )
+              : Center(
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      const Icon(Icons.route_rounded, color: lime, size: 34),
+                      const SizedBox(height: 9),
+                      Text(
+                        route.isEmpty
+                            ? (workoutFinished
+                                ? 'Для этой тренировки нет сохранённого GPS-маршрута.'
+                                : 'Маршрут появится после получения GPS')
+                            : 'Записано GPS-точек: ${route.length}. Нужно минимум две.',
+                        style: const TextStyle(color: muted, fontSize: 12),
+                        textAlign: TextAlign.center,
+                      ),
+                    ],
+                  ),
+                ),
         ),
         const SizedBox(height: 18),
         sectionTitle('ТИП АКТИВНОСТИ'),
