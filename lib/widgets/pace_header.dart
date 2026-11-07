@@ -1,58 +1,55 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
 import '../app/theme/pace_theme.dart';
+import 'glass_widgets.dart';
 
 class PaceHeader extends StatelessWidget {
-  const PaceHeader({super.key});
+  const PaceHeader({super.key, this.onProfile});
+  final VoidCallback? onProfile;
 
   @override
   Widget build(BuildContext context) {
     return Row(
       children: [
-        Container(
-          width: 44,
-          height: 44,
-          decoration: BoxDecoration(
-            color: lime,
-            borderRadius: BorderRadius.circular(13),
-          ),
-          child: const Icon(
-            Icons.bolt_rounded,
-            color: bg,
-            size: 29,
+        const Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                'P A C E',
+                style: TextStyle(
+                  color: muted,
+                  fontSize: 12,
+                  fontWeight: FontWeight.w600,
+                  letterSpacing: 2,
+                ),
+              ),
+              SizedBox(height: 8),
+              Text(
+                'Обзор',
+                style: TextStyle(
+                  fontSize: 36,
+                  height: 1.1,
+                  fontWeight: FontWeight.w700,
+                  letterSpacing: -1,
+                ),
+              ),
+            ],
           ),
         ),
-        const SizedBox(width: 11),
-        const Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              'PACE',
-              style: TextStyle(
-                fontSize: 21,
-                fontWeight: FontWeight.w900,
-                letterSpacing: 3,
-              ),
+        Semantics(
+          button: true,
+          label: 'Открыть профиль',
+          child: IconButton(
+            onPressed: onProfile,
+            tooltip: 'Профиль',
+            padding: EdgeInsets.zero,
+            icon: const GlassPanel(
+              radius: 28,
+              padding: EdgeInsets.all(14),
+              child: Icon(CupertinoIcons.person, size: 25, color: Colors.white),
             ),
-            Text(
-              'ATHLETE COMMUNITY',
-              style: TextStyle(
-                fontSize: 8,
-                color: muted,
-                letterSpacing: 1.7,
-              ),
-            ),
-          ],
-        ),
-        const Spacer(),
-        const Icon(Icons.notifications_none_rounded),
-        const SizedBox(width: 12),
-        const CircleAvatar(
-          radius: 19,
-          backgroundColor: panel,
-          child: Text(
-            'B',
-            style: TextStyle(color: lime, fontWeight: FontWeight.w900),
           ),
         ),
       ],

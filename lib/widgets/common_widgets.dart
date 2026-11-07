@@ -3,96 +3,62 @@ import 'package:flutter/material.dart';
 import '../app/theme/pace_theme.dart';
 import '../models/workout.dart';
 import '../features/tracker/widgets/route_painter.dart';
+import 'glass_widgets.dart';
 
 Widget sectionTitle(String text) {
   return Text(
     text,
     style: const TextStyle(
       color: muted,
-      fontSize: 11,
-      fontWeight: FontWeight.w900,
-      letterSpacing: 1.4,
+      fontSize: 14,
+      fontWeight: FontWeight.w600,
+      letterSpacing: 0.3,
     ),
   );
 }
 
-Widget metric(
-  String label,
-  String value,
-  IconData icon, {
-  String? suffix,
-}) {
+Widget metric(String label, String value, IconData icon, {String? suffix}) {
   return Padding(
-    padding: const EdgeInsets.only(right: 5),
+    padding: const EdgeInsets.only(right: 6),
     child: Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Icon(icon, color: lime, size: 19),
-        const SizedBox(height: 9),
+        Icon(icon, color: muted, size: 22),
+        const SizedBox(height: 10),
         FittedBox(
           fit: BoxFit.scaleDown,
           alignment: Alignment.centerLeft,
           child: Text(
             value,
-            style: const TextStyle(
-              fontSize: 18,
-              fontWeight: FontWeight.w900,
-            ),
+            style: const TextStyle(fontSize: 22, fontWeight: FontWeight.w600),
           ),
         ),
         if (suffix != null)
-          Text(
-            suffix,
-            style: const TextStyle(color: muted, fontSize: 10),
-          ),
+          Text(suffix, style: const TextStyle(color: muted, fontSize: 12)),
         const SizedBox(height: 4),
-        Text(
-          label,
-          style: const TextStyle(
-            color: muted,
-            fontSize: 9,
-            fontWeight: FontWeight.w800,
-          ),
-        ),
+        Text(label, style: const TextStyle(color: muted, fontSize: 11)),
       ],
     ),
   );
 }
 
-Widget statCard(
-  String label,
-  String value,
-  IconData icon, {
-  String? suffix,
-}) {
-  return Container(
-    padding: const EdgeInsets.all(17),
-    decoration: BoxDecoration(
-      color: panel,
-      borderRadius: BorderRadius.circular(17),
-    ),
+Widget statCard(String label, String value, IconData icon, {String? suffix}) {
+  return GlassPanel(
     child: Row(
       children: [
-        Icon(icon, color: lime, size: 23),
-        const SizedBox(width: 13),
+        Icon(icon, color: lime, size: 26),
+        const SizedBox(width: 14),
         Expanded(
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text(
-                label,
-                style: const TextStyle(
-                  color: muted,
-                  fontSize: 10,
-                  fontWeight: FontWeight.w800,
-                ),
-              ),
-              const SizedBox(height: 5),
+              Text(label, style: const TextStyle(color: muted, fontSize: 12)),
+              const SizedBox(height: 6),
               Text(
                 '$value${suffix == null ? '' : ' $suffix'}',
                 style: const TextStyle(
-                  fontSize: 23,
-                  fontWeight: FontWeight.w900,
+                  fontSize: 25,
+                  fontWeight: FontWeight.w600,
                 ),
               ),
             ],
@@ -110,81 +76,79 @@ String formatWorkoutDuration(Duration d) {
   return d.inHours > 0 ? '$h:$m:$s' : '$m:$s';
 }
 
-Widget workoutCard(Workout w) {
-  return Container(
-    margin: const EdgeInsets.only(bottom: 10),
-    padding: const EdgeInsets.all(15),
-    decoration: BoxDecoration(
-      color: panel,
-      borderRadius: BorderRadius.circular(16),
-    ),
-    child: Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Row(
-          children: [
-            const Icon(Icons.route_rounded, color: lime, size: 25),
-            const SizedBox(width: 12),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    w.sport,
-                    style: const TextStyle(fontWeight: FontWeight.w800),
-                  ),
-                  const SizedBox(height: 4),
-                  Text(
-                    '${w.date.day.toString().padLeft(2, '0')}.'
-                    '${w.date.month.toString().padLeft(2, '0')}.'
-                    '${w.date.year} · ${formatWorkoutDuration(w.duration)}',
-                    style: const TextStyle(color: muted, fontSize: 11),
-                  ),
-                ],
+Widget workoutCard(Workout w, {bool showRoute = true}) {
+  return Padding(
+    padding: const EdgeInsets.only(bottom: 10),
+    child: GlassPanel(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Container(
+                padding: const EdgeInsets.all(12),
+                decoration: BoxDecoration(
+                  color: const Color(0x354F526B),
+                  borderRadius: BorderRadius.circular(20),
+                  border: Border.all(color: const Color(0x506F748E)),
+                ),
+                child: Icon(
+                  w.sport == 'Велосипед'
+                      ? Icons.directions_bike_rounded
+                      : w.sport == 'Ходьба'
+                      ? Icons.directions_walk_rounded
+                      : Icons.directions_run_rounded,
+                  color: lime,
+                  size: 27,
+                ),
               ),
-            ),
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.end,
-              children: [
-                Text(
-                  '${w.distance.toStringAsFixed(2)} км',
-                  style: const TextStyle(fontWeight: FontWeight.w900),
+              const SizedBox(width: 14),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      w.sport,
+                      style: const TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      '${w.distance.toStringAsFixed(2)} км · ${formatWorkoutDuration(w.duration)}',
+                      style: const TextStyle(color: muted, fontSize: 14),
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      '${w.date.day.toString().padLeft(2, '0')}.'
+                      '${w.date.month.toString().padLeft(2, '0')}.'
+                      '${w.date.year} · +${w.xp} XP',
+                      style: const TextStyle(color: muted, fontSize: 12),
+                    ),
+                  ],
                 ),
-                const SizedBox(height: 4),
-                Text(
-                  '+${w.xp} XP',
-                  style: const TextStyle(
-                    color: lime,
-                    fontSize: 11,
-                    fontWeight: FontWeight.w800,
-                  ),
-                ),
-              ],
+              ),
+            ],
+          ),
+          if (showRoute) ...[
+            const SizedBox(height: 14),
+            if (w.route.length >= 2)
+              SizedBox(
+                height: 76,
+                width: double.infinity,
+                child: CustomPaint(painter: RoutePainter(w.route)),
+              ),
+            const SizedBox(height: 4),
+            Text(
+              w.route.length >= 2
+                  ? 'GPS-маршрут сохранён'
+                  : 'GPS-маршрут не записан',
+              style: const TextStyle(color: muted, fontSize: 12),
             ),
           ],
-        ),
-        if (w.route.length >= 2) ...[
-          const SizedBox(height: 12),
-          SizedBox(
-            height: 76,
-            width: double.infinity,
-            child: CustomPaint(
-              painter: RoutePainter(w.route),
-            ),
-          ),
-          const SizedBox(height: 4),
-          const Text(
-            'GPS-маршрут сохранён',
-            style: TextStyle(color: muted, fontSize: 10),
-          ),
-        ] else ...[
-          const SizedBox(height: 8),
-          const Text(
-            'GPS-маршрут не записан',
-            style: TextStyle(color: muted, fontSize: 10),
-          ),
         ],
-      ],
+      ),
     ),
   );
 }
@@ -195,52 +159,57 @@ Widget achievement(
   String subtitle,
   bool unlocked,
 ) {
-  return Container(
-    margin: const EdgeInsets.only(bottom: 10),
-    padding: const EdgeInsets.all(15),
-    decoration: BoxDecoration(
-      color: panel,
-      borderRadius: BorderRadius.circular(15),
-    ),
-    child: Row(
-      children: [
-        Icon(icon, color: unlocked ? lime : muted, size: 26),
-        const SizedBox(width: 12),
-        Expanded(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                title,
-                style: const TextStyle(fontWeight: FontWeight.w800),
-              ),
-              const SizedBox(height: 4),
-              Text(
-                subtitle,
-                style: const TextStyle(color: muted, fontSize: 11),
-              ),
-            ],
+  return Padding(
+    padding: const EdgeInsets.only(bottom: 10),
+    child: GlassPanel(
+      child: Row(
+        children: [
+          Icon(icon, color: unlocked ? lime : muted, size: 28),
+          const SizedBox(width: 14),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  title,
+                  style: const TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  subtitle,
+                  style: const TextStyle(color: muted, fontSize: 13),
+                ),
+              ],
+            ),
           ),
-        ),
-        Icon(
-          unlocked ? Icons.check_circle : Icons.lock_outline,
-          color: unlocked ? lime : muted,
-        ),
-      ],
+          const SizedBox(width: 8),
+          Icon(
+            unlocked ? Icons.check_circle : Icons.lock_outline,
+            color: unlocked ? lime : muted,
+            size: 22,
+          ),
+        ],
+      ),
     ),
   );
 }
 
 Widget emptyCard(String text) {
-  return Container(
-    padding: const EdgeInsets.all(20),
-    decoration: BoxDecoration(
-      color: panel,
-      borderRadius: BorderRadius.circular(16),
-    ),
-    child: Text(
-      text,
-      style: const TextStyle(color: muted, height: 1.5),
+  return GlassPanel(
+    child: Row(
+      children: [
+        const Icon(Icons.route_rounded, color: muted, size: 28),
+        const SizedBox(width: 14),
+        Expanded(
+          child: Text(
+            text,
+            style: const TextStyle(color: muted, fontSize: 15, height: 1.5),
+          ),
+        ),
+      ],
     ),
   );
 }
