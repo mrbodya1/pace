@@ -4,11 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
 import 'models/workout.dart';
 import 'data/storage/local_storage_service.dart';
-
-const lime = Color(0xFFC7F36B);
-const bg = Color(0xFF111310);
-const panel = Color(0xFF1C1F1A);
-const muted = Color(0xFF92978A);
+import 'app/theme/pace_theme.dart';
 
 void main() {
   runApp(const PaceApp());
@@ -22,15 +18,7 @@ class PaceApp extends StatelessWidget {
     return MaterialApp(
       title: 'PACE',
       debugShowCheckedModeBanner: false,
-      theme: ThemeData(
-        brightness: Brightness.dark,
-        scaffoldBackgroundColor: bg,
-        colorScheme: const ColorScheme.dark(
-          primary: lime,
-          surface: panel,
-        ),
-        useMaterial3: true,
-      ),
+      theme: paceTheme,
       home: const PaceHome(),
     );
   }
