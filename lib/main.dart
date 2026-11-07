@@ -36,12 +36,35 @@ class PaceApp extends StatelessWidget {
   }
 }
 
+class RoutePoint {
+  final double latitude;
+  final double longitude;
+
+  const RoutePoint({
+    required this.latitude,
+    required this.longitude,
+  });
+
+  Map<String, dynamic> toJson() => {
+        'latitude': latitude,
+        'longitude': longitude,
+      };
+
+  factory RoutePoint.fromJson(Map<String, dynamic> json) {
+    return RoutePoint(
+      latitude: (json['latitude'] as num).toDouble(),
+      longitude: (json['longitude'] as num).toDouble(),
+    );
+  }
+}
+
 class Workout {
   final DateTime date;
   final double distance;
   final Duration duration;
   final int xp;
   final String sport;
+  final List<RoutePoint> route;
 
   Workout({
     required this.date,
@@ -49,6 +72,7 @@ class Workout {
     required this.duration,
     required this.xp,
     required this.sport,
+    this.route = const [],
   });
 
   Map<String, dynamic> toJson() => {
@@ -57,17 +81,91 @@ class Workout {
         'durationSeconds': duration.inSeconds,
         'xp': xp,
         'sport': sport,
+        'route': route.map((point) => point.toJson()).toList(),
       };
 
   factory Workout.fromJson(Map<String, dynamic> json) {
+    final savedRoute = (json['route'] as List<dynamic>? ?? [])
+        .map((item) => RoutePoint.fromJson(
+              Map<String, dynamic>.from(item as Map),
+            ))
+        .toList();
+
     return Workout(
       date: DateTime.parse(json['date'] as String),
       distance: (json['distance'] as num).toDouble(),
       duration: Duration(seconds: (json['durationSeconds'] as num).toInt()),
       xp: (json['xp'] as num).toInt(),
       sport: json['sport'] as String,
+      route: savedRoute,
     );
   }
+}
+
+
+class RoutePainter extends CustomPainter {
+  final List<RoutePoint> points;
+
+  RoutePainter(this.points);
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    if (points.length < 2 || size.isEmpty) return;
+
+    final minLat = points.map((p) => p.latitude).reduce((a, b) => a < b ? a : b);
+    final maxLat = points.map((p) => p.latitude).reduce((a, b) => a > b ? a : b);
+    final minLon = points.map((p) => p.longitude).reduce((a, b) => a < b ? a : b);
+    final maxLon = points.map((p) => p.longitude).reduce((a, b) => a > b ? a : b);
+
+    final latRange = (maxLat - minLat).abs();
+    final lonRange = (maxLon - minLon).abs();
+    final safeLat = latRange < 0.000001 ? 0.000001 : latRange;
+    final safeLon = lonRange < 0.000001 ? 0.000001 : lonRange;
+    final scale = (size.width - 24) / safeLon < (size.height - 20) / safeLat
+        ? (size.width - 24) / safeLon
+        : (size.height - 20) / safeLat;
+    final drawWidth = safeLon * scale;
+    final drawHeight = safeLat * scale;
+    final offsetX = (size.width - drawWidth) / 2;
+    final offsetY = (size.height - drawHeight) / 2;
+
+    final path = Path();
+    for (var i = 0; i < points.length; i++) {
+      final point = points[i];
+      final x = offsetX + (point.longitude - minLon) * scale;
+      final y = size.height - offsetY - (point.latitude - minLat) * scale;
+      if (i == 0) {
+        path.moveTo(x, y);
+      } else {
+        path.lineTo(x, y);
+      }
+    }
+
+    final paint = Paint()
+      ..color = lime
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 3
+      ..strokeCap = StrokeCap.round
+      ..strokeJoin = StrokeJoin.round;
+    canvas.drawPath(path, paint);
+
+    final start = points.first;
+    final end = points.last;
+    final startOffset = Offset(
+      offsetX + (start.longitude - minLon) * scale,
+      size.height - offsetY - (start.latitude - minLat) * scale,
+    );
+    final endOffset = Offset(
+      offsetX + (end.longitude - minLon) * scale,
+      size.height - offsetY - (end.latitude - minLat) * scale,
+    );
+    canvas.drawCircle(startOffset, 4, Paint()..color = Colors.white);
+    canvas.drawCircle(endOffset, 4, Paint()..color = lime);
+  }
+
+  @override
+  bool shouldRepaint(covariant RoutePainter oldDelegate) =>
+      oldDelegate.points != points;
 }
 
 class PaceHome extends StatefulWidget {
@@ -382,6 +480,12 @@ class _PaceHomeState extends State<PaceHome>
 
     final finalDistance = distance / 1000;
     final finalDuration = stopwatch.elapsed;
+    final savedRoute = route
+        .map((position) => RoutePoint(
+              latitude: position.latitude,
+              longitude: position.longitude,
+            ))
+        .toList(growable: false);
     final wasSaved = finalDistance >= 0.05;
     final earnedXp = wasSaved ? (finalDistance * 100).round() : 0;
     final finishedActivity = sports[selectedSport];
@@ -419,6 +523,7 @@ class _PaceHomeState extends State<PaceHome>
             duration: finalDuration,
             xp: earnedXp,
             sport: finishedActivity,
+            route: savedRoute,
           ),
         );
       });
@@ -1280,46 +1385,72 @@ class _PaceHomeState extends State<PaceHome>
         color: panel,
         borderRadius: BorderRadius.circular(16),
       ),
-      child: Row(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Icon(Icons.route_rounded, color: lime, size: 25),
-          const SizedBox(width: 12),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  w.sport,
-                  style: const TextStyle(fontWeight: FontWeight.w800),
-                ),
-                const SizedBox(height: 4),
-                Text(
-                  '${w.date.day.toString().padLeft(2, '0')}.'
-                  '${w.date.month.toString().padLeft(2, '0')}.'
-                  '${w.date.year} · ${formatDuration(w.duration)}',
-                  style: const TextStyle(color: muted, fontSize: 11),
-                ),
-              ],
-            ),
-          ),
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.end,
+          Row(
             children: [
-              Text(
-                '${w.distance.toStringAsFixed(2)} км',
-                style: const TextStyle(fontWeight: FontWeight.w900),
-              ),
-              const SizedBox(height: 4),
-              Text(
-                '+${w.xp} XP',
-                style: const TextStyle(
-                  color: lime,
-                  fontSize: 11,
-                  fontWeight: FontWeight.w800,
+              const Icon(Icons.route_rounded, color: lime, size: 25),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      w.sport,
+                      style: const TextStyle(fontWeight: FontWeight.w800),
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      '${w.date.day.toString().padLeft(2, '0')}.'
+                      '${w.date.month.toString().padLeft(2, '0')}.'
+                      '${w.date.year} · ${formatDuration(w.duration)}',
+                      style: const TextStyle(color: muted, fontSize: 11),
+                    ),
+                  ],
                 ),
+              ),
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.end,
+                children: [
+                  Text(
+                    '${w.distance.toStringAsFixed(2)} км',
+                    style: const TextStyle(fontWeight: FontWeight.w900),
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    '+${w.xp} XP',
+                    style: const TextStyle(
+                      color: lime,
+                      fontSize: 11,
+                      fontWeight: FontWeight.w800,
+                    ),
+                  ),
+                ],
               ),
             ],
           ),
+          if (w.route.length >= 2) ...[
+            const SizedBox(height: 12),
+            SizedBox(
+              height: 76,
+              width: double.infinity,
+              child: CustomPaint(
+                painter: RoutePainter(w.route),
+              ),
+            ),
+            const SizedBox(height: 4),
+            const Text(
+              'GPS-маршрут сохранён',
+              style: TextStyle(color: muted, fontSize: 10),
+            ),
+          ] else ...[
+            const SizedBox(height: 8),
+            const Text(
+              'GPS-маршрут не записан',
+              style: TextStyle(color: muted, fontSize: 10),
+            ),
+          ],
         ],
       ),
     );
