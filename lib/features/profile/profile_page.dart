@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../app/theme/pace_theme.dart';
 import '../../widgets/common_widgets.dart';
+import '../auth/sign_in_page.dart';
 
 class ProfilePage extends StatelessWidget {
   const ProfilePage({
@@ -47,6 +48,21 @@ class ProfilePage extends StatelessWidget {
           child: Text(
             'Универсальный атлет',
             style: TextStyle(color: muted),
+          ),
+        ),
+        const SizedBox(height: 25),
+        FilledButton.icon(
+          onPressed: () {
+            Navigator.of(context).push<void>(
+              MaterialPageRoute<void>(
+                builder: (_) => const SignInPage(),
+              ),
+            );
+          },
+          icon: const Icon(Icons.login_rounded),
+          label: const Text('Войти в аккаунт'),
+          style: FilledButton.styleFrom(
+            minimumSize: const Size.fromHeight(52),
           ),
         ),
         const SizedBox(height: 25),
