@@ -1,8 +1,11 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
 import '../../app/theme/pace_theme.dart';
 import '../../models/workout.dart';
 import '../../widgets/common_widgets.dart';
+import '../../widgets/glass_widgets.dart';
+import '../../widgets/xp_ring.dart';
 
 class HomePage extends StatelessWidget {
   const HomePage({
@@ -16,171 +19,124 @@ class HomePage extends StatelessWidget {
     required this.onStartWorkout,
   });
 
-  final int xp;
-  final int level;
-  final int levelStart;
-  final int levelEnd;
+  final int xp, level, levelStart, levelEnd;
   final List<Workout> workouts;
   final Widget header;
   final VoidCallback onStartWorkout;
 
   @override
   Widget build(BuildContext context) {
-    final progress =
-        ((xp - levelStart) / (levelEnd - levelStart)).clamp(0.0, 1.0);
-
+    final now = DateTime.now();
+    const months = [
+      'января',
+      'февраля',
+      'марта',
+      'апреля',
+      'мая',
+      'июня',
+      'июля',
+      'августа',
+      'сентября',
+      'октября',
+      'ноября',
+      'декабря',
+    ];
+    final totalDistance = workouts.fold<double>(
+      0,
+      (sum, w) => sum + w.distance,
+    );
     return ListView(
-      padding: const EdgeInsets.all(20),
+      padding: const EdgeInsets.fromLTRB(22, 20, 22, 132),
       children: [
         header,
-        const SizedBox(height: 28),
-        const Text(
-          'ТВОЙ ПУТЬ. ТВОИ ПРАВИЛА.',
-          style: TextStyle(
-            color: muted,
-            fontSize: 10,
-            fontWeight: FontWeight.w800,
-            letterSpacing: 2,
-          ),
+        const SizedBox(height: 4),
+        Text(
+          '${now.day} ${months[now.month - 1]} ${now.year}',
+          style: const TextStyle(color: muted, fontSize: 16),
         ),
-        const SizedBox(height: 10),
-        const Text(
-          'Стань своей\nлучшей версией.',
-          style: TextStyle(
-            fontSize: 34,
-            height: 1.08,
-            fontWeight: FontWeight.w900,
-            letterSpacing: -1.3,
-          ),
+        const SizedBox(height: 16),
+        XpRing(
+          xp: xp,
+          level: level,
+          levelStart: levelStart,
+          levelEnd: levelEnd,
         ),
-        const SizedBox(height: 22),
-        Container(
-          padding: const EdgeInsets.all(22),
-          decoration: BoxDecoration(
-            gradient: const LinearGradient(
-              colors: [Color(0xFF292E24), Color(0xFF1A1D17)],
-            ),
-            borderRadius: BorderRadius.circular(23),
-          ),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
+        const SizedBox(height: 18),
+        IntrinsicHeight(
+          child: Row(
             children: [
-              const Text(
-                'АТЛЕТ · УРОВЕНЬ',
-                style: TextStyle(
-                  color: lime,
-                  fontSize: 10,
-                  fontWeight: FontWeight.w800,
-                  letterSpacing: 1.5,
+              Expanded(
+                child: _Summary(
+                icon: CupertinoIcons.flame,
+                  label: 'Тренировки',
+                  value: '${workouts.length}',
                 ),
               ),
-              const SizedBox(height: 12),
-              Row(
-                crossAxisAlignment: CrossAxisAlignment.end,
-                children: [
-                  Text(
-                    '$level',
-                    style: const TextStyle(
-                      fontSize: 65,
-                      height: 1,
-                      fontWeight: FontWeight.w900,
-                    ),
-                  ),
-                  const SizedBox(width: 14),
-                  const Padding(
-                    padding: EdgeInsets.only(bottom: 7),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          'BODYA',
-                          style: TextStyle(
-                            fontSize: 19,
-                            fontWeight: FontWeight.w900,
-                          ),
-                        ),
-                        Text(
-                          'Универсальный атлет',
-                          style: TextStyle(color: muted, fontSize: 11),
-                        ),
-                      ],
-                    ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 22),
-              Text(
-                '$xp XP',
-                style: const TextStyle(
-                  color: lime,
-                  fontSize: 28,
-                  fontWeight: FontWeight.w900,
+              const VerticalDivider(width: 24),
+              Expanded(
+                child: _Summary(
+                  icon: CupertinoIcons.location,
+                  label: 'Дистанция',
+                  value: '${totalDistance.toStringAsFixed(1)} км',
                 ),
-              ),
-              const SizedBox(height: 10),
-              ClipRRect(
-                borderRadius: BorderRadius.circular(8),
-                child: LinearProgressIndicator(
-                  value: progress,
-                  minHeight: 7,
-                  backgroundColor: Colors.white12,
-                  valueColor: const AlwaysStoppedAnimation(lime),
-                ),
-              ),
-              const SizedBox(height: 8),
-              Text(
-                '${levelEnd - xp} XP до уровня ${level + 1}',
-                style: const TextStyle(color: muted, fontSize: 11),
               ),
             ],
           ),
         ),
-        const SizedBox(height: 25),
-        sectionTitle('ТВОЯ СТАТИСТИКА'),
         const SizedBox(height: 12),
-        Row(
-          children: [
-            Expanded(
-              child: statCard(
-                'ТРЕНИРОВКИ',
-                '${workouts.length}',
-                Icons.fitness_center_rounded,
-              ),
-            ),
-            const SizedBox(width: 10),
-            Expanded(
-              child: statCard(
-                'ДИСТАНЦИЯ',
-                workouts.fold<double>(
-                  0,
-                  (sum, w) => sum + w.distance,
-                ).toStringAsFixed(1),
-                Icons.route_rounded,
-                suffix: 'км',
-              ),
-            ),
-          ],
+        const Divider(height: 24),
+        const Text(
+          'Последняя тренировка',
+          style: TextStyle(fontSize: 20, fontWeight: FontWeight.w600),
         ),
-        const SizedBox(height: 25),
-        sectionTitle('ПОСЛЕДНИЕ ТРЕНИРОВКИ'),
-        const SizedBox(height: 12),
+        const SizedBox(height: 14),
         if (workouts.isEmpty)
-          emptyCard('Здесь появятся твои реальные GPS-тренировки.')
+          emptyCard('Здесь появится твоя первая GPS-тренировка.')
         else
-          ...workouts.take(3).map(workoutCard),
+          workoutCard(workouts.first, showRoute: false),
         const SizedBox(height: 22),
-        FilledButton.icon(
-          onPressed: onStartWorkout,
-          icon: const Icon(Icons.play_arrow_rounded),
-          label: const Text('Начать тренировку'),
-          style: FilledButton.styleFrom(
-            backgroundColor: lime,
-            foregroundColor: bg,
-            minimumSize: const Size.fromHeight(54),
+        GlassWorkoutButton(onPressed: onStartWorkout),
+        const SizedBox(height: 8),
+      ],
+    );
+  }
+}
+
+class _Summary extends StatelessWidget {
+  const _Summary({
+    required this.icon,
+    required this.label,
+    required this.value,
+  });
+  final IconData icon;
+  final String label, value;
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      children: [
+        Icon(icon, color: muted, size: 25),
+        const SizedBox(width: 12),
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(label, style: const TextStyle(color: muted, fontSize: 14)),
+              const SizedBox(height: 4),
+              FittedBox(
+                fit: BoxFit.scaleDown,
+                child: Text(
+                  value,
+                  style: const TextStyle(
+                    fontSize: 28,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+              ),
+            ],
           ),
         ),
       ],
     );
   }
-
 }

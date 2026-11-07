@@ -7,6 +7,7 @@ import 'models/xp_progress.dart';
 import 'data/storage/local_storage_service.dart';
 import 'app/theme/pace_theme.dart';
 import 'widgets/pace_header.dart';
+import 'widgets/glass_widgets.dart';
 import 'features/home/home_page.dart';
 import 'features/tracker/tracker_page.dart';
 import 'features/progress/progress_page.dart';
@@ -430,7 +431,7 @@ class _PaceHomeState extends State<PaceHome>
         levelStart: levelStart,
         levelEnd: levelEnd,
         workouts: workouts,
-        header: const PaceHeader(),
+        header: PaceHeader(onProfile: () => setState(() => tab = 3)),
         onStartWorkout: () => setState(() => tab = 1),
       ),
       TrackerPage(
@@ -479,42 +480,19 @@ class _PaceHomeState extends State<PaceHome>
     ];
 
     return Scaffold(
-      body: SafeArea(
-        child: IndexedStack(
-          index: tab,
-          children: pages,
+      extendBody: true,
+      body: PaceBackground(
+        child: SafeArea(
+          bottom: false,
+          child: IndexedStack(index: tab, children: pages),
         ),
       ),
-      bottomNavigationBar: NavigationBar(
-        height: 70,
-        backgroundColor: const Color(0xFF191B17),
-        indicatorColor: lime.withValues(alpha: 0.14),
-        selectedIndex: tab,
-        onDestinationSelected: (index) {
-          setState(() => tab = index);
-        },
-        destinations: const [
-          NavigationDestination(
-            icon: Icon(Icons.grid_view_rounded),
-            selectedIcon: Icon(Icons.grid_view_rounded, color: lime),
-            label: 'Главная',
-          ),
-          NavigationDestination(
-            icon: Icon(Icons.directions_run_rounded),
-            selectedIcon: Icon(Icons.directions_run_rounded, color: lime),
-            label: 'Трекер',
-          ),
-          NavigationDestination(
-            icon: Icon(Icons.insights_rounded),
-            selectedIcon: Icon(Icons.insights_rounded, color: lime),
-            label: 'Прогресс',
-          ),
-          NavigationDestination(
-            icon: Icon(Icons.person_outline_rounded),
-            selectedIcon: Icon(Icons.person_rounded, color: lime),
-            label: 'Профиль',
-          ),
-        ],
+      bottomNavigationBar: SafeArea(
+        minimum: const EdgeInsets.fromLTRB(16, 8, 16, 12),
+        child: GlassNavigation(
+          index: tab,
+          onSelect: (index) => setState(() => tab = index),
+        ),
       ),
     );
   }

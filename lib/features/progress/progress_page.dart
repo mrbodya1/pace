@@ -23,12 +23,12 @@ class ProgressPage extends StatelessWidget {
     );
 
     return ListView(
-      padding: const EdgeInsets.all(20),
+      padding: const EdgeInsets.fromLTRB(22, 20, 22, 132),
       children: [
         const SizedBox(height: 10),
         const Text(
-          'Твой прогресс',
-          style: TextStyle(fontSize: 32, fontWeight: FontWeight.w900),
+          'Прогресс',
+          style: TextStyle(fontSize: 32, fontWeight: FontWeight.w600),
         ),
         const SizedBox(height: 20),
         statCard('УРОВЕНЬ', '$level', Icons.military_tech_rounded),
@@ -61,6 +61,13 @@ class ProgressPage extends StatelessWidget {
           'Набери 9000 XP',
           xp >= 9000,
         ),
+        const SizedBox(height: 24),
+        sectionTitle('ИСТОРИЯ ТРЕНИРОВОК'),
+        const SizedBox(height: 12),
+        if (workouts.isEmpty)
+          emptyCard('Твои тренировки появятся здесь после первой записи.')
+        else
+          ...workouts.map((w) => workoutCard(w)),
       ],
     );
   }

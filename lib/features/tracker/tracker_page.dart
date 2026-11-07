@@ -4,6 +4,7 @@ import 'package:geolocator/geolocator.dart';
 import '../../app/theme/pace_theme.dart';
 import '../../models/workout.dart';
 import '../../widgets/common_widgets.dart';
+import '../../widgets/glass_widgets.dart';
 import 'widgets/route_painter.dart';
 
 class TrackerPage extends StatelessWidget {
@@ -48,7 +49,10 @@ class TrackerPage extends StatelessWidget {
   final List<IconData> sportIcons;
   final String Function(Duration) formatDuration;
   final String Function(double) formatPace;
-  final VoidCallback onNewWorkout, onStartWorkout, onPauseWorkout, onFinishWorkout;
+  final VoidCallback onNewWorkout,
+      onStartWorkout,
+      onPauseWorkout,
+      onFinishWorkout;
   final ValueChanged<int> onSelectSport;
 
   @override
@@ -59,22 +63,24 @@ class TrackerPage extends StatelessWidget {
         : (km > 0 ? elapsed.inSeconds / km : 0.0);
     final displayedRoute = route.isNotEmpty
         ? route
-            .map((position) => RoutePoint(
+              .map(
+                (position) => RoutePoint(
                   latitude: position.latitude,
                   longitude: position.longitude,
-                ))
-            .toList(growable: false)
+                ),
+              )
+              .toList(growable: false)
         : (workoutFinished && workouts.isNotEmpty
-            ? workouts.first.route
-            : const <RoutePoint>[]);
+              ? workouts.first.route
+              : const <RoutePoint>[]);
 
     return ListView(
-      padding: const EdgeInsets.all(20),
+      padding: const EdgeInsets.fromLTRB(22, 20, 22, 132),
       children: [
         const SizedBox(height: 10),
         const Text(
           'Трекер',
-          style: TextStyle(fontSize: 32, fontWeight: FontWeight.w900),
+          style: TextStyle(fontSize: 34, fontWeight: FontWeight.w600),
         ),
         const SizedBox(height: 7),
         const Text(
@@ -82,13 +88,8 @@ class TrackerPage extends StatelessWidget {
           style: TextStyle(color: muted),
         ),
         const SizedBox(height: 23),
-        Container(
+        GlassPanel(
           padding: const EdgeInsets.all(22),
-          decoration: BoxDecoration(
-            color: panel,
-            borderRadius: BorderRadius.circular(24),
-            border: Border.all(color: Colors.white10),
-          ),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -127,13 +128,19 @@ class TrackerPage extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.baseline,
                 textBaseline: TextBaseline.alphabetic,
                 children: [
-                  Text(
-                    km.toStringAsFixed(2),
-                    style: const TextStyle(
-                      fontSize: 58,
-                      height: 1.1,
-                      fontWeight: FontWeight.w900,
-                      letterSpacing: -2,
+                  Flexible(
+                    child: FittedBox(
+                      fit: BoxFit.scaleDown,
+                      alignment: Alignment.centerLeft,
+                      child: Text(
+                        km.toStringAsFixed(2),
+                        style: const TextStyle(
+                          fontSize: 64,
+                          height: 1.1,
+                          fontWeight: FontWeight.w600,
+                          letterSpacing: -2,
+                        ),
+                      ),
                     ),
                   ),
                   const SizedBox(width: 8),
@@ -203,9 +210,7 @@ class TrackerPage extends StatelessWidget {
                   children: [
                     Expanded(
                       child: OutlinedButton.icon(
-                        onPressed: paused
-                            ? onStartWorkout
-                            : onPauseWorkout,
+                        onPressed: paused ? onStartWorkout : onPauseWorkout,
                         icon: Icon(
                           paused
                               ? Icons.play_arrow_rounded
@@ -242,7 +247,7 @@ class TrackerPage extends StatelessWidget {
           Container(
             padding: const EdgeInsets.all(18),
             decoration: BoxDecoration(
-              color: const Color(0xFF252A20),
+              color: const Color(0xD02A2C40),
               borderRadius: BorderRadius.circular(20),
               border: Border.all(color: lime.withValues(alpha: 0.35)),
             ),
@@ -259,7 +264,7 @@ class TrackerPage extends StatelessWidget {
                         style: TextStyle(
                           color: lime,
                           fontSize: 10,
-                          fontWeight: FontWeight.w900,
+                          fontWeight: FontWeight.w600,
                           letterSpacing: 1.1,
                         ),
                       ),
@@ -275,7 +280,7 @@ class TrackerPage extends StatelessWidget {
                   '$finishedSport · ${finishedDistance.toStringAsFixed(2)} км',
                   style: const TextStyle(
                     fontSize: 22,
-                    fontWeight: FontWeight.w900,
+                    fontWeight: FontWeight.w600,
                   ),
                 ),
                 const SizedBox(height: 5),
@@ -327,8 +332,8 @@ class TrackerPage extends StatelessWidget {
                       Text(
                         route.isEmpty
                             ? (workoutFinished
-                                ? 'Для этой тренировки нет сохранённого GPS-маршрута.'
-                                : 'Маршрут появится после получения GPS')
+                                  ? 'Для этой тренировки нет сохранённого GPS-маршрута.'
+                                  : 'Маршрут появится после получения GPS')
                             : 'Записано GPS-точек: ${route.length}. Нужно минимум две.',
                         style: const TextStyle(color: muted, fontSize: 12),
                         textAlign: TextAlign.center,
@@ -347,29 +352,24 @@ class TrackerPage extends StatelessWidget {
               child: Padding(
                 padding: EdgeInsets.only(right: i == 2 ? 0 : 8),
                 child: InkWell(
-                  onTap: tracking
-                      ? null
-                      : () => onSelectSport(i),
+                  onTap: tracking ? null : () => onSelectSport(i),
                   borderRadius: BorderRadius.circular(14),
                   child: Container(
                     padding: const EdgeInsets.symmetric(vertical: 15),
                     decoration: BoxDecoration(
-                      color: selected ? lime : panel,
+                      color: selected ? lime : const Color(0xD02A2C40),
                       borderRadius: BorderRadius.circular(14),
                     ),
                     child: Column(
                       children: [
-                        Icon(
-                          sportIcons[i],
-                          color: selected ? bg : muted,
-                        ),
+                        Icon(sportIcons[i], color: selected ? bg : muted),
                         const SizedBox(height: 6),
                         Text(
                           sports[i],
                           style: TextStyle(
                             color: selected ? bg : Colors.white,
                             fontWeight: FontWeight.w700,
-                            fontSize: 11,
+                            fontSize: 12,
                           ),
                         ),
                       ],
@@ -389,5 +389,4 @@ class TrackerPage extends StatelessWidget {
       ],
     );
   }
-
 }

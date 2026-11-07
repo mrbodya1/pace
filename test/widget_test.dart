@@ -6,7 +6,7 @@ void main() {
   testWidgets('PACE app starts', (WidgetTester tester) async {
     await tester.pumpWidget(const PaceApp());
 
-    expect(find.text('PACE'), findsOneWidget);
+    expect(find.text('Обзор'), findsOneWidget);
     expect(find.text('Главная'), findsOneWidget);
   });
 }
