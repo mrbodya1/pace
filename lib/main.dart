@@ -394,14 +394,14 @@ class _PaceHomeState extends State<PaceHome>
     gpsSubscription = Geolocator.getPositionStream(
       locationSettings: const LocationSettings(
         accuracy: LocationAccuracy.best,
-        distanceFilter: 3,
+        distanceFilter: 0,
       ),
     ).listen(
       (position) {
         if (!mounted || !tracking || paused) return;
 
-        // Ignore inaccurate readings.
-        if (position.accuracy > 30) return;
+        // Keep usable emulator and real-device readings; reject only very poor fixes.
+        if (position.accuracy > 50) return;
 
         final previous = lastPosition;
 
@@ -414,13 +414,6 @@ class _PaceHomeState extends State<PaceHome>
           return;
         }
 
-        final seconds = position.timestamp
-                .difference(previous.timestamp)
-                .inMilliseconds /
-            1000.0;
-
-        if (seconds <= 0) return;
-
         final segment = Geolocator.distanceBetween(
           previous.latitude,
           previous.longitude,
@@ -428,25 +421,34 @@ class _PaceHomeState extends State<PaceHome>
           position.longitude,
         );
 
-        final segmentSpeed = segment / seconds;
-
-        // Reject obvious GPS jumps and implausible speeds.
-        if (segmentSpeed > 12) return;
+        final seconds = position.timestamp
+                .difference(previous.timestamp)
+                .inMilliseconds /
+            1000.0;
+        final segmentSpeed = seconds > 0 ? segment / seconds : 0.0;
 
         setState(() {
+          // Always advance the reference point so one rejected jump cannot
+          // block every subsequent GPS update.
           lastPosition = position;
           lastAccuracy = position.accuracy;
 
-          if (segment >= 2) {
-            distance += segment;
-
-            final reportedSpeed = position.speed;
-            speed = reportedSpeed.isFinite && reportedSpeed >= 0
-                ? reportedSpeed
-                : segmentSpeed;
-
-            pace = speed > 0 ? 1000 / speed : 0;
+          if (segment >= 1) {
+            // Keep the route geometry even when emulator playback is too fast
+            // to count that segment toward workout distance.
             route.add(position);
+
+            // Count only plausible movement to avoid GPS jumps inflating distance.
+            if (segment <= 100 && seconds > 0 && segmentSpeed <= 20) {
+              distance += segment;
+
+              final reportedSpeed = position.speed;
+              speed = reportedSpeed.isFinite && reportedSpeed > 0
+                  ? reportedSpeed
+                  : segmentSpeed;
+
+              pace = speed > 0 ? 1000 / speed : 0;
+            }
           }
         });
       },
