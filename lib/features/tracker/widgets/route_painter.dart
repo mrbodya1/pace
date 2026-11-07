@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
-import '../../app/theme/pace_theme.dart';
-import '../../models/workout.dart';
+import '../../../app/theme/pace_theme.dart';
+import '../../../models/workout.dart';
 
 class RoutePainter extends CustomPainter {
   final List<RoutePoint> points;
