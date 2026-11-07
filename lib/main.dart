@@ -5,10 +5,10 @@ import 'package:geolocator/geolocator.dart';
 import 'models/workout.dart';
 import 'data/storage/local_storage_service.dart';
 import 'app/theme/pace_theme.dart';
-import 'widgets/common_widgets.dart';
 import 'features/home/home_page.dart';
 import 'features/tracker/tracker_page.dart';
 import 'features/progress/progress_page.dart';
+import 'features/profile/profile_page.dart';
 
 void main() {
   runApp(const PaceApp());
@@ -487,7 +487,16 @@ class _PaceHomeState extends State<PaceHome>
         level: level,
         workouts: workouts,
       ),
-      profilePage(),
+      ProfilePage(
+        sports: sports,
+        sportIcons: sportIcons,
+        selectedSport: selectedSport,
+        tracking: tracking,
+        onSelectSport: (i) {
+          setState(() => selectedSport = i);
+          _saveProgress();
+        },
+      ),
     ];
 
     return Scaffold(
@@ -583,75 +592,4 @@ class _PaceHomeState extends State<PaceHome>
       ],
     );
   }
-
-
-
-  Widget profilePage() {
-    return ListView(
-      padding: const EdgeInsets.all(20),
-      children: [
-        const SizedBox(height: 10),
-        const Text(
-          'Профиль',
-          style: TextStyle(fontSize: 32, fontWeight: FontWeight.w900),
-        ),
-        const SizedBox(height: 28),
-        const CircleAvatar(
-          radius: 46,
-          backgroundColor: panel,
-          child: Icon(Icons.person_rounded, size: 54, color: lime),
-        ),
-        const SizedBox(height: 14),
-        const Center(
-          child: Text(
-            'BODYA',
-            style: TextStyle(fontSize: 24, fontWeight: FontWeight.w900),
-          ),
-        ),
-        const SizedBox(height: 5),
-        const Center(
-          child: Text(
-            'Универсальный атлет',
-            style: TextStyle(color: muted),
-          ),
-        ),
-        const SizedBox(height: 25),
-        sectionTitle('СПОРТИВНЫЙ ПРОФИЛЬ'),
-        const SizedBox(height: 12),
-        ...sports.asMap().entries.map((entry) {
-          return Padding(
-            padding: const EdgeInsets.only(bottom: 9),
-            child: ListTile(
-              tileColor: panel,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(14),
-              ),
-              leading: Icon(
-                sportIcons[entry.key],
-                color: selectedSport == entry.key ? lime : muted,
-              ),
-              title: Text(entry.value),
-              trailing: selectedSport == entry.key
-                  ? const Icon(Icons.check_circle, color: lime)
-                  : null,
-              onTap: tracking
-                  ? null
-                  : () {
-                      setState(() => selectedSport = entry.key);
-                      _saveProgress();
-                    },
-            ),
-          );
-        }),
-        const SizedBox(height: 15),
-        const Text(
-          'PACE · Локальный прототип',
-          textAlign: TextAlign.center,
-          style: TextStyle(color: muted, fontSize: 11),
-        ),
-      ],
-    );
-  }
-
-
 }
