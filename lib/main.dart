@@ -5,7 +5,6 @@ import 'package:geolocator/geolocator.dart';
 import 'models/workout.dart';
 import 'data/storage/local_storage_service.dart';
 import 'app/theme/pace_theme.dart';
-import 'features/tracker/widgets/route_painter.dart';
 import 'widgets/common_widgets.dart';
 import 'features/home/home_page.dart';
 import 'features/tracker/tracker_page.dart';
