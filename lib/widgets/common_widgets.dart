@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 
 import '../app/theme/pace_theme.dart';
+import '../models/workout.dart';
+import '../features/tracker/widgets/route_painter.dart';
 
 Widget sectionTitle(String text) {
   return Text(
@@ -101,6 +103,13 @@ Widget statCard(
   );
 }
 
+String formatWorkoutDuration(Duration d) {
+  final h = d.inHours.toString().padLeft(2, '0');
+  final m = (d.inMinutes % 60).toString().padLeft(2, '0');
+  final s = (d.inSeconds % 60).toString().padLeft(2, '0');
+  return d.inHours > 0 ? '$h:$m:$s' : '$m:$s';
+}
+
 Widget workoutCard(Workout w) {
   return Container(
     margin: const EdgeInsets.only(bottom: 10),
@@ -128,7 +137,7 @@ Widget workoutCard(Workout w) {
                   Text(
                     '${w.date.day.toString().padLeft(2, '0')}.'
                     '${w.date.month.toString().padLeft(2, '0')}.'
-                    '${w.date.year} · ${formatDuration(w.duration)}',
+                    '${w.date.year} · ${formatWorkoutDuration(w.duration)}',
                     style: const TextStyle(color: muted, fontSize: 11),
                   ),
                 ],
