@@ -1,7 +1,9 @@
 
 import 'dart:async';
+import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 const lime = Color(0xFFC7F36B);
 const bg = Color(0xFF111310);
@@ -48,6 +50,24 @@ class Workout {
     required this.xp,
     required this.sport,
   });
+
+  Map<String, dynamic> toJson() => {
+        'date': date.toIso8601String(),
+        'distance': distance,
+        'durationSeconds': duration.inSeconds,
+        'xp': xp,
+        'sport': sport,
+      };
+
+  factory Workout.fromJson(Map<String, dynamic> json) {
+    return Workout(
+      date: DateTime.parse(json['date'] as String),
+      distance: (json['distance'] as num).toDouble(),
+      duration: Duration(seconds: (json['durationSeconds'] as num).toInt()),
+      xp: (json['xp'] as num).toInt(),
+      sport: json['sport'] as String,
+    );
+  }
 }
 
 class PaceHome extends StatefulWidget {
@@ -128,6 +148,51 @@ class _PaceHomeState extends State<PaceHome>
   void initState() {
     super.initState();
     WidgetsBinding.instance.addObserver(this);
+    _loadProgress();
+  }
+
+  Future<void> _loadProgress() async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final raw = prefs.getString('pace_local_data');
+
+      if (raw == null) return;
+
+      final data = jsonDecode(raw) as Map<String, dynamic>;
+      final savedWorkouts = (data['workouts'] as List<dynamic>? ?? [])
+          .map((item) => Workout.fromJson(
+                Map<String, dynamic>.from(item as Map),
+              ))
+          .toList();
+
+      if (!mounted) return;
+      setState(() {
+        xp = (data['xp'] as num?)?.toInt() ?? 6840;
+        final savedSport = (data['selectedSport'] as num?)?.toInt() ?? 0;
+        selectedSport = savedSport >= 0 && savedSport < sports.length
+            ? savedSport
+            : 0;
+        workouts
+          ..clear()
+          ..addAll(savedWorkouts);
+      });
+    } catch (e) {
+      _message('Не удалось загрузить сохранённый прогресс.');
+    }
+  }
+
+  Future<void> _saveProgress() async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final data = {
+        'xp': xp,
+        'selectedSport': selectedSport,
+        'workouts': workouts.map((workout) => workout.toJson()).toList(),
+      };
+      await prefs.setString('pace_local_data', jsonEncode(data));
+    } catch (e) {
+      _message('Не удалось сохранить прогресс на устройстве.');
+    }
   }
 
   @override
@@ -357,6 +422,7 @@ class _PaceHomeState extends State<PaceHome>
           ),
         );
       });
+      await _saveProgress();
 
       _message(
         'Тренировка сохранена: ${finalDistance.toStringAsFixed(2)} км · +$earnedXp XP',
@@ -1090,7 +1156,10 @@ class _PaceHomeState extends State<PaceHome>
                   : null,
               onTap: tracking
                   ? null
-                  : () => setState(() => selectedSport = entry.key),
+                  : () {
+                      setState(() => selectedSport = entry.key);
+                      _saveProgress();
+                    },
             ),
           );
         }),
