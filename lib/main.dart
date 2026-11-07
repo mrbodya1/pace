@@ -5,6 +5,7 @@ import 'package:geolocator/geolocator.dart';
 import 'models/workout.dart';
 import 'data/storage/local_storage_service.dart';
 import 'app/theme/pace_theme.dart';
+import 'widgets/pace_header.dart';
 import 'features/home/home_page.dart';
 import 'features/tracker/tracker_page.dart';
 import 'features/progress/progress_page.dart';
@@ -451,7 +452,7 @@ class _PaceHomeState extends State<PaceHome>
         levelStart: levelStart,
         levelEnd: levelEnd,
         workouts: workouts,
-        header: header(),
+        header: const PaceHeader(),
         onStartWorkout: () => setState(() => tab = 1),
       ),
       TrackerPage(
@@ -537,59 +538,6 @@ class _PaceHomeState extends State<PaceHome>
           ),
         ],
       ),
-    );
-  }
-
-  Widget header() {
-    return Row(
-      children: [
-        Container(
-          width: 44,
-          height: 44,
-          decoration: BoxDecoration(
-            color: lime,
-            borderRadius: BorderRadius.circular(13),
-          ),
-          child: const Icon(
-            Icons.bolt_rounded,
-            color: bg,
-            size: 29,
-          ),
-        ),
-        const SizedBox(width: 11),
-        const Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              'PACE',
-              style: TextStyle(
-                fontSize: 21,
-                fontWeight: FontWeight.w900,
-                letterSpacing: 3,
-              ),
-            ),
-            Text(
-              'ATHLETE COMMUNITY',
-              style: TextStyle(
-                fontSize: 8,
-                color: muted,
-                letterSpacing: 1.7,
-              ),
-            ),
-          ],
-        ),
-        const Spacer(),
-        const Icon(Icons.notifications_none_rounded),
-        const SizedBox(width: 12),
-        const CircleAvatar(
-          radius: 19,
-          backgroundColor: panel,
-          child: Text(
-            'B',
-            style: TextStyle(color: lime, fontWeight: FontWeight.w900),
-          ),
-        ),
-      ],
     );
   }
 }
