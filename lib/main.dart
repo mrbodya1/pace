@@ -1,10 +1,9 @@
 
 import 'dart:async';
-import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 import 'models/workout.dart';
+import 'data/storage/local_storage_service.dart';
 
 const lime = Color(0xFFC7F36B);
 const bg = Color(0xFF111310);
@@ -115,6 +114,8 @@ class _PaceHomeState extends State<PaceHome>
   int xp = 6840;
   int selectedSport = 0;
 
+  final LocalStorageService _storageService = LocalStorageService();
+
   final List<Workout> workouts = [];
   final List<Position> route = [];
 
@@ -185,12 +186,9 @@ class _PaceHomeState extends State<PaceHome>
 
   Future<void> _loadProgress() async {
     try {
-      final prefs = await SharedPreferences.getInstance();
-      final raw = prefs.getString('pace_local_data');
+      final data = await _storageService.loadProgress();
 
-      if (raw == null) return;
-
-      final data = jsonDecode(raw) as Map<String, dynamic>;
+      if (data == null) return;
       final savedWorkouts = (data['workouts'] as List<dynamic>? ?? [])
           .map((item) => Workout.fromJson(
                 Map<String, dynamic>.from(item as Map),
@@ -215,13 +213,11 @@ class _PaceHomeState extends State<PaceHome>
 
   Future<void> _saveProgress() async {
     try {
-      final prefs = await SharedPreferences.getInstance();
-      final data = {
-        'xp': xp,
-        'selectedSport': selectedSport,
-        'workouts': workouts.map((workout) => workout.toJson()).toList(),
-      };
-      await prefs.setString('pace_local_data', jsonEncode(data));
+      await _storageService.saveProgress(
+        xp: xp,
+        selectedSport: selectedSport,
+        workouts: workouts,
+      );
     } catch (e) {
       _message('Не удалось сохранить прогресс на устройстве.');
     }
