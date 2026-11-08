@@ -4,6 +4,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
 import '../app/theme/pace_theme.dart';
+import 'glass_lens.dart';
 
 /// Frosted controls inspired by the selected concept, rendered in Flutter.
 class GlassPanel extends StatelessWidget {
@@ -111,24 +112,10 @@ class GlassNavigation extends StatelessWidget {
             child: InkWell(
               onTap: () => onSelect(i),
               borderRadius: BorderRadius.circular(28),
-              child: AnimatedContainer(
-                duration: MediaQuery.disableAnimationsOf(context)
-                    ? Duration.zero
-                    : const Duration(milliseconds: 180),
+              child: Padding(
                 padding: const EdgeInsets.symmetric(
                   vertical: 12,
                   horizontal: 1,
-                ),
-                decoration: BoxDecoration(
-                  color: selected
-                      ? const Color(0x45D6D9F5)
-                      : Colors.transparent,
-                  borderRadius: BorderRadius.circular(28),
-                  border: Border.all(
-                    color: selected
-                        ? const Color(0x66E0E3FF)
-                        : Colors.transparent,
-                  ),
                 ),
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
@@ -165,43 +152,71 @@ class GlassNavigation extends StatelessWidget {
     return GlassPanel(
       radius: 36,
       padding: const EdgeInsets.all(5),
-      child: Row(
-        children: [
-          destination(0),
-          destination(1),
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 3),
-            child: Semantics(
-              button: true,
-              label: recording
-                  ? (paused
-                        ? 'Вернуться к тренировке на паузе'
-                        : 'Вернуться к записи')
-                  : 'Записать тренировку',
-              child: ExcludeSemantics(
-                child: IconButton.filled(
-                  key: const ValueKey('record-workout'),
-                  onPressed: onRecord,
-                  style: IconButton.styleFrom(
-                    backgroundColor: lime,
-                    foregroundColor: bg,
-                    fixedSize: const Size(52, 52),
-                  ),
-                  icon: Icon(
-                    recording
-                        ? (paused
-                              ? CupertinoIcons.pause_fill
-                              : CupertinoIcons.waveform)
-                        : CupertinoIcons.plus,
-                    size: 27,
+      child: LayoutBuilder(
+        builder: (context, constraints) {
+          // Four destinations share the remaining width around the fixed
+          // record action. The moving lens stays below the central button.
+          const recordWidth = 58.0;
+          final width = (constraints.maxWidth - recordWidth) / 4;
+          final start = width * index + (index >= 2 ? recordWidth : 0);
+          return Stack(
+            children: [
+              AnimatedPositionedDirectional(
+                key: const ValueKey('navigation-lens-position'),
+                duration: glassMotionDuration(context),
+                curve: glassMotionCurve,
+                start: start,
+                width: width,
+                top: 0,
+                bottom: 0,
+                child: IgnorePointer(
+                  child: DecoratedBox(
+                    key: const ValueKey('navigation-lens'),
+                    decoration: glassLensDecoration(context),
                   ),
                 ),
               ),
-            ),
-          ),
-          destination(2),
-          destination(3),
-        ],
+              Row(
+                children: [
+                  destination(0),
+                  destination(1),
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 3),
+                    child: Semantics(
+                      button: true,
+                      label: recording
+                          ? (paused
+                                ? 'Вернуться к тренировке на паузе'
+                                : 'Вернуться к записи')
+                          : 'Записать тренировку',
+                      child: ExcludeSemantics(
+                        child: IconButton.filled(
+                          key: const ValueKey('record-workout'),
+                          onPressed: onRecord,
+                          style: IconButton.styleFrom(
+                            backgroundColor: lime,
+                            foregroundColor: bg,
+                            fixedSize: const Size(52, 52),
+                          ),
+                          icon: Icon(
+                            recording
+                                ? (paused
+                                      ? CupertinoIcons.pause_fill
+                                      : CupertinoIcons.waveform)
+                                : CupertinoIcons.plus,
+                            size: 27,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                  destination(2),
+                  destination(3),
+                ],
+              ),
+            ],
+          );
+        },
       ),
     );
   }
