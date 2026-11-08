@@ -43,7 +43,7 @@ enum Specialization {
   const Specialization(this.title, this.subtitle, this.bonus, this.icon);
   final String title, subtitle, bonus;
   final IconData icon;
-  String get image => 'assets/images/specializations/$name.jpg';
+  String get image => 'assets/images/specializations/$name.png';
 
   static Specialization? fromId(Object? value) {
     for (final item in values) {
