@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import '../../app/theme/pace_theme.dart';
 import '../../data/storage/profile_storage_service.dart';
 import '../../models/specialization.dart';
+import '../../models/sport_catalog.dart';
 import '../../models/participant_sex.dart';
 import '../../widgets/common_widgets.dart';
 import '../../widgets/glass_widgets.dart';
@@ -253,7 +254,7 @@ class _ProfilePageState extends State<ProfilePage> {
                                   ),
                                 ),
                               ),
-                              for (var i = 0; i < widget.sports.length; i++)
+                              for (final i in SportCatalog.selectableIndices)
                                 ListTile(
                                   title: Text(widget.sports[i]),
                                   leading: Icon(

@@ -83,18 +83,21 @@ class TrackerPage extends StatelessWidget {
               ),
               Expanded(
                 child: ListView.builder(
-                  itemCount: sports.length,
-                  itemBuilder: (context, i) => ListTile(
-                    leading: Icon(
-                      sportIcons[i],
-                      color: selectedSport == i ? lime : muted,
-                    ),
-                    title: Text(sports[i]),
-                    trailing: selectedSport == i
-                        ? const Icon(CupertinoIcons.check_mark, color: lime)
-                        : null,
-                    onTap: () => Navigator.pop(context, i),
-                  ),
+                  itemCount: SportCatalog.selectableIndices.length,
+                  itemBuilder: (context, position) {
+                    final i = SportCatalog.selectableIndices[position];
+                    return ListTile(
+                      leading: Icon(
+                        sportIcons[i],
+                        color: selectedSport == i ? lime : muted,
+                      ),
+                      title: Text(sports[i]),
+                      trailing: selectedSport == i
+                          ? const Icon(CupertinoIcons.check_mark, color: lime)
+                          : null,
+                      onTap: () => Navigator.pop(context, i),
+                    );
+                  },
                 ),
               ),
             ],
@@ -137,7 +140,9 @@ class TrackerPage extends StatelessWidget {
     final result = workoutFinished;
     final km = result ? finishedDistance : distance / 1000;
     final duration = result ? finishedDuration : elapsed;
-    final sport = result ? finishedSport : sports[selectedSport];
+    final sport = SportCatalog.displayName(
+      result ? finishedSport : sports[selectedSport],
+    );
     final usesSpeed = SportCatalog.usesSpeed(sport);
     final calculatedPace = result
         ? (km > 0 ? duration.inSeconds / km : 0.0)

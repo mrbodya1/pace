@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../widgets/glass_tabs.dart';
 import '../../models/workout.dart';
+import '../../models/sport_catalog.dart';
 import '../../widgets/common_widgets.dart';
 import '../workouts/workout_details_page.dart';
 
@@ -32,9 +33,16 @@ class _ProgressPageState extends State<ProgressPage> {
       Duration.zero,
       (sum, w) => sum + w.duration,
     );
-    final sports = widget.workouts.map((w) => w.sport).toSet().toList()..sort();
+    final sports =
+        widget.workouts
+            .map((w) => SportCatalog.displayName(w.sport))
+            .toSet()
+            .toList()
+          ..sort();
     final filtered = widget.workouts
-        .where((w) => sport == null || w.sport == sport)
+        .where(
+          (w) => sport == null || SportCatalog.displayName(w.sport) == sport,
+        )
         .toList();
     return DefaultTabController(
       length: 3,

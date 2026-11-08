@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../app/theme/pace_theme.dart';
 import '../models/workout.dart';
+import '../models/sport_catalog.dart';
 import '../features/tracker/widgets/route_painter.dart';
 import 'glass_widgets.dart';
 
@@ -108,7 +109,7 @@ Widget workoutCard(Workout w, {bool showRoute = true}) {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      w.sport,
+                      SportCatalog.displayName(w.sport),
                       style: const TextStyle(
                         fontSize: 18,
                         fontWeight: FontWeight.w600,

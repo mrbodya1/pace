@@ -159,16 +159,18 @@ void main() {
       await tester.pumpAndSettle();
       expect(find.text('Виды спорта'), findsOneWidget);
       await tester.scrollUntilVisible(
-        find.widgetWithText(ListTile, 'Поход'),
+        find.widgetWithText(ListTile, 'Роллеры'),
         100,
         scrollable: find.descendant(
           of: find.byType(BottomSheet),
           matching: find.byType(Scrollable),
         ),
       );
-      await tester.tap(find.widgetWithText(ListTile, 'Поход'));
+      expect(find.text('Поход'), findsNothing);
+      expect(find.text('Скандинавская ходьба'), findsNothing);
+      await tester.tap(find.widgetWithText(ListTile, 'Роллеры'));
       await tester.pumpAndSettle();
-      expect(find.widgetWithText(TextButton, 'Поход'), findsOneWidget);
+      expect(find.widgetWithText(TextButton, 'Роллеры'), findsOneWidget);
       await tester.binding.handlePopRoute();
       await tester.pumpAndSettle();
       expect(find.text('Новая цель'), findsOneWidget);

@@ -21,7 +21,7 @@ class WorkoutDetailsPage extends StatelessWidget {
         : 0.0;
     final useSpeed = SportCatalog.usesSpeed(w.sport);
     return Scaffold(
-      appBar: AppBar(title: Text(w.sport)),
+      appBar: AppBar(title: Text(SportCatalog.displayName(w.sport))),
       body: PaceBackground(
         child: ListView(
           padding: const EdgeInsets.fromLTRB(22, 18, 22, 40),

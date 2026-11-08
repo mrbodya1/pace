@@ -93,8 +93,7 @@ class _PaceHomeState extends State<PaceHome> with WidgetsBindingObserver {
     if (tracking ||
         starting ||
         finishing ||
-        index < 0 ||
-        index >= sports.length) {
+        !SportCatalog.isSelectable(index)) {
       return;
     }
     setState(() => selectedSport = index);
@@ -129,9 +128,7 @@ class _PaceHomeState extends State<PaceHome> with WidgetsBindingObserver {
       setState(() {
         xp = (data['xp'] as num?)?.toInt() ?? 6840;
         final savedSport = (data['selectedSport'] as num?)?.toInt() ?? 0;
-        selectedSport = savedSport >= 0 && savedSport < sports.length
-            ? savedSport
-            : 0;
+        selectedSport = SportCatalog.restoreSelection(savedSport);
         workouts
           ..clear()
           ..addAll(savedWorkouts);
