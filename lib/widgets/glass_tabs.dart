@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 
 import '../app/theme/pace_theme.dart';
 import 'glass_widgets.dart';
+import 'glass_lens.dart';
 
 /// A single moving lens driven by the same controller as the page swipe.
 class GlassTabs extends StatelessWidget {
@@ -14,7 +15,6 @@ class GlassTabs extends StatelessWidget {
   Widget build(BuildContext context) {
     final controller = DefaultTabController.of(context);
     assert(controller.length == labels.length);
-    final highContrast = MediaQuery.highContrastOf(context);
     final style = Theme.of(context).textTheme.labelLarge!
         .copyWith(fontSize: 14, fontWeight: FontWeight.w600, letterSpacing: 0);
 
@@ -57,43 +57,7 @@ class GlassTabs extends StatelessWidget {
             indicatorSize: TabBarIndicatorSize.tab,
             indicatorAnimation: TabIndicatorAnimation.linear,
             indicatorPadding: const EdgeInsets.all(1),
-            indicator: BoxDecoration(
-              gradient: highContrast
-                  ? null
-                  : const LinearGradient(
-                      begin: Alignment.topLeft,
-                      end: Alignment.bottomRight,
-                      colors: [
-                        Color(0xB3C1C8E0),
-                        Color(0x6659607E),
-                        Color(0x4D202539),
-                        Color(0x997980A0),
-                      ],
-                      stops: [0, 0.23, 0.65, 1],
-                    ),
-              color: highContrast
-                  ? const Color(0xFF535A72)
-                  : const Color(0x558F98BC),
-              borderRadius: BorderRadius.circular(height / 2),
-              border: Border.all(
-                color: highContrast ? Colors.white : const Color(0xA6E2E7FA),
-                width: 1,
-              ),
-              boxShadow: highContrast
-                  ? const []
-                  : const [
-                      BoxShadow(
-                        color: Color(0x26E3E8FF),
-                        blurRadius: 8,
-                        spreadRadius: 0,
-                      ),
-                      BoxShadow(
-                        color: Color(0x4D000000),
-                        blurRadius: 10,
-                        offset: Offset(0, 3),
-                      ),
-                    ],
-            ),
+            indicator: glassLensDecoration(context, radius: height / 2),
             splashBorderRadius: BorderRadius.circular(height / 2),
             tabs: [
               for (var i = 0; i < labels.length; i++)

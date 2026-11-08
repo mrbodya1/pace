@@ -6,6 +6,7 @@ import '../../app/theme/pace_theme.dart';
 import '../../models/sport_catalog.dart';
 import '../../models/workout.dart';
 import '../../widgets/glass_widgets.dart';
+import '../../widgets/glass_segmented_control.dart';
 import 'widgets/route_painter.dart';
 
 class TrackerPage extends StatelessWidget {
@@ -197,28 +198,19 @@ class TrackerPage extends StatelessWidget {
                   style: TextStyle(color: muted, fontSize: 16),
                 ),
                 const SizedBox(height: 18),
-                Wrap(
-                  spacing: 8,
-                  runSpacing: 8,
-                  children: [
-                    for (final i in SportCatalog.quickIndices)
-                      ChoiceChip(
-                        label: Text(sports[i]),
-                        avatar: Icon(
-                          sportIcons[i],
-                          size: 19,
-                          color: selectedSport == i ? bg : muted,
-                        ),
-                        selected: selectedSport == i,
-                        showCheckmark: false,
-                        selectedColor: lime,
-                        backgroundColor: panel,
-                        labelStyle: TextStyle(
-                          color: selectedSport == i ? bg : Colors.white,
-                        ),
-                        onSelected: locked ? null : (_) => onSelectSport(i),
-                      ),
+                GlassSegmentedControl(
+                  key: const ValueKey('sport-selector'),
+                  labels: [
+                    for (final i in SportCatalog.quickIndices) sports[i],
                   ],
+                  selectedIndex:
+                      SportCatalog.quickIndices.contains(selectedSport)
+                      ? SportCatalog.quickIndices.indexOf(selectedSport)
+                      : null,
+                  onChanged: locked
+                      ? null
+                      : (index) =>
+                            onSelectSport(SportCatalog.quickIndices[index]),
                 ),
                 const SizedBox(height: 8),
                 Align(
