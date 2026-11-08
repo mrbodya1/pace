@@ -7,14 +7,17 @@ import 'package:sport_platform/app/theme/pace_theme.dart';
 import 'package:sport_platform/data/storage/profile_storage_service.dart';
 import 'package:sport_platform/features/profile/specialization_page.dart';
 import 'package:sport_platform/models/specialization.dart';
+import 'package:sport_platform/models/participant_sex.dart';
 import 'package:sport_platform/main.dart';
 import 'package:sport_platform/widgets/glass_widgets.dart';
+import 'package:sport_platform/widgets/glass_segmented_control.dart';
 
 class UnavailableProfileStorage extends ProfileStorageService {
   @override
   Future<Map<String, dynamic>> selectSpecialization(
-    Specialization specialization,
-  ) async {
+    Specialization specialization, {
+    ParticipantSex? participantSex,
+  }) async {
     throw StateError('Unavailable');
   }
 }
@@ -46,6 +49,73 @@ Future<void> open(WidgetTester tester) async {
 }
 
 void main() {
+  testWidgets(
+    'Participant choice previews without writing, saves with class and restores',
+    (tester) async {
+      final initialProfile = jsonEncode({
+        'name': 'Фёдор',
+        'sex': 'male',
+        'specializationId': 'runner',
+        'specializationChangedAt': '2026-11-01T10:00:00.000Z',
+      });
+      final progress = jsonEncode({
+        'xp': 9100,
+        'selectedSport': 0,
+        'workouts': [],
+      });
+      SharedPreferences.setMockInitialValues({
+        'pace_profile_data': initialProfile,
+        'pace_local_data': progress,
+      });
+      await tester.pumpWidget(host());
+      await open(tester);
+      await tester.tap(find.text('Женщина'));
+      await tester.pumpAndSettle();
+      final prefs = await SharedPreferences.getInstance();
+      expect(prefs.getString('pace_profile_data'), initialProfile);
+      await tester.pageBack();
+      await tester.pumpAndSettle();
+      expect(prefs.getString('pace_profile_data'), initialProfile);
+      await open(tester);
+      expect(
+        tester
+            .widget<GlassSegmentedControl>(
+              find.byKey(const ValueKey('participant-sex')),
+            )
+            .selectedIndex,
+        0,
+      );
+      await tester.tap(find.text('Женщина'));
+      await tester.pumpAndSettle();
+      await tester.tap(find.byKey(const ValueKey('save-specialization')));
+      await tester.pumpAndSettle();
+      final profile = await ProfileStorageService().load();
+      expect(profile['sex'], 'female');
+      expect(profile['name'], 'Фёдор');
+      expect(profile['specializationId'], 'runner');
+      expect(profile['specializationChangedAt'], '2026-11-01T10:00:00.000Z');
+      expect(prefs.getString('pace_local_data'), progress);
+      await open(tester);
+      expect(
+        tester
+            .widget<GlassSegmentedControl>(
+              find.byKey(const ValueKey('participant-sex')),
+            )
+            .selectedIndex,
+        1,
+      );
+      expect(
+        tester
+            .widget<FilledButton>(
+              find.byKey(const ValueKey('save-specialization')),
+            )
+            .onPressed,
+        isNull,
+      );
+      expect(tester.takeException(), isNull);
+    },
+  );
+
   testWidgets(
     'Profile settings opens all specializations and reflects a saved change',
     (tester) async {

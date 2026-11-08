@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import '../../app/theme/pace_theme.dart';
 import '../../data/storage/profile_storage_service.dart';
 import '../../models/specialization.dart';
+import '../../models/participant_sex.dart';
 import '../../widgets/common_widgets.dart';
 import '../../widgets/glass_widgets.dart';
 import '../../widgets/pace_page_scaffold.dart';
@@ -86,6 +87,8 @@ class _ProfilePageState extends State<ProfilePage> {
     final bio = profile['bio'] as String? ?? 'Универсальный атлет';
     final city = profile['city'] as String? ?? '';
     final specialization = Specialization.fromId(profile['specializationId']);
+    final participantSex =
+        ParticipantSex.fromId(profile['sex']) ?? ParticipantSex.male;
     return ListView(
       padding: const EdgeInsets.fromLTRB(22, 28, 22, 140),
       children: [
@@ -94,10 +97,25 @@ class _ProfilePageState extends State<ProfilePage> {
           style: TextStyle(fontSize: 32, fontWeight: FontWeight.w600),
         ),
         const SizedBox(height: 28),
-        const CircleAvatar(
+        CircleAvatar(
           radius: 42,
           backgroundColor: panel,
-          child: Icon(CupertinoIcons.person, size: 44, color: lime),
+          child: specialization == null
+              ? const Icon(CupertinoIcons.person, size: 44, color: lime)
+              : ClipOval(
+                  child: SizedBox.square(
+                    dimension: 84,
+                    child: Transform.scale(
+                      scale: 2.5,
+                      alignment: Alignment.topCenter,
+                      child: Image.asset(
+                        specialization.imageFor(participantSex),
+                        fit: BoxFit.cover,
+                        alignment: Alignment.topCenter,
+                      ),
+                    ),
+                  ),
+                ),
         ),
         const SizedBox(height: 16),
         Text(
@@ -128,7 +146,7 @@ class _ProfilePageState extends State<ProfilePage> {
         ),
         if (specialization != null) ...[
           Text(
-            specialization.title,
+            specialization.titleFor(participantSex),
             textAlign: TextAlign.center,
             style: const TextStyle(color: lime, fontWeight: FontWeight.w600),
           ),
@@ -157,7 +175,8 @@ class _ProfilePageState extends State<ProfilePage> {
                 ),
                 title: const Text('Специализация'),
                 subtitle: Text(
-                  specialization?.title ?? 'Выбери своего спортсмена',
+                  specialization?.titleFor(participantSex) ??
+                      'Выбери своего спортсмена',
                 ),
                 trailing: const Icon(
                   CupertinoIcons.chevron_right,

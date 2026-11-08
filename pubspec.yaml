@@ -60,7 +60,8 @@ flutter:
   uses-material-design: true
   assets:
     - assets/images/pace_ambient.jpg
-    - assets/images/specializations/
+    - assets/images/specializations/male/
+    - assets/images/specializations/female/
 
   # To add assets to your application, add an assets section, like this:
   # assets:

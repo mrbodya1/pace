@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import 'participant_sex.dart';
+
 /// Stable IDs are stored separately from the workout sport selection.
 enum Specialization {
   multiathlete(
@@ -43,7 +45,19 @@ enum Specialization {
   const Specialization(this.title, this.subtitle, this.bonus, this.icon);
   final String title, subtitle, bonus;
   final IconData icon;
-  String get image => 'assets/images/specializations/$name.png';
+  String imageFor(ParticipantSex sex) =>
+      'assets/images/specializations/${sex.name}/$name.png';
+
+  String titleFor(ParticipantSex sex) => sex == ParticipantSex.male
+      ? title
+      : switch (this) {
+          runner => 'Бегунья',
+          marathoner => 'Марафонка',
+          skier => 'Лыжница',
+          cyclist => 'Велосипедистка',
+          swimmer => 'Пловчиха',
+          _ => title,
+        };
 
   static Specialization? fromId(Object? value) {
     for (final item in values) {

@@ -3,6 +3,8 @@ import 'package:flutter/material.dart';
 import '../../app/theme/pace_theme.dart';
 import '../../data/storage/profile_storage_service.dart';
 import '../../models/specialization.dart';
+import '../../models/participant_sex.dart';
+import '../../widgets/glass_segmented_control.dart';
 import '../../widgets/glass_lens.dart';
 import '../../widgets/glass_widgets.dart';
 import '../../widgets/pace_page_scaffold.dart';
@@ -21,6 +23,9 @@ class _SpecializationPageState extends State<SpecializationPage> {
   ScrollController? carousel;
   Specialization selected = Specialization.trailrunner;
   Specialization? saved;
+  ParticipantSex sex = ParticipantSex.male;
+  ParticipantSex? savedSex;
+  bool get unchanged => selected == saved && sex == savedSex;
   bool loading = true, failed = false, saving = false;
   double horizontalTravel = 0;
 
@@ -40,6 +45,8 @@ class _SpecializationPageState extends State<SpecializationPage> {
       if (!mounted) return;
       saved = Specialization.fromId(profile['specializationId']);
       selected = saved ?? Specialization.trailrunner;
+      savedSex = ParticipantSex.fromId(profile['sex']);
+      sex = savedSex ?? ParticipantSex.male;
       controller?.dispose();
       controller = PageController(initialPage: selected.index);
       carousel?.dispose();
@@ -104,7 +111,7 @@ class _SpecializationPageState extends State<SpecializationPage> {
                     item.icon,
                     color: item == selected ? lime : muted,
                   ),
-                  title: Text(item.title),
+                  title: Text(item.titleFor(sex)),
                   subtitle: Text(item.bonus),
                   trailing: item == selected
                       ? const Icon(Icons.check_rounded, color: lime)
@@ -134,10 +141,13 @@ class _SpecializationPageState extends State<SpecializationPage> {
   }
 
   Future<void> _save() async {
-    if (saving || loading || failed || selected == saved) return;
+    if (saving || loading || failed || unchanged) return;
     setState(() => saving = true);
     try {
-      final profile = await storage.selectSpecialization(selected);
+      final profile = await storage.selectSpecialization(
+        selected,
+        participantSex: sex,
+      );
       if (mounted) Navigator.pop(context, profile);
     } catch (_) {
       if (!mounted) return;
@@ -172,7 +182,7 @@ class _SpecializationPageState extends State<SpecializationPage> {
                     child: OverflowBox(
                       maxWidth: size.width * 1.3,
                       child: Image.asset(
-                        Specialization.values[index].image,
+                        Specialization.values[index].imageFor(sex),
                         width: size.width * 1.3,
                         height: size.height * .95,
                         fit: BoxFit.contain,
@@ -222,7 +232,7 @@ class _SpecializationPageState extends State<SpecializationPage> {
         return Semantics(
           selected: active,
           button: true,
-          label: item.title,
+          label: item.titleFor(sex),
           child: AnimatedContainer(
             duration: glassMotionDuration(context),
             width: 146,
@@ -247,12 +257,12 @@ class _SpecializationPageState extends State<SpecializationPage> {
                       fit: StackFit.expand,
                       children: [
                         Positioned(
-                          top: -12,
+                          top: 0,
                           bottom: -100,
                           left: 40,
                           right: -10,
                           child: Image.asset(
-                            item.image,
+                            item.imageFor(sex),
                             fit: BoxFit.contain,
                             alignment: Alignment.topCenter,
                           ),
@@ -281,7 +291,7 @@ class _SpecializationPageState extends State<SpecializationPage> {
                                 ),
                                 const SizedBox(height: 4),
                                 Text(
-                                  item.title,
+                                  item.titleFor(sex),
                                   style: TextStyle(
                                     fontSize: 13,
                                     fontWeight: active
@@ -289,7 +299,7 @@ class _SpecializationPageState extends State<SpecializationPage> {
                                         : FontWeight.w400,
                                   ),
                                 ),
-                                if (item == saved)
+                                if (item == saved && sex == savedSex)
                                   const Text(
                                     'Текущая',
                                     style: TextStyle(
@@ -413,8 +423,33 @@ class _SpecializationPageState extends State<SpecializationPage> {
                   ],
                 ),
               ),
+              Padding(
+                padding: const EdgeInsets.fromLTRB(22, 16, 22, 0),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Text(
+                      'Участник',
+                      style: TextStyle(color: muted, fontSize: 13),
+                    ),
+                    const SizedBox(height: 8),
+                    GlassSegmentedControl(
+                      key: const ValueKey('participant-sex'),
+                      labels: ParticipantSex.values
+                          .map((value) => value.label)
+                          .toList(),
+                      selectedIndex: sex.index,
+                      onChanged: saving
+                          ? null
+                          : (index) => setState(
+                              () => sex = ParticipantSex.values[index],
+                            ),
+                    ),
+                  ],
+                ),
+              ),
               SizedBox(
-                height: (MediaQuery.sizeOf(context).height * .34).clamp(
+                height: (MediaQuery.sizeOf(context).height * .23).clamp(
                   180,
                   340,
                 ),
@@ -425,7 +460,7 @@ class _SpecializationPageState extends State<SpecializationPage> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      selected.title,
+                      selected.titleFor(sex),
                       style: const TextStyle(
                         fontSize: 32,
                         fontWeight: FontWeight.w600,
@@ -480,13 +515,13 @@ class _SpecializationPageState extends State<SpecializationPage> {
                   width: double.infinity,
                   child: FilledButton(
                     key: const ValueKey('save-specialization'),
-                    onPressed: saving || selected == saved ? null : _save,
+                    onPressed: saving || unchanged ? null : _save,
                     child: Text(
                       saving
                           ? 'Сохраняем…'
-                          : selected == saved
+                          : unchanged
                           ? 'Специализация выбрана'
-                          : 'Выбрать: ${selected.title}',
+                          : 'Выбрать: ${selected.titleFor(sex)}',
                     ),
                   ),
                 ),

@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../models/specialization.dart';
+import '../../models/participant_sex.dart';
 
 class ProfileStorageService {
   static const _key = 'pace_profile_data';
@@ -22,14 +23,21 @@ class ProfileStorageService {
 
   /// No cooldown in alpha. Keep the date for a future monthly change policy.
   Future<Map<String, dynamic>> selectSpecialization(
-    Specialization specialization,
-  ) async {
+    Specialization specialization, {
+    ParticipantSex? participantSex,
+  }) async {
     final profile = await load();
-    if (profile['specializationId'] == specialization.name) return profile;
-    profile['specializationId'] = specialization.name;
-    profile['specializationChangedAt'] = DateTime.now()
-        .toUtc()
-        .toIso8601String();
+    final changed = profile['specializationId'] != specialization.name;
+    final sexChanged =
+        participantSex != null && profile['sex'] != participantSex.name;
+    if (!changed && !sexChanged) return profile;
+    if (changed) {
+      profile['specializationId'] = specialization.name;
+      profile['specializationChangedAt'] = DateTime.now()
+          .toUtc()
+          .toIso8601String();
+    }
+    if (participantSex != null) profile['sex'] = participantSex.name;
     await save(profile);
     return profile;
   }
