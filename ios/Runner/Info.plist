@@ -67,8 +67,12 @@
 		<string>UIInterfaceOrientationLandscapeRight</string>
 	</array>
 <key>NSLocationWhenInUseUsageDescription</key>
-<string>PACE использует геолокацию для записи маршрута, дистанции и темпа тренировки.</string>
+<string>PACE записывает маршрут, дистанцию и темп начатой тобой тренировки, включая запись при блокировке экрана.</string>
 <key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
 <string>PACE записывает маршрут тренировки, в том числе когда экран заблокирован.</string>
+<key>UIBackgroundModes</key>
+<array>
+    <string>location</string>
+</array>
 </dict>
 </plist>
