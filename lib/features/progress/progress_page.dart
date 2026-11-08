@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import '../../app/theme/pace_theme.dart';
+import '../../widgets/glass_tabs.dart';
 import '../../models/workout.dart';
 import '../../widgets/common_widgets.dart';
 import '../workouts/workout_details_page.dart';
@@ -38,6 +38,9 @@ class _ProgressPageState extends State<ProgressPage> {
         .toList();
     return DefaultTabController(
       length: 3,
+      animationDuration: MediaQuery.disableAnimationsOf(context)
+          ? Duration.zero
+          : const Duration(milliseconds: 360),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -50,17 +53,7 @@ class _ProgressPageState extends State<ProgressPage> {
           ),
           const Padding(
             padding: EdgeInsets.symmetric(horizontal: 16),
-            child: TabBar(
-              labelColor: lime,
-              unselectedLabelColor: muted,
-              indicatorColor: lime,
-              dividerColor: Colors.transparent,
-              tabs: [
-                Tab(text: 'Обзор'),
-                Tab(text: 'Тренировки'),
-                Tab(text: 'Достижения'),
-              ],
-            ),
+            child: GlassTabs(labels: ['Обзор', 'Тренировки', 'Достижения']),
           ),
           Expanded(
             child: TabBarView(

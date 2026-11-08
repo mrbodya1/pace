@@ -1,6 +1,7 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
+import '../../widgets/glass_tabs.dart';
 import '../../app/theme/pace_theme.dart';
 import '../../widgets/glass_widgets.dart';
 
@@ -11,6 +12,9 @@ class CommunityPage extends StatelessWidget {
   Widget build(BuildContext context) {
     return DefaultTabController(
       length: 3,
+      animationDuration: MediaQuery.disableAnimationsOf(context)
+          ? Duration.zero
+          : const Duration(milliseconds: 360),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -27,17 +31,7 @@ class CommunityPage extends StatelessWidget {
           ),
           const Padding(
             padding: EdgeInsets.symmetric(horizontal: 16),
-            child: TabBar(
-              labelColor: lime,
-              unselectedLabelColor: muted,
-              indicatorColor: lime,
-              dividerColor: Colors.transparent,
-              tabs: [
-                Tab(text: 'Друзья'),
-                Tab(text: 'Клубы'),
-                Tab(text: 'Соревнования'),
-              ],
-            ),
+            child: GlassTabs(labels: ['Друзья', 'Клубы', 'Соревнования']),
           ),
           const Expanded(
             child: TabBarView(
