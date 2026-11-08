@@ -5,6 +5,7 @@ import '../../app/theme/pace_theme.dart';
 import '../../models/workout.dart';
 import '../../widgets/common_widgets.dart';
 import '../../widgets/xp_ring.dart';
+import '../workouts/workout_details_page.dart';
 
 class HomePage extends StatelessWidget {
   const HomePage({
@@ -64,7 +65,7 @@ class HomePage extends StatelessWidget {
             children: [
               Expanded(
                 child: _Summary(
-                icon: CupertinoIcons.flame,
+                  icon: CupertinoIcons.flame,
                   label: 'Тренировки',
                   value: '${workouts.length}',
                 ),
@@ -90,7 +91,18 @@ class HomePage extends StatelessWidget {
         if (workouts.isEmpty)
           emptyCard('Здесь появится твоя первая GPS-тренировка.')
         else
-          workoutCard(workouts.first, showRoute: false),
+          Semantics(
+            button: true,
+            label: 'Открыть последнюю тренировку',
+            child: GestureDetector(
+              onTap: () => Navigator.of(context).push<void>(
+                MaterialPageRoute(
+                  builder: (_) => WorkoutDetailsPage(workout: workouts.first),
+                ),
+              ),
+              child: workoutCard(workouts.first, showRoute: false),
+            ),
+          ),
       ],
     );
   }
