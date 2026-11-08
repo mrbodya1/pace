@@ -7,6 +7,7 @@ import '../../models/sport_catalog.dart';
 import '../../models/workout.dart';
 import '../../models/workout_xp.dart';
 import '../../widgets/workout_xp_panel.dart';
+import '../../services/workout_location_settings.dart';
 import '../../widgets/glass_widgets.dart';
 import '../../widgets/glass_segmented_control.dart';
 import 'widgets/route_painter.dart';
@@ -290,7 +291,9 @@ class TrackerPage extends StatelessWidget {
                         starting
                             ? 'Получаем координаты…'
                             : tracking
-                            ? (paused ? 'На паузе' : gpsStatus)
+                            ? (paused && gpsStatus == 'Пауза'
+                                  ? 'На паузе'
+                                  : gpsStatus)
                             : 'GPS подключится после старта',
                         style: TextStyle(
                           color: tracking && !paused ? lime : muted,
@@ -408,9 +411,10 @@ class TrackerPage extends StatelessWidget {
               _WorkoutRoute(points: points),
               if (!result) ...[
                 const SizedBox(height: 18),
-                const Text(
-                  'Пока запись работает при открытом приложении. '
-                  'Не блокируй экран во время тренировки.',
+                Text(
+                  WorkoutLocationSettings.supportsBackground
+                      ? 'Начни тренировку в PACE — затем можно свернуть приложение или заблокировать экран. Не закрывай PACE принудительно до завершения записи.'
+                      : 'На этом устройстве держи приложение открытым во время записи.',
                   style: TextStyle(color: muted, fontSize: 13, height: 1.5),
                 ),
               ],
@@ -468,7 +472,7 @@ class TrackerPage extends StatelessWidget {
         Expanded(
           child: OutlinedButton(
             key: const ValueKey('pause-workout'),
-            onPressed: finishing
+            onPressed: finishing || starting
                 ? null
                 : (paused ? onStartWorkout : onPauseWorkout),
             child: Text(paused ? 'Продолжить' : 'Пауза'),
@@ -478,7 +482,9 @@ class TrackerPage extends StatelessWidget {
         Expanded(
           child: FilledButton(
             key: const ValueKey('finish-workout'),
-            onPressed: finishing ? null : () => _confirmFinish(context),
+            onPressed: finishing || starting
+                ? null
+                : () => _confirmFinish(context),
             child: Text(finishing ? 'Сохраняем…' : 'Завершить'),
           ),
         ),

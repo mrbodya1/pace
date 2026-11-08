@@ -11,6 +11,8 @@ import 'models/participant_sex.dart';
 import 'models/workout_xp.dart';
 import 'services/workout_xp_calculator.dart';
 import 'services/elevation_tracker.dart';
+import 'services/workout_location_settings.dart';
+import 'services/workout_notifications.dart';
 import 'data/storage/profile_storage_service.dart';
 import 'data/storage/local_storage_service.dart';
 import 'app/theme/pace_theme.dart';
@@ -58,6 +60,7 @@ class _PaceHomeState extends State<PaceHome> with WidgetsBindingObserver {
   final List<Position> route = [];
 
   StreamSubscription<Position>? gpsSubscription;
+  Future<void> gpsStopping = Future<void>.value();
   Timer? clock;
   final Stopwatch stopwatch = Stopwatch();
   final ElevationTracker elevation = ElevationTracker();
@@ -164,25 +167,30 @@ class _PaceHomeState extends State<PaceHome> with WidgetsBindingObserver {
 
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
-    if (tracking && state == AppLifecycleState.paused) {
-      // This screen alone does not guarantee background GPS recording.
-      gpsStatus = 'Приложение свернуто';
+    if (tracking && !paused && !finishing) {
+      if (state == AppLifecycleState.resumed) {
+        elapsed = stopwatch.elapsed;
+        gpsStatus = 'Запись маршрута';
+      } else if (state == AppLifecycleState.paused &&
+          WorkoutLocationSettings.supportsBackground) {
+        gpsStatus = 'Фоновая запись маршрута';
+      }
     }
     if (mounted) setState(() {});
   }
 
+  bool get canStartGps => switch (WidgetsBinding.instance.lifecycleState) {
+    AppLifecycleState.paused ||
+    AppLifecycleState.hidden ||
+    AppLifecycleState.detached => false,
+    _ => true,
+  };
+
   Future<void> startWorkout() async {
     if (starting || finishing || (tracking && !paused)) return;
 
-    if (tracking && paused) {
-      lastPosition = null;
-      elevation.resetAnchor();
-      stopwatch.start();
-      setState(() {
-        paused = false;
-        gpsStatus = 'Запись маршрута';
-      });
-      _listenGps();
+    if (!canStartGps) {
+      _message('Открой PACE, чтобы начать или продолжить тренировку.');
       return;
     }
 
@@ -211,6 +219,23 @@ class _PaceHomeState extends State<PaceHome> with WidgetsBindingObserver {
         return;
       }
 
+      await WorkoutNotifications.requestOnce();
+      if (!mounted || !canStartGps) return;
+
+      if (tracking && paused) {
+        await _stopGps();
+        if (!mounted || !canStartGps) return;
+        lastPosition = null;
+        elevation.resetAnchor();
+        stopwatch.start();
+        setState(() {
+          paused = false;
+          gpsStatus = 'Запись маршрута';
+        });
+        await _listenGps();
+        return;
+      }
+
       Map<String, dynamic> profile;
       try {
         profile = await ProfileStorageService().load();
@@ -225,10 +250,14 @@ class _PaceHomeState extends State<PaceHome> with WidgetsBindingObserver {
         ),
       );
 
-      await gpsSubscription?.cancel();
+      await _stopGps();
       clock?.cancel();
 
       if (!mounted) return;
+      if (!canStartGps) {
+        _message('Открой PACE и нажми «Начать» ещё раз.');
+        return;
+      }
       workoutSpecialization = Specialization.fromId(
         profile['specializationId'],
       );
@@ -258,28 +287,61 @@ class _PaceHomeState extends State<PaceHome> with WidgetsBindingObserver {
         gpsStatus = 'Запись маршрута';
       });
 
-      _listenGps();
+      await _listenGps();
 
       clock = Timer.periodic(const Duration(seconds: 1), (_) {
         if (!mounted || !stopwatch.isRunning) return;
         setState(() => elapsed = stopwatch.elapsed);
       });
     } catch (e) {
-      _message('Не удалось получить GPS. Проверь сигнал и разрешения.');
+      if (tracking && !paused) {
+        _gpsInterrupted(
+          'Запись приостановлена: проверь геолокацию и разрешения.',
+        );
+      } else {
+        _message('Не удалось получить GPS. Проверь сигнал и разрешения.');
+      }
     } finally {
       if (mounted) setState(() => starting = false);
     }
   }
 
-  void _listenGps() {
-    gpsSubscription?.cancel();
+  Future<void> _stopGps() {
+    final subscription = gpsSubscription;
+    gpsSubscription = null;
+    if (subscription != null) {
+      gpsStopping = gpsStopping
+          .catchError((Object _) {})
+          .then((_) => subscription.cancel());
+    }
+    return gpsStopping;
+  }
+
+  void _gpsInterrupted(String reason) {
+    if (!mounted || !tracking || paused || finishing) return;
+    stopwatch.stop();
+    setState(() {
+      paused = true;
+      elapsed = stopwatch.elapsed;
+      gpsStatus = reason;
+    });
+    unawaited(_stopGps().catchError((Object _) {}));
+    _message(reason);
+  }
+
+  Future<void> _listenGps() async {
+    await _stopGps();
+    if (!mounted || !tracking || paused || finishing) return;
+    if (!canStartGps) {
+      _gpsInterrupted(
+        'Запись приостановлена. Открой PACE и нажми «Продолжить».',
+      );
+      return;
+    }
 
     gpsSubscription =
         Geolocator.getPositionStream(
-          locationSettings: const LocationSettings(
-            accuracy: LocationAccuracy.best,
-            distanceFilter: 0,
-          ),
+          locationSettings: WorkoutLocationSettings.current,
         ).listen(
           (position) {
             if (!mounted || !tracking || paused) return;
@@ -340,18 +402,22 @@ class _PaceHomeState extends State<PaceHome> with WidgetsBindingObserver {
             });
           },
           onError: (Object error) {
-            if (mounted) {
-              setState(() => gpsStatus = 'Ошибка получения GPS');
-            }
+            _gpsInterrupted(
+              'Запись приостановлена: проверь геолокацию и разрешения.',
+            );
           },
+          onDone: () => _gpsInterrupted(
+            'GPS остановлен. Нажми «Продолжить», чтобы возобновить запись.',
+          ),
+          cancelOnError: true,
         );
   }
 
   void pauseWorkout() {
-    if (!tracking || paused) return;
+    if (!tracking || paused || starting || finishing) return;
 
     stopwatch.stop();
-    gpsSubscription?.cancel();
+    unawaited(_stopGps().catchError((Object _) {}));
 
     setState(() {
       paused = true;
@@ -361,12 +427,12 @@ class _PaceHomeState extends State<PaceHome> with WidgetsBindingObserver {
   }
 
   Future<void> finishWorkout() async {
-    if (!tracking || finishing) return;
+    if (!tracking || finishing || starting) return;
     setState(() => finishing = true);
     try {
       stopwatch.stop();
       clock?.cancel();
-      await gpsSubscription?.cancel();
+      await _stopGps();
 
       final finalDistance = distance / 1000;
       final finalDuration = stopwatch.elapsed;
@@ -497,7 +563,7 @@ class _PaceHomeState extends State<PaceHome> with WidgetsBindingObserver {
   void dispose() {
     WidgetsBinding.instance.removeObserver(this);
     clock?.cancel();
-    gpsSubscription?.cancel();
+    unawaited(_stopGps().catchError((Object _) {}));
     stopwatch.stop();
     super.dispose();
   }

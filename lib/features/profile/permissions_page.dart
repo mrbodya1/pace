@@ -4,6 +4,8 @@ import 'package:geolocator/geolocator.dart';
 import '../../app/theme/pace_theme.dart';
 import '../../widgets/glass_widgets.dart';
 import '../../widgets/pace_page_scaffold.dart';
+import '../../services/workout_location_settings.dart';
+import '../../services/workout_notifications.dart';
 
 class PermissionsPage extends StatefulWidget {
   const PermissionsPage({super.key});
@@ -16,6 +18,7 @@ class _PermissionsPageState extends State<PermissionsPage>
   LocationPermission? permission;
   bool? enabled;
   bool failed = false;
+  bool? notificationsGranted;
 
   @override
   void initState() {
@@ -28,11 +31,13 @@ class _PermissionsPageState extends State<PermissionsPage>
     try {
       final value = await Geolocator.checkPermission();
       final service = await Geolocator.isLocationServiceEnabled();
+      final notifications = await WorkoutNotifications.isGranted();
       if (mounted) {
         setState(() {
           permission = value;
           enabled = service;
           failed = false;
+          notificationsGranted = notifications;
         });
       }
     } catch (_) {
@@ -78,6 +83,13 @@ class _PermissionsPageState extends State<PermissionsPage>
             ),
           ),
           const SizedBox(height: 20),
+          if (notificationsGranted != null) ...[
+            Text(
+              'Уведомление о записи: ${notificationsGranted! ? 'разрешено' : 'выключено'}',
+              style: const TextStyle(color: muted),
+            ),
+            const SizedBox(height: 12),
+          ],
           const Text(
             'Для записи маршрута PACE нужен доступ к геолокации. '
             'Разрешения можно изменить в настройках устройства.',
@@ -113,8 +125,10 @@ class _PermissionsPageState extends State<PermissionsPage>
           ),
           TextButton(onPressed: _refresh, child: const Text('Проверить снова')),
           const SizedBox(height: 20),
-          const Text(
-            'Фоновая запись пока не подключена. Во время тренировки держи приложение открытым.',
+          Text(
+            WorkoutLocationSettings.supportsBackground
+                ? 'После запуска тренировки запись продолжается при блокировке экрана и сворачивании PACE. На Android используется служба с уведомлением, на iPhone — системный индикатор геолокации. Не закрывай PACE принудительно во время записи.'
+                : 'Фоновая запись поддерживается на Android и iPhone. На этом устройстве держи PACE открытым.',
             style: TextStyle(color: muted, fontSize: 14, height: 1.5),
           ),
         ],
