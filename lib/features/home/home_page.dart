@@ -4,7 +4,6 @@ import 'package:flutter/material.dart';
 import '../../app/theme/pace_theme.dart';
 import '../../models/workout.dart';
 import '../../widgets/common_widgets.dart';
-import '../../widgets/glass_widgets.dart';
 import '../../widgets/xp_ring.dart';
 
 class HomePage extends StatelessWidget {
@@ -16,13 +15,11 @@ class HomePage extends StatelessWidget {
     required this.levelEnd,
     required this.workouts,
     required this.header,
-    required this.onStartWorkout,
   });
 
   final int xp, level, levelStart, levelEnd;
   final List<Workout> workouts;
   final Widget header;
-  final VoidCallback onStartWorkout;
 
   @override
   Widget build(BuildContext context) {
@@ -94,9 +91,6 @@ class HomePage extends StatelessWidget {
           emptyCard('Здесь появится твоя первая GPS-тренировка.')
         else
           workoutCard(workouts.first, showRoute: false),
-        const SizedBox(height: 22),
-        GlassWorkoutButton(onPressed: onStartWorkout),
-        const SizedBox(height: 8),
       ],
     );
   }

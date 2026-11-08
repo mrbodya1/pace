@@ -1,9 +1,10 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
 
 import '../../app/theme/pace_theme.dart';
+import '../../models/sport_catalog.dart';
 import '../../models/workout.dart';
-import '../../widgets/common_widgets.dart';
 import '../../widgets/glass_widgets.dart';
 import 'widgets/route_painter.dart';
 
@@ -15,10 +16,10 @@ class TrackerPage extends StatelessWidget {
     required this.elapsed,
     required this.speed,
     required this.route,
-    required this.workouts,
     required this.tracking,
     required this.paused,
     required this.starting,
+    required this.finishing,
     required this.workoutFinished,
     required this.gpsStatus,
     required this.finishedWasSaved,
@@ -26,6 +27,7 @@ class TrackerPage extends StatelessWidget {
     required this.finishedDistance,
     required this.finishedDuration,
     required this.finishedXp,
+    required this.finishedRoute,
     required this.sports,
     required this.sportIcons,
     required this.selectedSport,
@@ -36,357 +38,489 @@ class TrackerPage extends StatelessWidget {
     required this.onPauseWorkout,
     required this.onFinishWorkout,
     required this.onSelectSport,
+    required this.onClose,
   });
 
   final double distance, pace, speed, finishedDistance;
   final Duration elapsed, finishedDuration;
   final List<Position> route;
-  final List<Workout> workouts;
-  final bool tracking, paused, starting, workoutFinished, finishedWasSaved;
+  final List<RoutePoint> finishedRoute;
+  final bool tracking,
+      paused,
+      starting,
+      finishing,
+      workoutFinished,
+      finishedWasSaved;
   final String gpsStatus, finishedSport;
   final int finishedXp, selectedSport;
   final List<String> sports;
   final List<IconData> sportIcons;
   final String Function(Duration) formatDuration;
   final String Function(double) formatPace;
-  final VoidCallback onNewWorkout,
-      onStartWorkout,
-      onPauseWorkout,
-      onFinishWorkout;
+  final VoidCallback onNewWorkout, onStartWorkout, onPauseWorkout, onClose;
+  final Future<void> Function() onFinishWorkout;
   final ValueChanged<int> onSelectSport;
 
-  @override
-  Widget build(BuildContext context) {
-    final km = distance / 1000;
-    final displayedPace = pace > 0
-        ? pace
-        : (km > 0 ? elapsed.inSeconds / km : 0.0);
-    final displayedRoute = route.isNotEmpty
-        ? route
-              .map(
-                (position) => RoutePoint(
-                  latitude: position.latitude,
-                  longitude: position.longitude,
-                ),
-              )
-              .toList(growable: false)
-        : (workoutFinished && workouts.isNotEmpty
-              ? workouts.first.route
-              : const <RoutePoint>[]);
-
-    return ListView(
-      padding: const EdgeInsets.fromLTRB(22, 20, 22, 132),
-      children: [
-        const SizedBox(height: 10),
-        const Text(
-          'Трекер',
-          style: TextStyle(fontSize: 34, fontWeight: FontWeight.w600),
-        ),
-        const SizedBox(height: 7),
-        const Text(
-          'Записывай движение. Улучшай результат.',
-          style: TextStyle(color: muted),
-        ),
-        const SizedBox(height: 23),
-        GlassPanel(
-          padding: const EdgeInsets.all(22),
+  Future<void> _chooseSport(BuildContext context) async {
+    final selected = await showModalBottomSheet<int>(
+      context: context,
+      backgroundColor: panel,
+      showDragHandle: true,
+      isScrollControlled: true,
+      builder: (context) => SafeArea(
+        child: SizedBox(
+          height: MediaQuery.sizeOf(context).height * 0.7,
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Row(
-                children: [
-                  Icon(
-                    tracking && !paused
-                        ? Icons.gps_fixed_rounded
-                        : Icons.gps_not_fixed_rounded,
-                    color: lime,
-                  ),
-                  const SizedBox(width: 8),
-                  Expanded(
-                    child: Text(
-                      starting ? 'Получаем координаты…' : gpsStatus,
-                      style: const TextStyle(
-                        color: lime,
-                        fontWeight: FontWeight.w700,
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 25),
-              const Text(
-                'ДИСТАНЦИЯ',
-                style: TextStyle(
-                  color: muted,
-                  fontSize: 11,
-                  letterSpacing: 1.5,
-                  fontWeight: FontWeight.w800,
+              const Padding(
+                padding: EdgeInsets.fromLTRB(22, 0, 22, 16),
+                child: Text(
+                  'Виды спорта',
+                  style: TextStyle(fontSize: 24, fontWeight: FontWeight.w600),
                 ),
               ),
-              const SizedBox(height: 5),
-              Row(
-                crossAxisAlignment: CrossAxisAlignment.baseline,
-                textBaseline: TextBaseline.alphabetic,
-                children: [
-                  Flexible(
-                    child: FittedBox(
-                      fit: BoxFit.scaleDown,
-                      alignment: Alignment.centerLeft,
-                      child: Text(
-                        km.toStringAsFixed(2),
-                        style: const TextStyle(
-                          fontSize: 64,
-                          height: 1.1,
-                          fontWeight: FontWeight.w600,
-                          letterSpacing: -2,
-                        ),
-                      ),
+              Expanded(
+                child: ListView.builder(
+                  itemCount: sports.length,
+                  itemBuilder: (context, i) => ListTile(
+                    leading: Icon(
+                      sportIcons[i],
+                      color: selectedSport == i ? lime : muted,
                     ),
+                    title: Text(sports[i]),
+                    trailing: selectedSport == i
+                        ? const Icon(CupertinoIcons.check_mark, color: lime)
+                        : null,
+                    onTap: () => Navigator.pop(context, i),
                   ),
-                  const SizedBox(width: 8),
-                  const Text('км', style: TextStyle(color: muted)),
-                ],
-              ),
-              const SizedBox(height: 25),
-              Row(
-                children: [
-                  Expanded(
-                    child: metric(
-                      'ВРЕМЯ',
-                      formatDuration(elapsed),
-                      Icons.timer_outlined,
-                    ),
-                  ),
-                  Expanded(
-                    child: metric(
-                      'ТЕМП / КМ',
-                      formatPace(displayedPace),
-                      Icons.speed_rounded,
-                    ),
-                  ),
-                  Expanded(
-                    child: metric(
-                      'СКОРОСТЬ',
-                      (speed * 3.6).toStringAsFixed(1),
-                      Icons.bolt_rounded,
-                      suffix: 'км/ч',
-                    ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 26),
-              if (workoutFinished)
-                SizedBox(
-                  width: double.infinity,
-                  height: 54,
-                  child: FilledButton.icon(
-                    onPressed: onNewWorkout,
-                    icon: const Icon(Icons.refresh_rounded),
-                    label: const Text('Новая тренировка'),
-                    style: FilledButton.styleFrom(
-                      backgroundColor: lime,
-                      foregroundColor: bg,
-                    ),
-                  ),
-                )
-              else if (!tracking)
-                SizedBox(
-                  width: double.infinity,
-                  height: 54,
-                  child: FilledButton.icon(
-                    onPressed: starting ? null : onStartWorkout,
-                    icon: const Icon(Icons.play_arrow_rounded),
-                    label: Text(
-                      starting ? 'Ожидание GPS…' : 'Начать тренировку',
-                    ),
-                    style: FilledButton.styleFrom(
-                      backgroundColor: lime,
-                      foregroundColor: bg,
-                    ),
-                  ),
-                )
-              else
-                Row(
-                  children: [
-                    Expanded(
-                      child: OutlinedButton.icon(
-                        onPressed: paused ? onStartWorkout : onPauseWorkout,
-                        icon: Icon(
-                          paused
-                              ? Icons.play_arrow_rounded
-                              : Icons.pause_rounded,
-                        ),
-                        label: Text(paused ? 'Продолжить' : 'Пауза'),
-                        style: OutlinedButton.styleFrom(
-                          foregroundColor: lime,
-                          side: const BorderSide(color: lime),
-                          minimumSize: const Size(0, 52),
-                        ),
-                      ),
-                    ),
-                    const SizedBox(width: 10),
-                    Expanded(
-                      child: FilledButton.icon(
-                        onPressed: onFinishWorkout,
-                        icon: const Icon(Icons.stop_rounded),
-                        label: const Text('Завершить'),
-                        style: FilledButton.styleFrom(
-                          backgroundColor: lime,
-                          foregroundColor: bg,
-                          minimumSize: const Size(0, 52),
-                        ),
-                      ),
-                    ),
-                  ],
                 ),
+              ),
             ],
           ),
         ),
-        if (workoutFinished) ...[
-          const SizedBox(height: 14),
-          Container(
-            padding: const EdgeInsets.all(18),
-            decoration: BoxDecoration(
-              color: const Color(0xD02A2C40),
-              borderRadius: BorderRadius.circular(20),
-              border: Border.all(color: lime.withValues(alpha: 0.35)),
-            ),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
+      ),
+    );
+    if (selected != null &&
+        context.mounted &&
+        !tracking &&
+        !starting &&
+        !finishing) {
+      onSelectSport(selected);
+    }
+  }
+
+  Future<void> _confirmFinish(BuildContext context) async {
+    final finish = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Завершить тренировку?'),
+        content: const Text('Запись остановится, и ты увидишь результат.'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context, false),
+            child: const Text('Продолжить запись'),
+          ),
+          FilledButton(
+            onPressed: () => Navigator.pop(context, true),
+            child: const Text('Завершить'),
+          ),
+        ],
+      ),
+    );
+    if (finish == true && context.mounted) await onFinishWorkout();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final result = workoutFinished;
+    final km = result ? finishedDistance : distance / 1000;
+    final duration = result ? finishedDuration : elapsed;
+    final sport = result ? finishedSport : sports[selectedSport];
+    final usesSpeed = SportCatalog.usesSpeed(sport);
+    final calculatedPace = result
+        ? (km > 0 ? duration.inSeconds / km : 0.0)
+        : (pace > 0 ? pace : (km > 0 ? duration.inSeconds / km : 0.0));
+    final displayedSpeed = result
+        ? (duration.inSeconds > 0 ? km * 3600 / duration.inSeconds : 0.0)
+        : speed * 3.6;
+    final points = result
+        ? finishedRoute
+        : route
+              .map(
+                (p) => RoutePoint(latitude: p.latitude, longitude: p.longitude),
+              )
+              .toList(growable: false);
+    final locked = tracking || starting || finishing;
+
+    return Column(
+      children: [
+        Padding(
+          padding: const EdgeInsets.fromLTRB(22, 14, 14, 8),
+          child: Row(
+            children: [
+              Expanded(
+                child: Text(
+                  result
+                      ? 'Результат'
+                      : tracking
+                      ? sport
+                      : 'Тренировка',
+                  style: const TextStyle(
+                    fontSize: 28,
+                    fontWeight: FontWeight.w600,
+                    letterSpacing: -0.7,
+                  ),
+                ),
+              ),
+              IconButton(
+                key: const ValueKey('close-workout'),
+                onPressed: starting || finishing ? null : onClose,
+                tooltip: tracking ? 'Свернуть тренировку' : 'Закрыть',
+                icon: Icon(
+                  tracking ? CupertinoIcons.chevron_down : CupertinoIcons.xmark,
+                  color: muted,
+                  size: 22,
+                ),
+              ),
+            ],
+          ),
+        ),
+        Expanded(
+          child: ListView(
+            key: const PageStorageKey('workout-screen'),
+            padding: const EdgeInsets.fromLTRB(22, 12, 22, 24),
+            children: [
+              if (!result && !tracking) ...[
+                const Text(
+                  'Выбери свой ритм',
+                  style: TextStyle(color: muted, fontSize: 16),
+                ),
+                const SizedBox(height: 18),
+                Wrap(
+                  spacing: 8,
+                  runSpacing: 8,
+                  children: [
+                    for (final i in SportCatalog.quickIndices)
+                      ChoiceChip(
+                        label: Text(sports[i]),
+                        avatar: Icon(
+                          sportIcons[i],
+                          size: 19,
+                          color: selectedSport == i ? bg : muted,
+                        ),
+                        selected: selectedSport == i,
+                        showCheckmark: false,
+                        selectedColor: lime,
+                        backgroundColor: panel,
+                        labelStyle: TextStyle(
+                          color: selectedSport == i ? bg : Colors.white,
+                        ),
+                        onSelected: locked ? null : (_) => onSelectSport(i),
+                      ),
+                  ],
+                ),
+                const SizedBox(height: 8),
+                Align(
+                  alignment: Alignment.centerLeft,
+                  child: TextButton.icon(
+                    onPressed: locked ? null : () => _chooseSport(context),
+                    icon: Icon(
+                      !SportCatalog.quickIndices.contains(selectedSport)
+                          ? sportIcons[selectedSport]
+                          : CupertinoIcons.ellipsis_circle,
+                      size: 21,
+                    ),
+                    label: Text(
+                      !SportCatalog.quickIndices.contains(selectedSport)
+                          ? sports[selectedSport]
+                          : 'Другие виды спорта',
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 18),
+              ],
+              if (result) ...[
+                const Center(
+                  child: Icon(
+                    CupertinoIcons.check_mark_circled,
+                    color: lime,
+                    size: 44,
+                  ),
+                ),
+                const SizedBox(height: 12),
+                Center(
+                  child: Text(
+                    finishedWasSaved
+                        ? 'Тренировка сохранена'
+                        : 'Тренировка завершена',
+                    style: const TextStyle(
+                      fontSize: 20,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 6),
+                Center(
+                  child: Text(
+                    sport,
+                    style: const TextStyle(color: muted, fontSize: 16),
+                  ),
+                ),
+                const SizedBox(height: 26),
+              ] else ...[
                 Row(
                   children: [
-                    const Icon(Icons.check_circle_rounded, color: lime),
+                    Icon(
+                      paused
+                          ? CupertinoIcons.pause_circle
+                          : tracking
+                          ? CupertinoIcons.circle_filled
+                          : CupertinoIcons.location,
+                      size: 18,
+                      color: tracking && !paused ? lime : muted,
+                    ),
                     const SizedBox(width: 8),
-                    const Expanded(
+                    Expanded(
                       child: Text(
-                        'ИТОГ ПОСЛЕДНЕЙ ТРЕНИРОВКИ',
+                        starting
+                            ? 'Получаем координаты…'
+                            : tracking
+                            ? (paused ? 'На паузе' : gpsStatus)
+                            : 'GPS подключится после старта',
                         style: TextStyle(
-                          color: lime,
-                          fontSize: 10,
-                          fontWeight: FontWeight.w600,
-                          letterSpacing: 1.1,
+                          color: tracking && !paused ? lime : muted,
+                          fontSize: 14,
                         ),
                       ),
-                    ),
-                    Text(
-                      finishedWasSaved ? 'Сохранена' : 'Не сохранена',
-                      style: const TextStyle(color: muted, fontSize: 10),
                     ),
                   ],
                 ),
-                const SizedBox(height: 12),
-                Text(
-                  '$finishedSport · ${finishedDistance.toStringAsFixed(2)} км',
-                  style: const TextStyle(
-                    fontSize: 22,
-                    fontWeight: FontWeight.w600,
+                const SizedBox(height: 26),
+              ],
+              const Text(
+                'Дистанция',
+                textAlign: TextAlign.center,
+                style: TextStyle(color: muted, fontSize: 15),
+              ),
+              const SizedBox(height: 4),
+              Center(
+                child: FittedBox(
+                  fit: BoxFit.scaleDown,
+                  child: Text(
+                    km.toStringAsFixed(2).replaceAll('.', ','),
+                    style: const TextStyle(
+                      fontSize: 76,
+                      height: 1.1,
+                      fontWeight: FontWeight.w600,
+                      letterSpacing: -3,
+                    ),
                   ),
                 ),
-                const SizedBox(height: 5),
-                Text(
-                  'Время ${formatDuration(finishedDuration)}'
-                  '${finishedWasSaved ? ' · +$finishedXp XP' : ' · меньше 50 м'}',
-                  style: const TextStyle(color: muted, fontSize: 12),
+              ),
+              const Text(
+                'километра',
+                textAlign: TextAlign.center,
+                style: TextStyle(color: muted, fontSize: 14),
+              ),
+              const SizedBox(height: 26),
+              GlassPanel(
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Expanded(
+                      child: _WorkoutMetric(
+                        label: 'Время',
+                        value: formatDuration(duration),
+                        icon: CupertinoIcons.stopwatch,
+                      ),
+                    ),
+                    const SizedBox(width: 16),
+                    Expanded(
+                      child: _WorkoutMetric(
+                        label: usesSpeed ? 'Скорость, км/ч' : 'Темп, мин/км',
+                        value: usesSpeed
+                            ? displayedSpeed
+                                  .toStringAsFixed(1)
+                                  .replaceAll('.', ',')
+                            : formatPace(calculatedPace),
+                        icon: CupertinoIcons.speedometer,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              if (result) ...[
+                const SizedBox(height: 18),
+                if (finishedWasSaved)
+                  Center(
+                    child: Text(
+                      '+$finishedXp XP',
+                      style: const TextStyle(
+                        color: lime,
+                        fontSize: 24,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                  )
+                else
+                  const Text(
+                    'Тренировки короче 50 м не добавляются в историю.',
+                    textAlign: TextAlign.center,
+                    style: TextStyle(color: muted, fontSize: 14),
+                  ),
+              ],
+              const SizedBox(height: 22),
+              _WorkoutRoute(points: points),
+              if (!result) ...[
+                const SizedBox(height: 18),
+                const Text(
+                  'Пока запись работает при открытом приложении. '
+                  'Не блокируй экран во время тренировки.',
+                  style: TextStyle(color: muted, fontSize: 13, height: 1.5),
                 ),
               ],
+            ],
+          ),
+        ),
+        SafeArea(
+          top: false,
+          child: Padding(
+            padding: const EdgeInsets.fromLTRB(22, 10, 22, 18),
+            child: _controls(context),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _controls(BuildContext context) {
+    if (workoutFinished) {
+      return Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          SizedBox(
+            width: double.infinity,
+            child: FilledButton(
+              onPressed: onClose,
+              child: const Text('Готово'),
             ),
           ),
-        ],
-        const SizedBox(height: 22),
-        sectionTitle('МАРШРУТ'),
-        const SizedBox(height: 12),
-        Container(
-          height: 145,
-          decoration: BoxDecoration(
-            color: panel,
-            borderRadius: BorderRadius.circular(20),
+          TextButton(
+            onPressed: onNewWorkout,
+            child: const Text('Новая тренировка'),
           ),
-          child: displayedRoute.length >= 2
-              ? Padding(
-                  padding: const EdgeInsets.all(12),
-                  child: Column(
-                    children: [
-                      Expanded(
-                        child: CustomPaint(
-                          painter: RoutePainter(displayedRoute),
-                          child: const SizedBox.expand(),
-                        ),
-                      ),
-                      const SizedBox(height: 5),
-                      Text(
-                        workoutFinished
-                            ? 'Маршрут последней тренировки · ${displayedRoute.length} точек'
-                            : 'Записано GPS-точек: ${displayedRoute.length}',
-                        style: const TextStyle(color: muted, fontSize: 10),
-                      ),
-                    ],
-                  ),
+        ],
+      );
+    }
+    if (!tracking) {
+      return SizedBox(
+        width: double.infinity,
+        child: FilledButton.icon(
+          key: const ValueKey('start-workout'),
+          onPressed: starting ? null : onStartWorkout,
+          icon: starting
+              ? const SizedBox.square(
+                  dimension: 18,
+                  child: CircularProgressIndicator(strokeWidth: 2),
                 )
-              : Center(
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      const Icon(Icons.route_rounded, color: lime, size: 34),
-                      const SizedBox(height: 9),
-                      Text(
-                        route.isEmpty
-                            ? (workoutFinished
-                                  ? 'Для этой тренировки нет сохранённого GPS-маршрута.'
-                                  : 'Маршрут появится после получения GPS')
-                            : 'Записано GPS-точек: ${route.length}. Нужно минимум две.',
-                        style: const TextStyle(color: muted, fontSize: 12),
-                        textAlign: TextAlign.center,
-                      ),
-                    ],
-                  ),
-                ),
+              : const Icon(CupertinoIcons.play_fill, size: 20),
+          label: Text(starting ? 'Ожидание GPS…' : 'Начать'),
         ),
-        const SizedBox(height: 18),
-        sectionTitle('ТИП АКТИВНОСТИ'),
+      );
+    }
+    return Row(
+      children: [
+        Expanded(
+          child: OutlinedButton(
+            key: const ValueKey('pause-workout'),
+            onPressed: finishing
+                ? null
+                : (paused ? onStartWorkout : onPauseWorkout),
+            child: Text(paused ? 'Продолжить' : 'Пауза'),
+          ),
+        ),
+        const SizedBox(width: 12),
+        Expanded(
+          child: FilledButton(
+            key: const ValueKey('finish-workout'),
+            onPressed: finishing ? null : () => _confirmFinish(context),
+            child: Text(finishing ? 'Сохраняем…' : 'Завершить'),
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+class _WorkoutMetric extends StatelessWidget {
+  const _WorkoutMetric({
+    required this.label,
+    required this.value,
+    required this.icon,
+  });
+  final String label, value;
+  final IconData icon;
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Icon(icon, size: 21, color: muted),
         const SizedBox(height: 12),
-        Row(
-          children: List.generate(sports.length, (i) {
-            final selected = selectedSport == i;
-            return Expanded(
-              child: Padding(
-                padding: EdgeInsets.only(right: i == 2 ? 0 : 8),
-                child: InkWell(
-                  onTap: tracking ? null : () => onSelectSport(i),
-                  borderRadius: BorderRadius.circular(14),
-                  child: Container(
-                    padding: const EdgeInsets.symmetric(vertical: 15),
-                    decoration: BoxDecoration(
-                      color: selected ? lime : const Color(0xD02A2C40),
-                      borderRadius: BorderRadius.circular(14),
-                    ),
+        FittedBox(
+          fit: BoxFit.scaleDown,
+          alignment: Alignment.centerLeft,
+          child: Text(
+            value,
+            style: const TextStyle(fontSize: 28, fontWeight: FontWeight.w600),
+          ),
+        ),
+        const SizedBox(height: 6),
+        Text(label, style: const TextStyle(color: muted, fontSize: 13)),
+      ],
+    );
+  }
+}
+
+class _WorkoutRoute extends StatelessWidget {
+  const _WorkoutRoute({required this.points});
+  final List<RoutePoint> points;
+
+  @override
+  Widget build(BuildContext context) {
+    return GlassPanel(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const Text(
+            'Маршрут',
+            style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
+          ),
+          const SizedBox(height: 14),
+          SizedBox(
+            width: double.infinity,
+            height: 120,
+            child: points.length >= 2
+                ? CustomPaint(painter: RoutePainter(points))
+                : const Center(
                     child: Column(
+                      mainAxisSize: MainAxisSize.min,
                       children: [
-                        Icon(sportIcons[i], color: selected ? bg : muted),
-                        const SizedBox(height: 6),
+                        Icon(CupertinoIcons.location, color: muted, size: 28),
+                        SizedBox(height: 10),
                         Text(
-                          sports[i],
-                          style: TextStyle(
-                            color: selected ? bg : Colors.white,
-                            fontWeight: FontWeight.w700,
-                            fontSize: 12,
-                          ),
+                          'Здесь появится GPS-маршрут',
+                          textAlign: TextAlign.center,
+                          style: TextStyle(color: muted, fontSize: 14),
                         ),
                       ],
                     ),
                   ),
-                ),
-              ),
-            );
-          }),
-        ),
-        const SizedBox(height: 18),
-        const Text(
-          'История тренировок и GPS-маршруты сохраняются на устройстве. '
-          'Фоновая GPS-запись при блокировке экрана ещё не реализована.',
-          style: TextStyle(color: muted, fontSize: 12, height: 1.5),
-        ),
-      ],
+          ),
+        ],
+      ),
     );
   }
 }

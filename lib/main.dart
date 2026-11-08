@@ -1,14 +1,17 @@
-
 import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
+
 import 'models/workout.dart';
 import 'models/xp_progress.dart';
+import 'models/sport_catalog.dart';
 import 'data/storage/local_storage_service.dart';
 import 'app/theme/pace_theme.dart';
 import 'widgets/pace_header.dart';
 import 'widgets/glass_widgets.dart';
 import 'features/home/home_page.dart';
+import 'features/community/community_page.dart';
 import 'features/tracker/tracker_page.dart';
 import 'features/progress/progress_page.dart';
 import 'features/profile/profile_page.dart';
@@ -38,8 +41,7 @@ class PaceHome extends StatefulWidget {
   State<PaceHome> createState() => _PaceHomeState();
 }
 
-class _PaceHomeState extends State<PaceHome>
-    with WidgetsBindingObserver {
+class _PaceHomeState extends State<PaceHome> with WidgetsBindingObserver {
   int tab = 0;
   int xp = 6840;
   int selectedSport = 0;
@@ -53,6 +55,9 @@ class _PaceHomeState extends State<PaceHome>
   Timer? clock;
   final Stopwatch stopwatch = Stopwatch();
 
+  bool workoutOpen = false;
+  bool finishing = false;
+  List<RoutePoint> finishedRoute = [];
   bool tracking = false;
   bool paused = false;
   bool starting = false;
@@ -71,12 +76,30 @@ class _PaceHomeState extends State<PaceHome>
   Position? lastPosition;
   String gpsStatus = 'GPS не запущен';
 
-  final sports = ['Бег', 'Ходьба', 'Велосипед'];
-  final sportIcons = [
-    Icons.directions_run_rounded,
-    Icons.directions_walk_rounded,
-    Icons.directions_bike_rounded,
-  ];
+  final sports = SportCatalog.names;
+  final sportIcons = SportCatalog.icons;
+
+  void _openWorkout() {
+    if (workoutFinished && !tracking) startNewWorkout();
+    setState(() => workoutOpen = true);
+  }
+
+  void _closeWorkout() {
+    if (starting || finishing) return;
+    setState(() => workoutOpen = false);
+  }
+
+  void _selectSport(int index) {
+    if (tracking ||
+        starting ||
+        finishing ||
+        index < 0 ||
+        index >= sports.length) {
+      return;
+    }
+    setState(() => selectedSport = index);
+    unawaited(_saveProgress());
+  }
 
   int get level => XpProgress(xp).level;
 
@@ -97,9 +120,9 @@ class _PaceHomeState extends State<PaceHome>
 
       if (data == null) return;
       final savedWorkouts = (data['workouts'] as List<dynamic>? ?? [])
-          .map((item) => Workout.fromJson(
-                Map<String, dynamic>.from(item as Map),
-              ))
+          .map(
+            (item) => Workout.fromJson(Map<String, dynamic>.from(item as Map)),
+          )
           .toList();
 
       if (!mounted) return;
@@ -140,7 +163,7 @@ class _PaceHomeState extends State<PaceHome>
   }
 
   Future<void> startWorkout() async {
-    if (starting) return;
+    if (starting || finishing || (tracking && !paused)) return;
 
     if (tracking && paused) {
       stopwatch.start();
@@ -158,8 +181,7 @@ class _PaceHomeState extends State<PaceHome>
     });
 
     try {
-      final serviceEnabled =
-          await Geolocator.isLocationServiceEnabled();
+      final serviceEnabled = await Geolocator.isLocationServiceEnabled();
 
       if (!serviceEnabled) {
         _message('Включи геолокацию на устройстве.');
@@ -178,8 +200,7 @@ class _PaceHomeState extends State<PaceHome>
         return;
       }
 
-      final firstPosition =
-          await Geolocator.getCurrentPosition(
+      final firstPosition = await Geolocator.getCurrentPosition(
         locationSettings: const LocationSettings(
           accuracy: LocationAccuracy.best,
           timeLimit: Duration(seconds: 20),
@@ -211,13 +232,10 @@ class _PaceHomeState extends State<PaceHome>
 
       _listenGps();
 
-      clock = Timer.periodic(
-        const Duration(seconds: 1),
-        (_) {
-          if (!mounted || !stopwatch.isRunning) return;
-          setState(() => elapsed = stopwatch.elapsed);
-        },
-      );
+      clock = Timer.periodic(const Duration(seconds: 1), (_) {
+        if (!mounted || !stopwatch.isRunning) return;
+        setState(() => elapsed = stopwatch.elapsed);
+      });
     } catch (e) {
       _message('Не удалось получить GPS. Проверь сигнал и разрешения.');
     } finally {
@@ -228,73 +246,75 @@ class _PaceHomeState extends State<PaceHome>
   void _listenGps() {
     gpsSubscription?.cancel();
 
-    gpsSubscription = Geolocator.getPositionStream(
-      locationSettings: const LocationSettings(
-        accuracy: LocationAccuracy.best,
-        distanceFilter: 0,
-      ),
-    ).listen(
-      (position) {
-        if (!mounted || !tracking || paused) return;
+    gpsSubscription =
+        Geolocator.getPositionStream(
+          locationSettings: const LocationSettings(
+            accuracy: LocationAccuracy.best,
+            distanceFilter: 0,
+          ),
+        ).listen(
+          (position) {
+            if (!mounted || !tracking || paused) return;
 
-        // Keep usable emulator and real-device readings; reject only very poor fixes.
-        if (position.accuracy > 50) return;
+            // Keep usable emulator and real-device readings; reject only very poor fixes.
+            if (position.accuracy > 50) return;
 
-        final previous = lastPosition;
+            final previous = lastPosition;
 
-        if (previous == null) {
-          setState(() {
-            lastPosition = position;
-            lastAccuracy = position.accuracy;
-            route.add(position);
-          });
-          return;
-        }
-
-        final segment = Geolocator.distanceBetween(
-          previous.latitude,
-          previous.longitude,
-          position.latitude,
-          position.longitude,
-        );
-
-        final seconds = position.timestamp
-                .difference(previous.timestamp)
-                .inMilliseconds /
-            1000.0;
-        final segmentSpeed = seconds > 0 ? segment / seconds : 0.0;
-
-        setState(() {
-          // Always advance the reference point so one rejected jump cannot
-          // block every subsequent GPS update.
-          lastPosition = position;
-          lastAccuracy = position.accuracy;
-
-          if (segment >= 1) {
-            // Keep the route geometry even when emulator playback is too fast
-            // to count that segment toward workout distance.
-            route.add(position);
-
-            // Count only plausible movement to avoid GPS jumps inflating distance.
-            if (segment <= 100 && seconds > 0 && segmentSpeed <= 20) {
-              distance += segment;
-
-              final reportedSpeed = position.speed;
-              speed = reportedSpeed.isFinite && reportedSpeed > 0
-                  ? reportedSpeed
-                  : segmentSpeed;
-
-              pace = speed > 0 ? 1000 / speed : 0;
+            if (previous == null) {
+              setState(() {
+                lastPosition = position;
+                lastAccuracy = position.accuracy;
+                route.add(position);
+              });
+              return;
             }
-          }
-        });
-      },
-      onError: (Object error) {
-        if (mounted) {
-          setState(() => gpsStatus = 'Ошибка получения GPS');
-        }
-      },
-    );
+
+            final segment = Geolocator.distanceBetween(
+              previous.latitude,
+              previous.longitude,
+              position.latitude,
+              position.longitude,
+            );
+
+            final seconds =
+                position.timestamp
+                    .difference(previous.timestamp)
+                    .inMilliseconds /
+                1000.0;
+            final segmentSpeed = seconds > 0 ? segment / seconds : 0.0;
+
+            setState(() {
+              // Always advance the reference point so one rejected jump cannot
+              // block every subsequent GPS update.
+              lastPosition = position;
+              lastAccuracy = position.accuracy;
+
+              if (segment >= 1) {
+                // Keep the route geometry even when emulator playback is too fast
+                // to count that segment toward workout distance.
+                route.add(position);
+
+                // Count only plausible movement to avoid GPS jumps inflating distance.
+                if (segment <= 100 && seconds > 0 && segmentSpeed <= 20) {
+                  distance += segment;
+
+                  final reportedSpeed = position.speed;
+                  speed = reportedSpeed.isFinite && reportedSpeed > 0
+                      ? reportedSpeed
+                      : segmentSpeed;
+
+                  pace = speed > 0 ? 1000 / speed : 0;
+                }
+              }
+            });
+          },
+          onError: (Object error) {
+            if (mounted) {
+              setState(() => gpsStatus = 'Ошибка получения GPS');
+            }
+          },
+        );
   }
 
   void pauseWorkout() {
@@ -311,74 +331,82 @@ class _PaceHomeState extends State<PaceHome>
   }
 
   Future<void> finishWorkout() async {
-    if (!tracking) return;
+    if (!tracking || finishing) return;
+    setState(() => finishing = true);
+    try {
+      stopwatch.stop();
+      clock?.cancel();
+      await gpsSubscription?.cancel();
 
-    stopwatch.stop();
-    clock?.cancel();
-    await gpsSubscription?.cancel();
-
-    final finalDistance = distance / 1000;
-    final finalDuration = stopwatch.elapsed;
-    final savedRoute = route
-        .map((position) => RoutePoint(
+      final finalDistance = distance / 1000;
+      final finalDuration = stopwatch.elapsed;
+      final savedRoute = route
+          .map(
+            (position) => RoutePoint(
               latitude: position.latitude,
               longitude: position.longitude,
-            ))
-        .toList(growable: false);
-    final wasSaved = finalDistance >= 0.05;
-    final earnedXp = wasSaved ? (finalDistance * 100).round() : 0;
-    final finishedActivity = sports[selectedSport];
+            ),
+          )
+          .toList(growable: false);
+      final wasSaved = finalDistance >= 0.05;
+      final earnedXp = wasSaved ? (finalDistance * 100).round() : 0;
+      final finishedActivity = sports[selectedSport];
 
-    setState(() {
-      tracking = false;
-      paused = false;
-      workoutFinished = true;
-
-      // Keep the result separately, then clear the active tracker.
-      finishedDistance = finalDistance;
-      finishedDuration = finalDuration;
-      finishedXp = earnedXp;
-      finishedSport = finishedActivity;
-      finishedWasSaved = wasSaved;
-
-      distance = 0;
-      speed = 0;
-      pace = 0;
-      elapsed = Duration.zero;
-      lastAccuracy = 0;
-      lastPosition = null;
-      route.clear();
-      gpsStatus = 'Тренировка завершена';
-    });
-
-    if (wasSaved) {
       setState(() {
-        xp += earnedXp;
-        workouts.insert(
-          0,
-          Workout(
-            date: DateTime.now(),
-            distance: finalDistance,
-            duration: finalDuration,
-            xp: earnedXp,
-            sport: finishedActivity,
-            route: savedRoute,
-          ),
-        );
-      });
-      await _saveProgress();
+        tracking = false;
+        paused = false;
+        workoutFinished = true;
 
-      _message(
-        'Тренировка сохранена: ${finalDistance.toStringAsFixed(2)} км · +$earnedXp XP',
-      );
-    } else {
-      _message('Тренировка короче 50 м — результат не добавлен в историю.');
+        // Keep the result separately, then clear the active tracker.
+        finishedDistance = finalDistance;
+        finishedDuration = finalDuration;
+        finishedXp = earnedXp;
+        finishedSport = finishedActivity;
+        finishedWasSaved = wasSaved;
+        finishedRoute = savedRoute;
+
+        distance = 0;
+        speed = 0;
+        pace = 0;
+        elapsed = Duration.zero;
+        lastAccuracy = 0;
+        lastPosition = null;
+        route.clear();
+        gpsStatus = 'Тренировка завершена';
+      });
+
+      if (wasSaved) {
+        setState(() {
+          xp += earnedXp;
+          workouts.insert(
+            0,
+            Workout(
+              date: DateTime.now(),
+              distance: finalDistance,
+              duration: finalDuration,
+              xp: earnedXp,
+              sport: finishedActivity,
+              route: savedRoute,
+            ),
+          );
+        });
+        await _saveProgress();
+
+        _message(
+          'Тренировка сохранена: ${finalDistance.toStringAsFixed(2)} км · +$earnedXp XP',
+        );
+      } else {
+        _message('Тренировка короче 50 м — результат не добавлен в историю.');
+      }
+    } finally {
+      if (mounted) setState(() => finishing = false);
     }
   }
 
   void startNewWorkout() {
     setState(() {
       workoutFinished = false;
+      finishedRoute = [];
       distance = 0;
       speed = 0;
       pace = 0;
@@ -392,9 +420,8 @@ class _PaceHomeState extends State<PaceHome>
 
   void _message(String message) {
     if (!mounted) return;
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text(message)),
-    );
+    ScaffoldMessenger.of(context)
+        .showSnackBar(SnackBar(content: Text(message)));
   }
 
   String formatDuration(Duration d) {
@@ -432,67 +459,84 @@ class _PaceHomeState extends State<PaceHome>
         levelEnd: levelEnd,
         workouts: workouts,
         header: PaceHeader(onProfile: () => setState(() => tab = 3)),
-        onStartWorkout: () => setState(() => tab = 1),
       ),
-      TrackerPage(
-        distance: distance,
-        pace: pace,
-        elapsed: elapsed,
-        speed: speed,
-        route: route,
-        workouts: workouts,
-        tracking: tracking,
-        paused: paused,
-        starting: starting,
-        workoutFinished: workoutFinished,
-        gpsStatus: gpsStatus,
-        finishedWasSaved: finishedWasSaved,
-        finishedSport: finishedSport,
-        finishedDistance: finishedDistance,
-        finishedDuration: finishedDuration,
-        finishedXp: finishedXp,
-        sports: sports,
-        sportIcons: sportIcons,
-        selectedSport: selectedSport,
-        formatDuration: formatDuration,
-        formatPace: formatPace,
-        onNewWorkout: startNewWorkout,
-        onStartWorkout: startWorkout,
-        onPauseWorkout: pauseWorkout,
-        onFinishWorkout: finishWorkout,
-        onSelectSport: (i) => setState(() => selectedSport = i),
-      ),
-      ProgressPage(
-        xp: xp,
-        level: level,
-        workouts: workouts,
-      ),
+      const CommunityPage(),
+      ProgressPage(xp: xp, level: level, workouts: workouts),
       ProfilePage(
         sports: sports,
         sportIcons: sportIcons,
         selectedSport: selectedSport,
-        tracking: tracking,
-        onSelectSport: (i) {
-          setState(() => selectedSport = i);
-          _saveProgress();
-        },
+        tracking: tracking || starting || finishing,
+        onSelectSport: _selectSport,
       ),
     ];
 
-    return Scaffold(
-      extendBody: true,
-      body: PaceBackground(
-        child: SafeArea(
-          bottom: false,
-          child: IndexedStack(index: tab, children: pages),
+    return PopScope(
+      canPop: !workoutOpen,
+      onPopInvokedWithResult: (didPop, result) {
+        if (!didPop && workoutOpen) _closeWorkout();
+      },
+      child: Scaffold(
+        extendBody: true,
+        body: PaceBackground(
+          child: SafeArea(
+            bottom: false,
+            child: Stack(
+              fit: StackFit.expand,
+              children: [
+                Offstage(
+                  offstage: workoutOpen,
+                  child: IndexedStack(index: tab, children: pages),
+                ),
+                if (workoutOpen)
+                  Positioned.fill(
+                    child: TrackerPage(
+                      distance: distance,
+                      pace: pace,
+                      elapsed: elapsed,
+                      speed: speed,
+                      route: route,
+                      tracking: tracking,
+                      paused: paused,
+                      starting: starting,
+                      finishing: finishing,
+                      workoutFinished: workoutFinished,
+                      gpsStatus: gpsStatus,
+                      finishedWasSaved: finishedWasSaved,
+                      finishedSport: finishedSport,
+                      finishedDistance: finishedDistance,
+                      finishedDuration: finishedDuration,
+                      finishedXp: finishedXp,
+                      finishedRoute: finishedRoute,
+                      sports: sports,
+                      sportIcons: sportIcons,
+                      selectedSport: selectedSport,
+                      formatDuration: formatDuration,
+                      formatPace: formatPace,
+                      onNewWorkout: startNewWorkout,
+                      onStartWorkout: startWorkout,
+                      onPauseWorkout: pauseWorkout,
+                      onFinishWorkout: finishWorkout,
+                      onSelectSport: _selectSport,
+                      onClose: _closeWorkout,
+                    ),
+                  ),
+              ],
+            ),
+          ),
         ),
-      ),
-      bottomNavigationBar: SafeArea(
-        minimum: const EdgeInsets.fromLTRB(16, 8, 16, 12),
-        child: GlassNavigation(
-          index: tab,
-          onSelect: (index) => setState(() => tab = index),
-        ),
+        bottomNavigationBar: workoutOpen
+            ? null
+            : SafeArea(
+                minimum: const EdgeInsets.fromLTRB(12, 8, 12, 12),
+                child: GlassNavigation(
+                  index: tab,
+                  onSelect: (index) => setState(() => tab = index),
+                  onRecord: _openWorkout,
+                  recording: tracking,
+                  paused: paused,
+                ),
+              ),
       ),
     );
   }

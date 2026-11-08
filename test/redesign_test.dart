@@ -56,11 +56,14 @@ void main() {
         ),
       );
       await tester.pumpAndSettle();
-      await tester.ensureVisible(find.byType(GlassWorkoutButton));
+      expect(find.byType(GlassWorkoutButton), findsNothing);
+      await tester.tap(find.byKey(const ValueKey('record-workout')));
       await tester.pumpAndSettle();
-      await tester.tap(find.byType(GlassWorkoutButton));
+      expect(find.text('GPS подключится после старта'), findsOneWidget);
+      expect(find.byType(GlassNavigation), findsNothing);
+      await tester.tap(find.byKey(const ValueKey('close-workout')));
       await tester.pumpAndSettle();
-      expect(find.text('GPS не запущен'), findsOneWidget);
+      expect(find.byType(GlassNavigation), findsOneWidget);
       expect(tester.takeException(), isNull);
     });
   }

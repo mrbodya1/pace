@@ -80,83 +80,128 @@ class GlassNavigation extends StatelessWidget {
     super.key,
     required this.index,
     required this.onSelect,
+    required this.onRecord,
+    this.recording = false,
+    this.paused = false,
   });
 
   final int index;
   final ValueChanged<int> onSelect;
+  final VoidCallback onRecord;
+  final bool recording, paused;
 
   @override
   Widget build(BuildContext context) {
-    const labels = ['Главная', 'Трекер', 'Прогресс', 'Профиль'];
+    const labels = ['Главная', 'Сообщество', 'Прогресс', 'Профиль'];
     const icons = [
       CupertinoIcons.house,
-      CupertinoIcons.location,
+      CupertinoIcons.person_2,
       CupertinoIcons.chart_bar,
       CupertinoIcons.person,
     ];
-    return GlassPanel(
-      radius: 36,
-      padding: const EdgeInsets.all(6),
-      child: Row(
-        children: List.generate(labels.length, (i) {
-          final selected = i == index;
-          return Expanded(
-            child: Semantics(
-              selected: selected,
-              button: true,
-              label: labels[i],
-              child: ExcludeSemantics(
-                child: InkWell(
-                  onTap: () => onSelect(i),
-                  borderRadius: BorderRadius.circular(30),
-                  child: AnimatedContainer(
-                    duration: MediaQuery.disableAnimationsOf(context)
-                        ? Duration.zero
-                        : const Duration(milliseconds: 180),
-                    padding: const EdgeInsets.symmetric(
-                      vertical: 10,
-                      horizontal: 2,
+
+    Widget destination(int i) {
+      final selected = index == i;
+      return Expanded(
+        child: Semantics(
+          selected: selected,
+          button: true,
+          label: labels[i],
+          child: ExcludeSemantics(
+            child: InkWell(
+              onTap: () => onSelect(i),
+              borderRadius: BorderRadius.circular(28),
+              child: AnimatedContainer(
+                duration: MediaQuery.disableAnimationsOf(context)
+                    ? Duration.zero
+                    : const Duration(milliseconds: 180),
+                padding: const EdgeInsets.symmetric(
+                  vertical: 12,
+                  horizontal: 1,
+                ),
+                decoration: BoxDecoration(
+                  color: selected
+                      ? const Color(0x45D6D9F5)
+                      : Colors.transparent,
+                  borderRadius: BorderRadius.circular(28),
+                  border: Border.all(
+                    color: selected
+                        ? const Color(0x66E0E3FF)
+                        : Colors.transparent,
+                  ),
+                ),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(
+                      icons[i],
+                      size: 24,
+                      color: selected ? Colors.white : muted,
                     ),
-                    decoration: BoxDecoration(
-                      color: selected
-                          ? const Color(0x45D6D9F5)
-                          : Colors.transparent,
-                      borderRadius: BorderRadius.circular(30),
-                      border: Border.all(
-                        color: selected
-                            ? const Color(0x66E0E3FF)
-                            : Colors.transparent,
+                    const SizedBox(height: 5),
+                    FittedBox(
+                      fit: BoxFit.scaleDown,
+                      child: Text(
+                        labels[i],
+                        maxLines: 1,
+                        style: TextStyle(
+                          fontSize: 11,
+                          color: selected ? Colors.white : muted,
+                          fontWeight: selected
+                              ? FontWeight.w600
+                              : FontWeight.w400,
+                        ),
                       ),
                     ),
-                    child: Column(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Icon(
-                          icons[i],
-                          size: 25,
-                          color: selected ? Colors.white : muted,
-                        ),
-                        const SizedBox(height: 4),
-                        Text(
-                          labels[i],
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                          style: TextStyle(
-                            fontSize: 11,
-                            fontWeight: selected
-                                ? FontWeight.w600
-                                : FontWeight.w400,
-                            color: selected ? Colors.white : muted,
-                          ),
-                        ),
-                      ],
-                    ),
+                  ],
+                ),
+              ),
+            ),
+          ),
+        ),
+      );
+    }
+
+    return GlassPanel(
+      radius: 36,
+      padding: const EdgeInsets.all(5),
+      child: Row(
+        children: [
+          destination(0),
+          destination(1),
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 3),
+            child: Semantics(
+              button: true,
+              label: recording
+                  ? (paused
+                        ? 'Вернуться к тренировке на паузе'
+                        : 'Вернуться к записи')
+                  : 'Записать тренировку',
+              child: ExcludeSemantics(
+                child: IconButton.filled(
+                  key: const ValueKey('record-workout'),
+                  onPressed: onRecord,
+                  style: IconButton.styleFrom(
+                    backgroundColor: lime,
+                    foregroundColor: bg,
+                    fixedSize: const Size(52, 52),
+                  ),
+                  icon: Icon(
+                    recording
+                        ? (paused
+                              ? CupertinoIcons.pause_fill
+                              : CupertinoIcons.waveform)
+                        : CupertinoIcons.plus,
+                    size: 27,
                   ),
                 ),
               ),
             ),
-          );
-        }),
+          ),
+          destination(2),
+          destination(3),
+        ],
       ),
     );
   }
