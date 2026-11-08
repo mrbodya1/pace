@@ -34,7 +34,16 @@ void main() {
         ),
       );
       await tester.pumpAndSettle();
-      await tester.ensureVisible(find.widgetWithText(ListTile, 'Ходьба'));
+      await tester.scrollUntilVisible(
+        find.widgetWithText(ListTile, 'Ходьба'),
+        180,
+        scrollable: find
+            .descendant(
+              of: find.byType(ListView).first,
+              matching: find.byType(Scrollable),
+            )
+            .first,
+      );
       await tester.pumpAndSettle();
       await tester.tap(find.widgetWithText(ListTile, 'Ходьба'));
       await tester.pumpAndSettle();

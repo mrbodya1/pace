@@ -3,10 +3,12 @@ import 'package:flutter/material.dart';
 
 import '../../app/theme/pace_theme.dart';
 import '../../data/storage/profile_storage_service.dart';
+import '../../models/specialization.dart';
 import '../../widgets/common_widgets.dart';
 import '../../widgets/glass_widgets.dart';
 import '../auth/sign_in_page.dart';
 import 'permissions_page.dart';
+import 'specialization_page.dart';
 
 class ProfilePage extends StatefulWidget {
   const ProfilePage({
@@ -70,11 +72,19 @@ class _ProfilePageState extends State<ProfilePage> {
     if (value != null && mounted) setState(() => profile = value);
   }
 
+  Future<void> _chooseSpecialization() async {
+    final value = await Navigator.of(context).push<Map<String, dynamic>>(
+      MaterialPageRoute(builder: (_) => SpecializationPage(storage: storage)),
+    );
+    if (value != null && mounted) setState(() => profile = value);
+  }
+
   @override
   Widget build(BuildContext context) {
     final name = profile['name'] as String? ?? 'BODYA';
     final bio = profile['bio'] as String? ?? 'Универсальный атлет';
     final city = profile['city'] as String? ?? '';
+    final specialization = Specialization.fromId(profile['specializationId']);
     return ListView(
       padding: const EdgeInsets.fromLTRB(22, 28, 22, 140),
       children: [
@@ -115,6 +125,14 @@ class _ProfilePageState extends State<ProfilePage> {
           onPressed: loading ? null : () => _edit(),
           child: const Text('Редактировать профиль'),
         ),
+        if (specialization != null) ...[
+          Text(
+            specialization.title,
+            textAlign: TextAlign.center,
+            style: const TextStyle(color: lime, fontWeight: FontWeight.w600),
+          ),
+          const SizedBox(height: 6),
+        ],
         const SizedBox(height: 16),
         FilledButton.icon(
           onPressed: () => Navigator.of(
@@ -130,6 +148,24 @@ class _ProfilePageState extends State<ProfilePage> {
           padding: EdgeInsets.zero,
           child: Column(
             children: [
+              ListTile(
+                key: const ValueKey('profile-specialization'),
+                leading: Icon(
+                  specialization?.icon ?? Icons.auto_awesome_rounded,
+                  color: lime,
+                ),
+                title: const Text('Специализация'),
+                subtitle: Text(
+                  specialization?.title ?? 'Выбери своего спортсмена',
+                ),
+                trailing: const Icon(
+                  CupertinoIcons.chevron_right,
+                  size: 18,
+                  color: muted,
+                ),
+                onTap: loading ? null : _chooseSpecialization,
+              ),
+              const Divider(height: 1, indent: 18, endIndent: 18),
               ListTile(
                 leading: const Icon(CupertinoIcons.person, color: muted),
                 title: const Text('Личные параметры'),
