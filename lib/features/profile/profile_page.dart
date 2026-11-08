@@ -5,6 +5,7 @@ import '../../app/theme/pace_theme.dart';
 import '../../data/storage/profile_storage_service.dart';
 import '../../models/specialization.dart';
 import '../../models/sport_catalog.dart';
+import '../../models/xp_progress.dart';
 import '../../models/participant_sex.dart';
 import '../../widgets/common_widgets.dart';
 import '../../widgets/glass_widgets.dart';
@@ -21,12 +22,14 @@ class ProfilePage extends StatefulWidget {
     required this.selectedSport,
     required this.tracking,
     required this.onSelectSport,
+    this.xp,
   });
   final List<String> sports;
   final List<IconData> sportIcons;
   final int selectedSport;
   final bool tracking;
   final ValueChanged<int> onSelectSport;
+  final int? xp;
 
   @override
   State<ProfilePage> createState() => _ProfilePageState();
@@ -130,6 +133,14 @@ class _ProfilePageState extends State<ProfilePage> {
             bio,
             textAlign: TextAlign.center,
             style: const TextStyle(color: muted, fontSize: 15),
+          ),
+        ],
+        if (widget.xp != null) ...[
+          const SizedBox(height: 8),
+          Text(
+            'Уровень ${XpProgress(widget.xp!).level} · ${widget.xp} XP',
+            textAlign: TextAlign.center,
+            style: const TextStyle(color: lime, fontSize: 14),
           ),
         ],
         if (city.isNotEmpty) ...[

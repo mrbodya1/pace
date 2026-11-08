@@ -87,6 +87,16 @@ void main() {
         expect(find.text('0,07'), findsOneWidget);
         await tester.tap(find.byKey(const ValueKey('pause-workout')));
         await tester.pumpAndSettle();
+        await tester.scrollUntilVisible(
+          find.text('На паузе'),
+          -100,
+          scrollable: find
+              .descendant(
+                of: find.byType(ListView).first,
+                matching: find.byType(Scrollable),
+              )
+              .first,
+        );
         expect(find.text('На паузе'), findsOneWidget);
         gps.positions.add(AlphaGps.point(4));
         await tester.pump();
@@ -116,12 +126,21 @@ void main() {
           prefs.getString('pace_local_data')!,
         ) as Map<String, dynamic>;
         expect((data['workouts'] as List).length, 1);
-        expect(data['xp'], 6847);
         expect(data['selectedSport'], 3);
         expect(data.keys.toSet(), {'xp', 'selectedSport', 'workouts'});
         final record =
             (data['workouts'] as List).single as Map<String, dynamic>;
         expect(record['sport'], 'Лыжи');
+        expect(data['xp'], 6840 + (record['xp'] as int));
+        final breakdown = record['xpBreakdown'] as Map;
+        expect(breakdown['version'], 1);
+        expect(breakdown['total'], record['xp']);
+        expect(breakdown['specializationId'], isNull);
+        expect(
+          (breakdown['distance'] as num).toDouble(),
+          closeTo((record['distance'] as num) * 100 / 15, .000001),
+        );
+        expect(record['elevationGain'], 0);
         expect((record['route'] as List).length, 4);
         await tester.tap(find.text('Готово'));
         await tester.pumpAndSettle();

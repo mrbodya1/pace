@@ -5,6 +5,7 @@ import '../../models/sport_catalog.dart';
 import '../../models/workout.dart';
 import '../../widgets/common_widgets.dart';
 import '../../widgets/glass_widgets.dart';
+import '../../widgets/workout_xp_panel.dart';
 import '../tracker/widgets/route_painter.dart';
 
 class WorkoutDetailsPage extends StatelessWidget {
@@ -15,7 +16,7 @@ class WorkoutDetailsPage extends StatelessWidget {
   Widget build(BuildContext context) {
     final w = workout;
     final pace = w.distance > 0 ? w.duration.inSeconds / w.distance : 0.0;
-    final seconds = pace.round();
+    final seconds = (w.sport == 'Плавание' ? pace / 10 : pace).round();
     final speed = w.duration.inSeconds > 0
         ? w.distance * 3600 / w.duration.inSeconds
         : 0.0;
@@ -48,12 +49,25 @@ class WorkoutDetailsPage extends StatelessWidget {
               useSpeed
                   ? '${speed.toStringAsFixed(1)} км/ч'
                   : seconds > 0
-                  ? '${seconds ~/ 60}:${(seconds % 60).toString().padLeft(2, '0')} мин/км'
+                  ? '${seconds ~/ 60}:${(seconds % 60).toString().padLeft(2, '0')} ${w.sport == 'Плавание' ? 'мин/100 м' : 'мин/км'}'
                   : '--:--',
               Icons.speed_rounded,
             ),
             const SizedBox(height: 12),
             statCard('ЗАРАБОТАНО XP', '+${w.xp}', Icons.bolt_rounded),
+            if (w.elevationGain != null) ...[
+              const SizedBox(height: 12),
+              statCard(
+                'НАБОР ВЫСОТЫ',
+                '${w.elevationGain!.round()}',
+                Icons.landscape_rounded,
+                suffix: 'м',
+              ),
+            ],
+            if (w.xpBreakdown != null) ...[
+              const SizedBox(height: 18),
+              WorkoutXpPanel(value: w.xpBreakdown!),
+            ],
             const SizedBox(height: 24),
             sectionTitle('МАРШРУТ'),
             const SizedBox(height: 12),

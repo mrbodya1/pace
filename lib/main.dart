@@ -6,6 +6,12 @@ import 'package:geolocator/geolocator.dart';
 import 'models/workout.dart';
 import 'models/xp_progress.dart';
 import 'models/sport_catalog.dart';
+import 'models/specialization.dart';
+import 'models/participant_sex.dart';
+import 'models/workout_xp.dart';
+import 'services/workout_xp_calculator.dart';
+import 'services/elevation_tracker.dart';
+import 'data/storage/profile_storage_service.dart';
 import 'data/storage/local_storage_service.dart';
 import 'app/theme/pace_theme.dart';
 import 'widgets/pace_header.dart';
@@ -54,6 +60,12 @@ class _PaceHomeState extends State<PaceHome> with WidgetsBindingObserver {
   StreamSubscription<Position>? gpsSubscription;
   Timer? clock;
   final Stopwatch stopwatch = Stopwatch();
+  final ElevationTracker elevation = ElevationTracker();
+  Specialization? workoutSpecialization;
+  ParticipantSex? workoutParticipantSex;
+  DateTime? workoutStartedAt;
+  WorkoutXp? finishedXpBreakdown;
+  double finishedElevation = 0;
 
   bool workoutOpen = false;
   bool finishing = false;
@@ -163,6 +175,8 @@ class _PaceHomeState extends State<PaceHome> with WidgetsBindingObserver {
     if (starting || finishing || (tracking && !paused)) return;
 
     if (tracking && paused) {
+      lastPosition = null;
+      elevation.resetAnchor();
       stopwatch.start();
       setState(() {
         paused = false;
@@ -197,6 +211,13 @@ class _PaceHomeState extends State<PaceHome> with WidgetsBindingObserver {
         return;
       }
 
+      Map<String, dynamic> profile;
+      try {
+        profile = await ProfileStorageService().load();
+      } catch (_) {
+        _message('Не удалось прочитать специализацию. Попробуй начать снова.');
+        return;
+      }
       final firstPosition = await Geolocator.getCurrentPosition(
         locationSettings: const LocationSettings(
           accuracy: LocationAccuracy.best,
@@ -206,6 +227,16 @@ class _PaceHomeState extends State<PaceHome> with WidgetsBindingObserver {
 
       await gpsSubscription?.cancel();
       clock?.cancel();
+
+      if (!mounted) return;
+      workoutSpecialization = Specialization.fromId(
+        profile['specializationId'],
+      );
+      workoutParticipantSex = ParticipantSex.fromId(profile['sex']);
+      workoutStartedAt = DateTime.now();
+      elevation
+        ..reset()
+        ..add(firstPosition.altitude);
 
       stopwatch
         ..reset()
@@ -263,6 +294,7 @@ class _PaceHomeState extends State<PaceHome> with WidgetsBindingObserver {
                 lastPosition = position;
                 lastAccuracy = position.accuracy;
                 route.add(position);
+                elevation.add(position.altitude);
               });
               return;
             }
@@ -295,6 +327,7 @@ class _PaceHomeState extends State<PaceHome> with WidgetsBindingObserver {
                 // Count only plausible movement to avoid GPS jumps inflating distance.
                 if (segment <= 100 && seconds > 0 && segmentSpeed <= 20) {
                   distance += segment;
+                  elevation.add(position.altitude);
 
                   final reportedSpeed = position.speed;
                   speed = reportedSpeed.isFinite && reportedSpeed > 0
@@ -342,12 +375,24 @@ class _PaceHomeState extends State<PaceHome> with WidgetsBindingObserver {
             (position) => RoutePoint(
               latitude: position.latitude,
               longitude: position.longitude,
+              altitude: position.altitude.isFinite ? position.altitude : null,
             ),
           )
           .toList(growable: false);
       final wasSaved = finalDistance >= 0.05;
-      final earnedXp = wasSaved ? (finalDistance * 100).round() : 0;
       final finishedActivity = sports[selectedSport];
+      final gainedElevation = elevation.gain;
+      final breakdown = wasSaved
+          ? WorkoutXpCalculator.calculate(
+              sport: finishedActivity,
+              distanceKm: finalDistance,
+              activeDuration: finalDuration,
+              elevationMeters: gainedElevation,
+              specialization: workoutSpecialization,
+              participantSex: workoutParticipantSex,
+            )
+          : null;
+      final earnedXp = breakdown?.total ?? 0;
 
       setState(() {
         tracking = false;
@@ -361,6 +406,8 @@ class _PaceHomeState extends State<PaceHome> with WidgetsBindingObserver {
         finishedSport = finishedActivity;
         finishedWasSaved = wasSaved;
         finishedRoute = savedRoute;
+        finishedElevation = gainedElevation;
+        finishedXpBreakdown = breakdown;
 
         distance = 0;
         speed = 0;
@@ -378,12 +425,15 @@ class _PaceHomeState extends State<PaceHome> with WidgetsBindingObserver {
           workouts.insert(
             0,
             Workout(
-              date: DateTime.now(),
+              date: workoutStartedAt ?? DateTime.now(),
               distance: finalDistance,
               duration: finalDuration,
               xp: earnedXp,
               sport: finishedActivity,
               route: savedRoute,
+              elevationGain: gainedElevation,
+              xpBreakdown: breakdown,
+              startedAt: workoutStartedAt,
             ),
           );
         });
@@ -404,6 +454,12 @@ class _PaceHomeState extends State<PaceHome> with WidgetsBindingObserver {
     setState(() {
       workoutFinished = false;
       finishedRoute = [];
+      finishedXpBreakdown = null;
+      finishedElevation = 0;
+      workoutSpecialization = null;
+      workoutParticipantSex = null;
+      workoutStartedAt = null;
+      elevation.reset();
       distance = 0;
       speed = 0;
       pace = 0;
@@ -460,6 +516,7 @@ class _PaceHomeState extends State<PaceHome> with WidgetsBindingObserver {
       const CommunityPage(),
       ProgressPage(xp: xp, level: level, workouts: workouts),
       ProfilePage(
+        xp: xp,
         sports: sports,
         sportIcons: sportIcons,
         selectedSport: selectedSport,
@@ -504,6 +561,9 @@ class _PaceHomeState extends State<PaceHome> with WidgetsBindingObserver {
                       finishedDistance: finishedDistance,
                       finishedDuration: finishedDuration,
                       finishedXp: finishedXp,
+                      elevationGain: elevation.gain,
+                      finishedElevation: finishedElevation,
+                      finishedXpBreakdown: finishedXpBreakdown,
                       finishedRoute: finishedRoute,
                       sports: sports,
                       sportIcons: sportIcons,

@@ -11,6 +11,7 @@ abstract final class SportCatalog {
     'Скандинавская ходьба',
     'Поход',
     'Роллеры',
+    'Плавание',
   ];
   static const icons = [
     Icons.directions_run_rounded,
@@ -21,10 +22,11 @@ abstract final class SportCatalog {
     Icons.nordic_walking_rounded,
     Icons.hiking_rounded,
     Icons.roller_skating_rounded,
+    Icons.pool_rounded,
   ];
   static const quickIndices = [0, 2, 3];
   // IDs 5 and 6 remain reserved for old Nordic-walk/hike data.
-  static const selectableIndices = [0, 1, 2, 3, 4, 7];
+  static const selectableIndices = [0, 1, 2, 3, 4, 7, 8];
 
   static bool isSelectable(int index) => selectableIndices.contains(index);
 

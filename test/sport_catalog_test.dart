@@ -8,7 +8,7 @@ import 'package:sport_platform/models/sport_catalog.dart';
 
 void main() {
   test('Retired IDs stay reserved and old roller names remain speed-based', () {
-    expect(SportCatalog.selectableIndices, [0, 1, 2, 3, 4, 7]);
+    expect(SportCatalog.selectableIndices, [0, 1, 2, 3, 4, 7, 8]);
     expect(SportCatalog.names[7], 'Роллеры');
     expect(SportCatalog.restoreSelection(7), 7);
     expect(SportCatalog.restoreSelection(5), 1);

@@ -365,7 +365,7 @@ class _SpecializationPageState extends State<SpecializationPage> {
         ),
         const SizedBox(height: 8),
         const Text(
-          'Новая система XP готовится к запуску. Сейчас сохраняется выбор специализации.',
+          'Бонус действует для новых тренировок. Специализация фиксируется при старте записи.',
           style: TextStyle(color: muted, fontSize: 13),
         ),
       ],

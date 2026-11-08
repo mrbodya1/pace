@@ -5,6 +5,8 @@ import 'package:geolocator/geolocator.dart';
 import '../../app/theme/pace_theme.dart';
 import '../../models/sport_catalog.dart';
 import '../../models/workout.dart';
+import '../../models/workout_xp.dart';
+import '../../widgets/workout_xp_panel.dart';
 import '../../widgets/glass_widgets.dart';
 import '../../widgets/glass_segmented_control.dart';
 import 'widgets/route_painter.dart';
@@ -40,9 +42,14 @@ class TrackerPage extends StatelessWidget {
     required this.onFinishWorkout,
     required this.onSelectSport,
     required this.onClose,
+    this.elevationGain = 0,
+    this.finishedElevation = 0,
+    this.finishedXpBreakdown,
   });
 
   final double distance, pace, speed, finishedDistance;
+  final double elevationGain, finishedElevation;
+  final WorkoutXp? finishedXpBreakdown;
   final Duration elapsed, finishedDuration;
   final List<Position> route;
   final List<RoutePoint> finishedRoute;
@@ -335,14 +342,40 @@ class TrackerPage extends StatelessWidget {
                     const SizedBox(width: 16),
                     Expanded(
                       child: _WorkoutMetric(
-                        label: usesSpeed ? 'Скорость, км/ч' : 'Темп, мин/км',
+                        label: usesSpeed
+                            ? 'Скорость, км/ч'
+                            : sport == 'Плавание'
+                            ? 'Темп, мин/100 м'
+                            : 'Темп, мин/км',
                         value: usesSpeed
                             ? displayedSpeed
                                   .toStringAsFixed(1)
                                   .replaceAll('.', ',')
-                            : formatPace(calculatedPace),
+                            : formatPace(
+                                sport == 'Плавание'
+                                    ? calculatedPace / 10
+                                    : calculatedPace,
+                              ),
                         icon: CupertinoIcons.speedometer,
                       ),
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(height: 12),
+              GlassPanel(
+                child: Row(
+                  children: [
+                    const Icon(Icons.landscape_rounded, color: lime),
+                    const SizedBox(width: 12),
+                    const Expanded(
+                      child: Text(
+                        'Набор высоты',
+                        style: TextStyle(color: muted),
+                      ),
+                    ),
+                    Text(
+                      '${(result ? finishedElevation : elevationGain).round()} м',
                     ),
                   ],
                 ),
@@ -366,6 +399,10 @@ class TrackerPage extends StatelessWidget {
                     textAlign: TextAlign.center,
                     style: TextStyle(color: muted, fontSize: 14),
                   ),
+              ],
+              if (result && finishedXpBreakdown != null) ...[
+                const SizedBox(height: 18),
+                WorkoutXpPanel(value: finishedXpBreakdown!),
               ],
               const SizedBox(height: 22),
               _WorkoutRoute(points: points),
