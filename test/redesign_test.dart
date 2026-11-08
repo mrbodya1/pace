@@ -34,7 +34,11 @@ void main() {
         ),
       );
       await tester.pumpAndSettle();
-      await tester.tap(find.text('Бег').last);
+      await tester.ensureVisible(find.widgetWithText(ListTile, 'Ходьба'));
+      await tester.pumpAndSettle();
+      await tester.tap(find.widgetWithText(ListTile, 'Ходьба'));
+      await tester.pumpAndSettle();
+      await tester.tap(find.widgetWithText(ListTile, 'Бег'));
       await tester.pumpAndSettle();
       final prefs = await SharedPreferences.getInstance();
       final saved = jsonDecode(
@@ -44,6 +48,8 @@ void main() {
       expect(saved['xp'], 9100);
       expect(saved['workouts'], isEmpty);
 
+      await tester.ensureVisible(find.text('Войти в аккаунт'));
+      await tester.pumpAndSettle();
       await tester.tap(find.text('Войти в аккаунт'));
       await tester.pumpAndSettle();
       expect(find.text('Войти через Mail'), findsOneWidget);
