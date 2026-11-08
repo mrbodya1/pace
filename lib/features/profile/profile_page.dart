@@ -6,6 +6,7 @@ import '../../data/storage/profile_storage_service.dart';
 import '../../models/specialization.dart';
 import '../../widgets/common_widgets.dart';
 import '../../widgets/glass_widgets.dart';
+import '../../widgets/pace_page_scaffold.dart';
 import '../auth/sign_in_page.dart';
 import 'permissions_page.dart';
 import 'specialization_page.dart';
@@ -386,87 +387,83 @@ class _ProfileEditorState extends State<_ProfileEditor> {
   Widget build(BuildContext context) {
     return PopScope(
       canPop: !saving,
-      child: Scaffold(
-        appBar: AppBar(
-          title: Text(widget.personal ? 'Личные параметры' : 'Редактирование'),
-        ),
-        body: PaceBackground(
-          child: Form(
-            key: form,
-            child: ListView(
-              padding: const EdgeInsets.all(22),
-              children: [
-                if (widget.personal) ...[
-                  TextFormField(
-                    controller: height,
-                    decoration: const InputDecoration(labelText: 'Рост, см'),
-                    keyboardType: const TextInputType.numberWithOptions(
-                      decimal: true,
-                    ),
-                    validator: _number,
+      child: PacePageScaffold(
+        title: widget.personal ? 'Личные параметры' : 'Редактирование',
+        body: Form(
+          key: form,
+          child: ListView(
+            padding: const EdgeInsets.all(22),
+            children: [
+              if (widget.personal) ...[
+                TextFormField(
+                  controller: height,
+                  decoration: const InputDecoration(labelText: 'Рост, см'),
+                  keyboardType: const TextInputType.numberWithOptions(
+                    decimal: true,
                   ),
-                  const SizedBox(height: 18),
-                  TextFormField(
-                    controller: weight,
-                    decoration: const InputDecoration(labelText: 'Вес, кг'),
-                    keyboardType: const TextInputType.numberWithOptions(
-                      decimal: true,
-                    ),
-                    validator: _number,
+                  validator: _number,
+                ),
+                const SizedBox(height: 18),
+                TextFormField(
+                  controller: weight,
+                  decoration: const InputDecoration(labelText: 'Вес, кг'),
+                  keyboardType: const TextInputType.numberWithOptions(
+                    decimal: true,
                   ),
-                  const SizedBox(height: 18),
-                  TextFormField(
-                    controller: birthday,
-                    decoration: const InputDecoration(
-                      labelText: 'Дата рождения',
-                      hintText: 'ДД.ММ.ГГГГ',
-                    ),
-                    keyboardType: TextInputType.datetime,
-                    validator: _birthday,
+                  validator: _number,
+                ),
+                const SizedBox(height: 18),
+                TextFormField(
+                  controller: birthday,
+                  decoration: const InputDecoration(
+                    labelText: 'Дата рождения',
+                    hintText: 'ДД.ММ.ГГГГ',
                   ),
-                  const SizedBox(height: 18),
-                  DropdownButtonFormField<String>(
-                    initialValue: sex,
-                    decoration: const InputDecoration(labelText: 'Пол'),
-                    items: const [
-                      DropdownMenuItem(value: '', child: Text('Не указан')),
-                      DropdownMenuItem(value: 'male', child: Text('Мужской')),
-                      DropdownMenuItem(value: 'female', child: Text('Женский')),
-                    ],
-                    onChanged: saving
-                        ? null
-                        : (value) => setState(() => sex = value ?? ''),
-                  ),
-                ] else ...[
-                  TextFormField(
-                    controller: name,
-                    maxLength: 40,
-                    decoration: const InputDecoration(labelText: 'Имя'),
-                    validator: (value) => value == null || value.trim().isEmpty
-                        ? 'Укажи имя'
-                        : null,
-                  ),
-                  const SizedBox(height: 18),
-                  TextFormField(
-                    controller: city,
-                    maxLength: 80,
-                    decoration: const InputDecoration(labelText: 'Город'),
-                  ),
-                  const SizedBox(height: 18),
-                  TextFormField(
-                    controller: bio,
-                    maxLength: 160,
-                    maxLines: 3,
-                    decoration: const InputDecoration(labelText: 'О себе'),
-                  ),
-                ],
-                const SizedBox(height: 28),
-                FilledButton(
-                  onPressed: saving ? null : _save,
-                  child: Text(saving ? 'Сохраняем…' : 'Сохранить'),
+                  keyboardType: TextInputType.datetime,
+                  validator: _birthday,
+                ),
+                const SizedBox(height: 18),
+                DropdownButtonFormField<String>(
+                  initialValue: sex,
+                  decoration: const InputDecoration(labelText: 'Пол'),
+                  items: const [
+                    DropdownMenuItem(value: '', child: Text('Не указан')),
+                    DropdownMenuItem(value: 'male', child: Text('Мужской')),
+                    DropdownMenuItem(value: 'female', child: Text('Женский')),
+                  ],
+                  onChanged: saving
+                      ? null
+                      : (value) => setState(() => sex = value ?? ''),
+                ),
+              ] else ...[
+                TextFormField(
+                  controller: name,
+                  maxLength: 40,
+                  decoration: const InputDecoration(labelText: 'Имя'),
+                  validator: (value) => value == null || value.trim().isEmpty
+                      ? 'Укажи имя'
+                      : null,
+                ),
+                const SizedBox(height: 18),
+                TextFormField(
+                  controller: city,
+                  maxLength: 80,
+                  decoration: const InputDecoration(labelText: 'Город'),
+                ),
+                const SizedBox(height: 18),
+                TextFormField(
+                  controller: bio,
+                  maxLength: 160,
+                  maxLines: 3,
+                  decoration: const InputDecoration(labelText: 'О себе'),
                 ),
               ],
-            ),
+              const SizedBox(height: 28),
+              FilledButton(
+                onPressed: saving ? null : _save,
+                child: Text(saving ? 'Сохраняем…' : 'Сохранить'),
+              ),
+            ],
           ),
         ),
       ),
