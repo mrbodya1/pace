@@ -6,7 +6,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:sport_platform/main.dart';
+import 'support/test_app.dart';
 import 'package:sport_platform/services/workout_location_settings.dart';
 import 'package:sport_platform/services/workout_notifications.dart';
 
@@ -43,7 +43,7 @@ class BackgroundGps extends AlphaGps {
 Future<void> openRecording(WidgetTester tester, BackgroundGps gps) async {
   SharedPreferences.setMockInitialValues({});
   GeolocatorPlatform.instance = gps;
-  await tester.pumpWidget(const PaceApp());
+  await tester.pumpWidget(const TestPaceApp());
   await tester.pumpAndSettle();
   await tester.tap(find.byKey(const ValueKey('record-workout')));
   await tester.pumpAndSettle();
@@ -145,7 +145,7 @@ void main() {
       final workout = (data['workouts'] as List).single as Map;
       expect((workout['route'] as List).length, 5);
       expect(workout['distance'], closeTo(.08896, .001));
-      expect(data['xp'], 6840 + (workout['xp'] as int));
+      expect(data['xp'], workout['xp'] as int);
       await tester.pumpWidget(const SizedBox.shrink());
     },
   );

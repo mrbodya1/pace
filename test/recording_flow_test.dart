@@ -5,7 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:sport_platform/main.dart';
+import 'support/test_app.dart';
 import 'package:sport_platform/models/sport_catalog.dart';
 import 'package:sport_platform/widgets/glass_widgets.dart';
 
@@ -57,7 +57,7 @@ void main() {
           await gps.positions.close();
         });
         SharedPreferences.setMockInitialValues({});
-        await tester.pumpWidget(const PaceApp());
+        await tester.pumpWidget(const TestPaceApp());
         await tester.pumpAndSettle();
         expect(find.text('Начать тренировку'), findsNothing);
         await tester.tap(find.byKey(const ValueKey('record-workout')));
@@ -131,7 +131,7 @@ void main() {
         final record =
             (data['workouts'] as List).single as Map<String, dynamic>;
         expect(record['sport'], 'Лыжи');
-        expect(data['xp'], 6840 + (record['xp'] as int));
+        expect(data['xp'], record['xp'] as int);
         final breakdown = record['xpBreakdown'] as Map;
         expect(breakdown['version'], 1);
         expect(breakdown['total'], record['xp']);
@@ -165,7 +165,7 @@ void main() {
           'workouts': [],
         }),
       });
-      await tester.pumpWidget(const PaceApp());
+      await tester.pumpWidget(const TestPaceApp());
       await tester.pumpAndSettle();
       await tester.tap(find.text('Сообщество'));
       await tester.pumpAndSettle();

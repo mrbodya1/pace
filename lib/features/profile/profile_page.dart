@@ -1,8 +1,11 @@
+import 'dart:async';
+
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
 import '../../app/theme/pace_theme.dart';
 import '../../data/storage/profile_storage_service.dart';
+import '../../services/account_service.dart';
 import '../../models/specialization.dart';
 import '../../models/sport_catalog.dart';
 import '../../models/xp_progress.dart';
@@ -10,9 +13,10 @@ import '../../models/participant_sex.dart';
 import '../../widgets/common_widgets.dart';
 import '../../widgets/glass_widgets.dart';
 import '../../widgets/pace_page_scaffold.dart';
-import '../auth/sign_in_page.dart';
+import '../auth/email_auth_page.dart';
 import 'permissions_page.dart';
 import 'specialization_page.dart';
+import '../onboarding/welcome_stories.dart';
 
 class ProfilePage extends StatefulWidget {
   const ProfilePage({
@@ -23,6 +27,7 @@ class ProfilePage extends StatefulWidget {
     required this.tracking,
     required this.onSelectSport,
     this.xp,
+    this.accounts,
   });
   final List<String> sports;
   final List<IconData> sportIcons;
@@ -30,33 +35,72 @@ class ProfilePage extends StatefulWidget {
   final bool tracking;
   final ValueChanged<int> onSelectSport;
   final int? xp;
+  final AccountService? accounts;
 
   @override
   State<ProfilePage> createState() => _ProfilePageState();
 }
 
 class _ProfilePageState extends State<ProfilePage> {
-  final storage = ProfileStorageService();
+  late final storage = ProfileStorageService(accounts: accounts);
+  late final accounts = widget.accounts ?? AccountService.instance;
   Map<String, dynamic> profile = {};
   bool loading = true;
+  bool _signingOut = false;
+  int _loadVersion = 0;
+  String? _accountError;
 
   @override
   void initState() {
     super.initState();
+    accounts.addListener(_accountChanged);
     _load();
+    unawaited(_restoreAccount());
   }
 
-  Future<void> _load() async {
+  @override
+  void dispose() {
+    accounts.removeListener(_accountChanged);
+    super.dispose();
+  }
+
+  void _accountChanged() => unawaited(_load());
+
+  Future<void> _restoreAccount() async {
     try {
-      final value = await storage.load();
+      await accounts.initialize();
       if (mounted) {
-        setState(() {
-          profile = value;
-          loading = false;
-        });
+        await _load();
       }
     } catch (_) {
       if (mounted) {
+        setState(
+          () => _accountError =
+              'Не удалось проверить аккаунт. Нажми «Повторить проверку входа».',
+        );
+      }
+    }
+  }
+
+  Future<void> _load() async {
+    final version = ++_loadVersion;
+    try {
+      var value = await storage.load();
+      final accountName = accounts.account?.name.trim() ?? '';
+      if (accountName.isNotEmpty && value['name'] != accountName) {
+        value = {...value, 'name': accountName};
+      }
+      if (mounted && version == _loadVersion) {
+        setState(() {
+          profile = value;
+          loading = false;
+          if (accounts.account != null) {
+            _accountError = null;
+          }
+        });
+      }
+    } catch (_) {
+      if (mounted && version == _loadVersion) {
         setState(() => loading = false);
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text('Не удалось загрузить профиль.')),
@@ -72,10 +116,11 @@ class _ProfilePageState extends State<ProfilePage> {
           profile: profile,
           personal: personal,
           storage: storage,
+          accounts: accounts,
         ),
       ),
     );
-    if (value != null && mounted) setState(() => profile = value);
+    if (value != null && mounted) await _load();
   }
 
   Future<void> _chooseSpecialization() async {
@@ -85,10 +130,53 @@ class _ProfilePageState extends State<ProfilePage> {
     if (value != null && mounted) setState(() => profile = value);
   }
 
+  Future<void> _openAuth({required bool register}) async {
+    final registered = await Navigator.of(context).push<bool>(
+      MaterialPageRoute(
+        builder: (_) => EmailAuthPage(accounts: accounts, register: register),
+      ),
+    );
+    if (!mounted) return;
+    if (registered == true) {
+      await Navigator.of(context).push<void>(
+        MaterialPageRoute(builder: (_) => SpecializationPage(storage: storage)),
+      );
+    }
+    if (mounted) await _load();
+  }
+
+  Future<void> _signOut() async {
+    setState(() => _signingOut = true);
+    try {
+      await accounts.signOut();
+    } catch (error) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              error is AccountError
+                  ? error.message
+                  : 'Не удалось выйти. Повтори попытку.',
+            ),
+          ),
+        );
+      }
+    } finally {
+      if (mounted) setState(() => _signingOut = false);
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
-    final name = profile['name'] as String? ?? 'BODYA';
-    final bio = profile['bio'] as String? ?? 'Универсальный атлет';
+    final accountName = accounts.account?.name.trim() ?? '';
+    final localName = profile['name'] as String? ?? '';
+    final name = accountName.isNotEmpty
+        ? accountName
+        : localName.isEmpty || localName == 'BODYA'
+        ? 'Гость'
+        : localName;
+    final savedBio = profile['bio'] as String? ?? '';
+    final bio = savedBio == 'Универсальный атлет' ? '' : savedBio;
     final city = profile['city'] as String? ?? '';
     final specialization = Specialization.fromId(profile['specializationId']);
     final participantSex =
@@ -127,6 +215,14 @@ class _ProfilePageState extends State<ProfilePage> {
           textAlign: TextAlign.center,
           style: const TextStyle(fontSize: 26, fontWeight: FontWeight.w600),
         ),
+        if (accounts.account == null) ...[
+          const SizedBox(height: 6),
+          const Text(
+            'Без входа · данные на этом устройстве',
+            textAlign: TextAlign.center,
+            style: TextStyle(color: muted),
+          ),
+        ],
         if (bio.isNotEmpty) ...[
           const SizedBox(height: 6),
           Text(
@@ -165,13 +261,24 @@ class _ProfilePageState extends State<ProfilePage> {
           const SizedBox(height: 6),
         ],
         const SizedBox(height: 16),
-        FilledButton.icon(
-          onPressed: () => Navigator.of(
-            context,
-          ).push<void>(MaterialPageRoute(builder: (_) => const SignInPage())),
-          icon: const Icon(CupertinoIcons.person_crop_circle),
-          label: const Text('Войти в аккаунт'),
-        ),
+        if (accounts.account == null) ...[
+          FilledButton(
+            onPressed: () => _openAuth(register: true),
+            child: const Text('Регистрация'),
+          ),
+          const SizedBox(height: 8),
+          OutlinedButton(
+            onPressed: () => _openAuth(register: false),
+            child: const Text('Войти'),
+          ),
+        ],
+        if (_accountError != null) ...[
+          Text(_accountError!, style: const TextStyle(color: muted)),
+          TextButton(
+            onPressed: _restoreAccount,
+            child: const Text('Повторить проверку входа'),
+          ),
+        ],
         const SizedBox(height: 28),
         sectionTitle('ЛИЧНЫЕ НАСТРОЙКИ'),
         const SizedBox(height: 12),
@@ -293,6 +400,36 @@ class _ProfilePageState extends State<ProfilePage> {
                   },
           ),
         ),
+        const SizedBox(height: 20),
+        Material(
+          type: MaterialType.transparency,
+          child: ListTile(
+            leading: const Icon(Icons.bolt_rounded, color: lime),
+            title: const Text('О PACE'),
+            trailing: const Icon(
+              CupertinoIcons.chevron_right,
+              size: 18,
+              color: muted,
+            ),
+            onTap: () => Navigator.of(context).push<void>(
+              MaterialPageRoute(
+                builder: (routeContext) => WelcomeStories(
+                  onComplete: () async {
+                    Navigator.of(routeContext).pop();
+                  },
+                ),
+              ),
+            ),
+          ),
+        ),
+        if (accounts.account != null) ...[
+          const SizedBox(height: 28),
+          OutlinedButton.icon(
+            onPressed: _signingOut ? null : _signOut,
+            icon: const Icon(Icons.logout_rounded),
+            label: Text(_signingOut ? 'Выходим…' : 'Выйти'),
+          ),
+        ],
         const SizedBox(height: 28),
         const Text(
           'Прогресс и параметры сохраняются на этом устройстве.',
@@ -309,10 +446,12 @@ class _ProfileEditor extends StatefulWidget {
     required this.profile,
     required this.personal,
     required this.storage,
+    required this.accounts,
   });
   final Map<String, dynamic> profile;
   final bool personal;
   final ProfileStorageService storage;
+  final AccountService accounts;
   @override
   State<_ProfileEditor> createState() => _ProfileEditorState();
 }
@@ -327,11 +466,9 @@ class _ProfileEditorState extends State<_ProfileEditor> {
   void initState() {
     super.initState();
     name = TextEditingController(
-      text: widget.profile['name'] as String? ?? 'BODYA',
+      text: widget.profile['name'] as String? ?? 'Гость',
     );
-    bio = TextEditingController(
-      text: widget.profile['bio'] as String? ?? 'Универсальный атлет',
-    );
+    bio = TextEditingController(text: widget.profile['bio'] as String? ?? '');
     city = TextEditingController(text: widget.profile['city'] as String? ?? '');
     height = TextEditingController(
       text: widget.profile['height']?.toString() ?? '',
@@ -382,14 +519,15 @@ class _ProfileEditorState extends State<_ProfileEditor> {
   Future<void> _save() async {
     if (saving || !form.currentState!.validate()) return;
     setState(() => saving = true);
-    final value = Map<String, dynamic>.from(widget.profile);
+    final value = <String, dynamic>{};
+    final remove = <String>{};
     if (widget.personal) {
       value['birthday'] = birthday.text.trim();
       value['sex'] = sex;
       for (final entry in {'height': height, 'weight': weight}.entries) {
         final number = double.tryParse(entry.value.text.replaceAll(',', '.'));
         if (number == null) {
-          value.remove(entry.key);
+          remove.add(entry.key);
         } else {
           value[entry.key] = number;
         }
@@ -400,14 +538,23 @@ class _ProfileEditorState extends State<_ProfileEditor> {
       value['city'] = city.text.trim();
     }
     try {
-      await widget.storage.save(value);
-      if (mounted) Navigator.pop(context, value);
-    } catch (_) {
+      if (!widget.personal &&
+          widget.accounts.account != null &&
+          widget.accounts.account!.name != name.text.trim()) {
+        await widget.accounts.updateName(name.text);
+      }
+      final saved = await widget.storage.updateFields(value, remove: remove);
+      if (mounted) Navigator.pop(context, saved);
+    } catch (error) {
       if (mounted) {
         setState(() => saving = false);
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Не удалось сохранить профиль. Попробуй снова.'),
+          SnackBar(
+            content: Text(
+              error is AccountError
+                  ? error.message
+                  : 'Не удалось сохранить профиль. Попробуй снова.',
+            ),
           ),
         );
       }

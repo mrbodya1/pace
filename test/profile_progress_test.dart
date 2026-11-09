@@ -3,7 +3,7 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:sport_platform/main.dart';
+import 'support/test_app.dart';
 import 'package:sport_platform/widgets/glass_widgets.dart';
 
 void main() {
@@ -16,7 +16,7 @@ void main() {
       'workouts': [],
     });
     SharedPreferences.setMockInitialValues({'pace_local_data': progress});
-    await tester.pumpWidget(const PaceApp());
+    await tester.pumpWidget(const TestPaceApp());
     await tester.pumpAndSettle();
     await tester.tap(
       find.descendant(
@@ -59,7 +59,7 @@ void main() {
     expect(profile['weight'], 75.5);
     expect(profile['birthday'], '01.02.2000');
     await tester.pumpWidget(const SizedBox.shrink());
-    await tester.pumpWidget(const PaceApp());
+    await tester.pumpWidget(const TestPaceApp());
     await tester.pumpAndSettle();
     await tester.tap(
       find.descendant(
@@ -91,7 +91,7 @@ void main() {
         ],
       }),
     });
-    await tester.pumpWidget(const PaceApp());
+    await tester.pumpWidget(const TestPaceApp());
     await tester.pumpAndSettle();
     await tester.tap(
       find.descendant(

@@ -3,7 +3,7 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:sport_platform/main.dart';
+import 'support/test_app.dart';
 import 'package:sport_platform/widgets/glass_widgets.dart';
 
 void main() {
@@ -21,7 +21,7 @@ void main() {
           'workouts': [],
         }),
       });
-      await tester.pumpWidget(const PaceApp());
+      await tester.pumpWidget(const TestPaceApp());
       await tester.pumpAndSettle();
       expect(find.text('Обзор'), findsOneWidget);
       expect(find.text('9 100 XP'), findsOneWidget);
@@ -57,11 +57,15 @@ void main() {
       expect(saved['xp'], 9100);
       expect(saved['workouts'], isEmpty);
 
-      await tester.ensureVisible(find.text('Войти в аккаунт'));
+      await tester.scrollUntilVisible(
+        find.text('Регистрация'),
+        -200,
+        scrollable: find.byType(Scrollable).first,
+      );
       await tester.pumpAndSettle();
-      await tester.tap(find.text('Войти в аккаунт'));
+      await tester.tap(find.text('Регистрация'));
       await tester.pumpAndSettle();
-      expect(find.text('Войти через Mail'), findsOneWidget);
+      expect(find.text('Создай аккаунт PACE'), findsOneWidget);
       await tester.pageBack();
       await tester.pumpAndSettle();
       await tester.tap(

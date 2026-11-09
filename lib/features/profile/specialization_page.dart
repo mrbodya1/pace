@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../../app/theme/pace_theme.dart';
 import '../../data/storage/profile_storage_service.dart';
 import '../../models/specialization.dart';
+import '../../services/account_service.dart';
 import '../../models/participant_sex.dart';
 import '../../widgets/glass_segmented_control.dart';
 import '../../widgets/glass_lens.dart';
@@ -149,12 +150,16 @@ class _SpecializationPageState extends State<SpecializationPage> {
         participantSex: sex,
       );
       if (mounted) Navigator.pop(context, profile);
-    } catch (_) {
+    } catch (error) {
       if (!mounted) return;
       setState(() => saving = false);
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Не удалось сохранить специализацию. Попробуй снова.'),
+        SnackBar(
+          content: Text(
+            error is AccountError
+                ? error.message
+                : 'Не удалось сохранить специализацию. Попробуй снова.',
+          ),
         ),
       );
     }

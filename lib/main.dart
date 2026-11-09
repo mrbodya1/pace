@@ -20,6 +20,7 @@ import 'app/theme/pace_theme.dart';
 import 'widgets/pace_header.dart';
 import 'widgets/glass_widgets.dart';
 import 'features/home/home_page.dart';
+import 'features/onboarding/startup_flow.dart';
 import 'features/community/community_page.dart';
 import 'features/tracker/tracker_page.dart';
 import 'features/progress/progress_page.dart';
@@ -38,7 +39,7 @@ class PaceApp extends StatelessWidget {
       title: 'PACE',
       debugShowCheckedModeBanner: false,
       theme: paceTheme,
-      home: const PaceHome(),
+      home: const StartupFlow(home: PaceHome()),
     );
   }
 }
@@ -52,7 +53,7 @@ class PaceHome extends StatefulWidget {
 
 class _PaceHomeState extends State<PaceHome> with WidgetsBindingObserver {
   int tab = 0;
-  int xp = 6840;
+  int xp = 0;
   int selectedSport = 0;
 
   final LocalStorageService _storageService = LocalStorageService();
@@ -200,7 +201,7 @@ class _PaceHomeState extends State<PaceHome> with WidgetsBindingObserver {
       if (!mounted) return;
       setState(() {
         if (data != null) {
-          xp = (data['xp'] as num?)?.toInt() ?? 6840;
+          xp = (data['xp'] as num?)?.toInt() ?? 0;
           selectedSport = SportCatalog.restoreSelection(
             (data['selectedSport'] as num?)?.toInt() ?? 0,
           );

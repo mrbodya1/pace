@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:sport_platform/main.dart';
+import 'support/test_app.dart';
 import 'package:sport_platform/models/workout.dart';
 import 'package:sport_platform/models/specialization.dart';
 import 'package:sport_platform/services/workout_xp_calculator.dart';
@@ -48,7 +48,7 @@ void main() {
           'sex': 'female',
         }),
       });
-      await tester.pumpWidget(const PaceApp());
+      await tester.pumpWidget(const TestPaceApp());
       await tester.pumpAndSettle();
       await tester.tap(find.byKey(const ValueKey('record-workout')));
       await tester.pumpAndSettle();
@@ -103,7 +103,7 @@ void main() {
       await tester.tap(find.text('Готово'));
       await tester.pumpAndSettle();
       await tester.pumpWidget(const SizedBox.shrink());
-      await tester.pumpWidget(const PaceApp());
+      await tester.pumpWidget(const TestPaceApp());
       await tester.pumpAndSettle();
       final reopened = jsonDecode(prefs.getString('pace_local_data')!) as Map;
       expect((reopened['workouts'] as List).length, 1);

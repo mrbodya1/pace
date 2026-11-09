@@ -5,7 +5,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:sport_platform/data/storage/local_storage_service.dart';
-import 'package:sport_platform/main.dart';
+import 'support/test_app.dart';
 import 'package:sport_platform/app/theme/pace_theme.dart';
 import 'package:sport_platform/models/participant_sex.dart';
 import 'package:sport_platform/models/specialization.dart';
@@ -111,7 +111,7 @@ void main() {
           'sex': 'female',
         }),
       });
-      await tester.pumpWidget(const PaceApp());
+      await tester.pumpWidget(const TestPaceApp());
       await tester.pumpAndSettle();
       await tester.tap(find.byKey(const ValueKey('record-workout')));
       await tester.pumpAndSettle();
@@ -132,7 +132,7 @@ void main() {
       final prefs = await SharedPreferences.getInstance();
       expect(prefs.getString('pace_local_data'), progress);
       await tester.pumpWidget(const SizedBox.shrink());
-      await tester.pumpWidget(const PaceApp());
+      await tester.pumpWidget(const TestPaceApp());
       await tester.pumpAndSettle();
       expect(find.text('Восстановлена тренировка'), findsOneWidget);
       expect(find.widgetWithText(OutlinedButton, 'Продолжить'), findsOneWidget);
@@ -153,7 +153,7 @@ void main() {
         'pace_local_data': progress,
         'pace_active_workout': jsonEncode(fixture(distance: 20).toJson()),
       });
-      await tester.pumpWidget(const PaceApp());
+      await tester.pumpWidget(const TestPaceApp());
       await tester.pumpAndSettle();
       await tester.tap(find.byKey(const ValueKey('finish-workout')));
       await tester.pumpAndSettle();
@@ -290,7 +290,7 @@ void main() {
           'sex': 'male',
         }),
       });
-      await tester.pumpWidget(const PaceApp());
+      await tester.pumpWidget(const TestPaceApp());
       await tester.pumpAndSettle();
       expect(find.text('Восстановлена тренировка'), findsWidgets);
       expect(find.widgetWithText(OutlinedButton, 'Продолжить'), findsOneWidget);
@@ -319,7 +319,7 @@ void main() {
       expect(data['xp'], 9460);
       expect(prefs.getString('pace_active_workout'), isNull);
       await tester.pumpWidget(const SizedBox.shrink());
-      await tester.pumpWidget(const PaceApp());
+      await tester.pumpWidget(const TestPaceApp());
       await tester.pumpAndSettle();
       expect(find.text('Восстановлена тренировка'), findsNothing);
       expect(
@@ -343,7 +343,7 @@ void main() {
       SharedPreferences.setMockInitialValues({
         'pace_active_workout': jsonEncode(fixture().toJson()),
       });
-      await tester.pumpWidget(const PaceApp());
+      await tester.pumpWidget(const TestPaceApp());
       await tester.pumpAndSettle();
       await tester.tap(find.byKey(const ValueKey('pause-workout')));
       await tester.pumpAndSettle();
@@ -364,7 +364,7 @@ void main() {
       expect(draft.specialization, Specialization.runner);
       expect(draft.route.length, 5);
       await tester.pumpWidget(const SizedBox.shrink());
-      await tester.pumpWidget(const PaceApp());
+      await tester.pumpWidget(const TestPaceApp());
       await tester.pumpAndSettle();
       expect(find.text('Восстановлена тренировка'), findsWidgets);
       expect(find.widgetWithText(OutlinedButton, 'Продолжить'), findsOneWidget);
@@ -383,7 +383,7 @@ void main() {
       }),
       'pace_active_workout': jsonEncode(fixture().toJson()),
     });
-    await tester.pumpWidget(const PaceApp());
+    await tester.pumpWidget(const TestPaceApp());
     await tester.pumpAndSettle();
     expect(find.text('Восстановлена тренировка'), findsNothing);
     final prefs = await SharedPreferences.getInstance();
@@ -397,7 +397,7 @@ void main() {
     tester,
   ) async {
     SharedPreferences.setMockInitialValues({'pace_active_workout': '{bad'});
-    await tester.pumpWidget(const PaceApp());
+    await tester.pumpWidget(const TestPaceApp());
     await tester.pumpAndSettle();
     await tester.tap(find.byKey(const ValueKey('record-workout')));
     await tester.pumpAndSettle();

@@ -17,9 +17,11 @@ migrate(function (app) {
         oauth2: { enabled: false, providers: [] },
         otp: { enabled: false },
         authAlert: { enabled: false },
-        fields: [{ name: "name", type: "text", max: 40 }]
+        fields: [
+            { name: "name", type: "text", max: 40 },
+            { name: "password", type: "password", min: 12 }
+        ]
     });
-    collection.fields.getByName("password").min = 12;
     app.save(collection);
 
     // Keep PocketBase's built-in rules instead of replacing operator settings.

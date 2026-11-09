@@ -8,7 +8,7 @@ import 'package:sport_platform/data/storage/profile_storage_service.dart';
 import 'package:sport_platform/features/profile/specialization_page.dart';
 import 'package:sport_platform/models/specialization.dart';
 import 'package:sport_platform/models/participant_sex.dart';
-import 'package:sport_platform/main.dart';
+import 'support/test_app.dart';
 import 'package:sport_platform/widgets/glass_widgets.dart';
 import 'package:sport_platform/widgets/glass_segmented_control.dart';
 
@@ -120,7 +120,7 @@ void main() {
     'Profile settings opens all specializations and reflects a saved change',
     (tester) async {
       SharedPreferences.setMockInitialValues({});
-      await tester.pumpWidget(const PaceApp());
+      await tester.pumpWidget(const TestPaceApp());
       await tester.pumpAndSettle();
       await tester.tap(
         find.descendant(

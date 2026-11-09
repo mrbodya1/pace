@@ -3,7 +3,7 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:sport_platform/main.dart';
+import 'support/test_app.dart';
 import 'package:sport_platform/models/sport_catalog.dart';
 
 void main() {
@@ -40,7 +40,7 @@ void main() {
             'workouts': history,
           }),
         });
-        await tester.pumpWidget(const PaceApp());
+        await tester.pumpWidget(const TestPaceApp());
         await tester.pumpAndSettle();
         await tester.tap(find.byKey(const ValueKey('record-workout')));
         await tester.pumpAndSettle();
