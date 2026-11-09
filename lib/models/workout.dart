@@ -36,6 +36,7 @@ class Workout {
   final double? elevationGain;
   final WorkoutXp? xpBreakdown;
   final DateTime? startedAt;
+  final String? sessionId;
 
   Workout({
     required this.date,
@@ -47,6 +48,7 @@ class Workout {
     this.elevationGain,
     this.xpBreakdown,
     this.startedAt,
+    this.sessionId,
   });
 
   Map<String, dynamic> toJson() => {
@@ -59,6 +61,7 @@ class Workout {
     if (elevationGain != null) 'elevationGain': elevationGain,
     if (xpBreakdown != null) 'xpBreakdown': xpBreakdown!.toJson(),
     if (startedAt != null) 'startedAt': startedAt!.toIso8601String(),
+    if (sessionId != null) 'sessionId': sessionId,
   };
 
   factory Workout.fromJson(Map<String, dynamic> json) {
@@ -84,6 +87,7 @@ class Workout {
       startedAt: json['startedAt'] == null
           ? null
           : DateTime.parse(json['startedAt'] as String),
+      sessionId: json['sessionId'] as String?,
     );
   }
 }
