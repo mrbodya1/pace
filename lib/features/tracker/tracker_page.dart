@@ -46,11 +46,13 @@ class TrackerPage extends StatelessWidget {
     this.elevationGain = 0,
     this.finishedElevation = 0,
     this.finishedXpBreakdown,
+    this.recoveredWorkout = false,
   });
 
   final double distance, pace, speed, finishedDistance;
   final double elevationGain, finishedElevation;
   final WorkoutXp? finishedXpBreakdown;
+  final bool recoveredWorkout;
   final Duration elapsed, finishedDuration;
   final List<Position> route;
   final List<RoutePoint> finishedRoute;
@@ -205,6 +207,29 @@ class TrackerPage extends StatelessWidget {
             key: const PageStorageKey('workout-screen'),
             padding: const EdgeInsets.fromLTRB(22, 12, 22, 24),
             children: [
+              if (recoveredWorkout) ...[
+                const GlassPanel(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'Восстановлена тренировка',
+                        style: TextStyle(
+                          color: lime,
+                          fontSize: 19,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                      SizedBox(height: 8),
+                      Text(
+                        'Восстановлены данные последнего автосохранения. Запись на паузе — можно продолжить или завершить. Время, пока PACE не работал, не учитывается.',
+                        style: TextStyle(color: muted),
+                      ),
+                    ],
+                  ),
+                ),
+                const SizedBox(height: 18),
+              ],
               if (!result && !tracking) ...[
                 const Text(
                   'Выбери свой ритм',
@@ -413,7 +438,7 @@ class TrackerPage extends StatelessWidget {
                 const SizedBox(height: 18),
                 Text(
                   WorkoutLocationSettings.supportsBackground
-                      ? 'Начни тренировку в PACE — затем можно свернуть приложение или заблокировать экран. Не закрывай PACE принудительно до завершения записи.'
+                      ? 'Начни тренировку в PACE — затем можно свернуть приложение или заблокировать экран. Черновик сохраняется автоматически; после закрытия запись можно восстановить.'
                       : 'На этом устройстве держи приложение открытым во время записи.',
                   style: TextStyle(color: muted, fontSize: 13, height: 1.5),
                 ),

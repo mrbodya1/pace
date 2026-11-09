@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
 
 import 'models/workout.dart';
+import 'models/workout_draft.dart';
 import 'models/xp_progress.dart';
 import 'models/sport_catalog.dart';
 import 'models/specialization.dart';
@@ -70,6 +71,16 @@ class _PaceHomeState extends State<PaceHome> with WidgetsBindingObserver {
   WorkoutXp? finishedXpBreakdown;
   double finishedElevation = 0;
 
+  Duration restoredDuration = Duration.zero;
+  Duration get activeDuration => restoredDuration + stopwatch.elapsed;
+  String? workoutSessionId;
+  DateTime? lastCheckpoint;
+  bool recoveredWorkout = false;
+  bool loadingProgress = true,
+      progressReadFailed = false,
+      draftReadFailed = false;
+  bool draftSaveWarned = false;
+
   bool workoutOpen = false;
   bool finishing = false;
   List<RoutePoint> finishedRoute = [];
@@ -94,18 +105,56 @@ class _PaceHomeState extends State<PaceHome> with WidgetsBindingObserver {
   final sports = SportCatalog.names;
   final sportIcons = SportCatalog.icons;
 
-  void _openWorkout() {
+  Future<void> _openWorkout() async {
+    if (loadingProgress) return;
+    if (progressReadFailed) {
+      _message('Перезапусти PACE: сохранённый прогресс не удалось прочитать.');
+      return;
+    }
+    if (draftReadFailed) {
+      final discard = await showDialog<bool>(
+        context: context,
+        builder: (context) => AlertDialog(
+          title: const Text('Не удалось восстановить запись'),
+          content: const Text(
+            'Сохранённый черновик не удалось прочитать. Можно оставить его или удалить перед новой тренировкой.',
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context, false),
+              child: const Text('Оставить'),
+            ),
+            TextButton(
+              onPressed: () => Navigator.pop(context, true),
+              child: const Text('Удалить черновик'),
+            ),
+          ],
+        ),
+      );
+      if (discard != true || !mounted) return;
+      try {
+        await _storageService.clearDraft();
+      } catch (_) {
+        _message('Не удалось удалить черновик. Попробуй снова.');
+        return;
+      }
+      if (!mounted) return;
+      draftReadFailed = false;
+    }
     if (workoutFinished && !tracking) startNewWorkout();
     setState(() => workoutOpen = true);
   }
 
   void _closeWorkout() {
     if (starting || finishing) return;
+    unawaited(_checkpoint(force: true));
     setState(() => workoutOpen = false);
   }
 
   void _selectSport(int index) {
-    if (tracking ||
+    if (loadingProgress ||
+        progressReadFailed ||
+        tracking ||
         starting ||
         finishing ||
         !SportCatalog.isSelectable(index)) {
@@ -131,26 +180,115 @@ class _PaceHomeState extends State<PaceHome> with WidgetsBindingObserver {
   Future<void> _loadProgress() async {
     try {
       final data = await _storageService.loadProgress();
-
-      if (data == null) return;
-      final savedWorkouts = (data['workouts'] as List<dynamic>? ?? [])
+      final savedWorkouts = (data?['workouts'] as List<dynamic>? ?? [])
           .map(
             (item) => Workout.fromJson(Map<String, dynamic>.from(item as Map)),
           )
           .toList();
-
+      WorkoutDraft? draft;
+      try {
+        draft = await _storageService.loadDraft();
+      } catch (_) {
+        draftReadFailed = true;
+      }
+      if (draft != null && savedWorkouts.any((w) => w.sessionId == draft!.id)) {
+        try {
+          await _storageService.clearDraft();
+        } catch (_) {}
+        draft = null;
+      }
       if (!mounted) return;
       setState(() {
-        xp = (data['xp'] as num?)?.toInt() ?? 6840;
-        final savedSport = (data['selectedSport'] as num?)?.toInt() ?? 0;
-        selectedSport = SportCatalog.restoreSelection(savedSport);
+        if (data != null) {
+          xp = (data['xp'] as num?)?.toInt() ?? 6840;
+          selectedSport = SportCatalog.restoreSelection(
+            (data['selectedSport'] as num?)?.toInt() ?? 0,
+          );
+        }
         workouts
           ..clear()
           ..addAll(savedWorkouts);
+        if (draft != null) {
+          final saved = draft;
+          workoutSessionId = saved.id;
+          workoutStartedAt = saved.startedAt.toLocal();
+          workoutSpecialization = saved.specialization;
+          workoutParticipantSex = saved.participantSex;
+          selectedSport = saved.sportIndex;
+          restoredDuration = saved.activeDuration;
+          elapsed = saved.activeDuration;
+          distance = saved.distanceMeters;
+          elevation
+            ..reset()
+            ..gain = saved.elevationMeters;
+          route
+            ..clear()
+            ..addAll(saved.route);
+          tracking = true;
+          paused = true;
+          recoveredWorkout = true;
+          workoutOpen = true;
+          gpsStatus = 'Пауза';
+        }
+        loadingProgress = false;
       });
-    } catch (e) {
-      _message('Не удалось загрузить сохранённый прогресс.');
+    } catch (_) {
+      if (!mounted) return;
+      setState(() {
+        loadingProgress = false;
+        progressReadFailed = true;
+      });
+      _message(
+        'Не удалось загрузить прогресс. Перезапусти PACE перед новой записью.',
+      );
     }
+  }
+
+  Future<void> _checkpoint({bool force = false}) async {
+    if (!tracking ||
+        (finishing && !force) ||
+        workoutSessionId == null ||
+        workoutStartedAt == null) {
+      return;
+    }
+    final now = DateTime.now();
+    if (!force &&
+        lastCheckpoint != null &&
+        now.difference(lastCheckpoint!) < const Duration(seconds: 5)) {
+      return;
+    }
+    lastCheckpoint = now;
+    final draft = WorkoutDraft(
+      id: workoutSessionId!,
+      sportIndex: selectedSport,
+      startedAt: workoutStartedAt!,
+      savedAt: now,
+      activeDuration: activeDuration,
+      distanceMeters: distance,
+      elevationMeters: elevation.gain,
+      specialization: workoutSpecialization,
+      participantSex: workoutParticipantSex,
+      route: List<Position>.from(route),
+    );
+    try {
+      await _storageService.saveDraft(draft);
+      draftSaveWarned = false;
+    } catch (_) {
+      lastCheckpoint = null;
+      if (!draftSaveWarned) {
+        draftSaveWarned = true;
+        _message('Не удалось автосохранить тренировку. Пока не закрывай PACE.');
+      }
+    }
+  }
+
+  void _startClock() {
+    clock?.cancel();
+    clock = Timer.periodic(const Duration(seconds: 1), (_) {
+      if (!mounted || !stopwatch.isRunning) return;
+      setState(() => elapsed = activeDuration);
+      unawaited(_checkpoint());
+    });
   }
 
   Future<void> _saveProgress() async {
@@ -167,9 +305,16 @@ class _PaceHomeState extends State<PaceHome> with WidgetsBindingObserver {
 
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (tracking &&
+        !finishing &&
+        (state == AppLifecycleState.hidden ||
+            state == AppLifecycleState.paused ||
+            state == AppLifecycleState.detached)) {
+      unawaited(_checkpoint(force: true));
+    }
     if (tracking && !paused && !finishing) {
       if (state == AppLifecycleState.resumed) {
-        elapsed = stopwatch.elapsed;
+        elapsed = activeDuration;
         gpsStatus = 'Запись маршрута';
       } else if (state == AppLifecycleState.paused &&
           WorkoutLocationSettings.supportsBackground) {
@@ -187,7 +332,14 @@ class _PaceHomeState extends State<PaceHome> with WidgetsBindingObserver {
   };
 
   Future<void> startWorkout() async {
-    if (starting || finishing || (tracking && !paused)) return;
+    if (loadingProgress ||
+        progressReadFailed ||
+        draftReadFailed ||
+        starting ||
+        finishing ||
+        (tracking && !paused)) {
+      return;
+    }
 
     if (!canStartGps) {
       _message('Открой PACE, чтобы начать или продолжить тренировку.');
@@ -230,9 +382,12 @@ class _PaceHomeState extends State<PaceHome> with WidgetsBindingObserver {
         stopwatch.start();
         setState(() {
           paused = false;
+          recoveredWorkout = false;
           gpsStatus = 'Запись маршрута';
         });
+        await _checkpoint(force: true);
         await _listenGps();
+        _startClock();
         return;
       }
 
@@ -263,6 +418,10 @@ class _PaceHomeState extends State<PaceHome> with WidgetsBindingObserver {
       );
       workoutParticipantSex = ParticipantSex.fromId(profile['sex']);
       workoutStartedAt = DateTime.now();
+      workoutSessionId = WorkoutDraft.newId();
+      restoredDuration = Duration.zero;
+      recoveredWorkout = false;
+      lastCheckpoint = null;
       elevation
         ..reset()
         ..add(firstPosition.altitude);
@@ -287,12 +446,9 @@ class _PaceHomeState extends State<PaceHome> with WidgetsBindingObserver {
         gpsStatus = 'Запись маршрута';
       });
 
+      await _checkpoint(force: true);
       await _listenGps();
-
-      clock = Timer.periodic(const Duration(seconds: 1), (_) {
-        if (!mounted || !stopwatch.isRunning) return;
-        setState(() => elapsed = stopwatch.elapsed);
-      });
+      _startClock();
     } catch (e) {
       if (tracking && !paused) {
         _gpsInterrupted(
@@ -322,10 +478,11 @@ class _PaceHomeState extends State<PaceHome> with WidgetsBindingObserver {
     stopwatch.stop();
     setState(() {
       paused = true;
-      elapsed = stopwatch.elapsed;
+      elapsed = activeDuration;
       gpsStatus = reason;
     });
     unawaited(_stopGps().catchError((Object _) {}));
+    unawaited(_checkpoint(force: true));
     _message(reason);
   }
 
@@ -358,6 +515,7 @@ class _PaceHomeState extends State<PaceHome> with WidgetsBindingObserver {
                 route.add(position);
                 elevation.add(position.altitude);
               });
+              unawaited(_checkpoint());
               return;
             }
 
@@ -400,6 +558,7 @@ class _PaceHomeState extends State<PaceHome> with WidgetsBindingObserver {
                 }
               }
             });
+            unawaited(_checkpoint());
           },
           onError: (Object error) {
             _gpsInterrupted(
@@ -421,9 +580,10 @@ class _PaceHomeState extends State<PaceHome> with WidgetsBindingObserver {
 
     setState(() {
       paused = true;
-      elapsed = stopwatch.elapsed;
+      elapsed = activeDuration;
       gpsStatus = 'Пауза';
     });
+    unawaited(_checkpoint(force: true));
   }
 
   Future<void> finishWorkout() async {
@@ -435,7 +595,7 @@ class _PaceHomeState extends State<PaceHome> with WidgetsBindingObserver {
       await _stopGps();
 
       final finalDistance = distance / 1000;
-      final finalDuration = stopwatch.elapsed;
+      final finalDuration = activeDuration;
       final savedRoute = route
           .map(
             (position) => RoutePoint(
@@ -460,12 +620,39 @@ class _PaceHomeState extends State<PaceHome> with WidgetsBindingObserver {
           : null;
       final earnedXp = breakdown?.total ?? 0;
 
+      await _checkpoint(force: true);
+      if (wasSaved) {
+        final result = await _storageService.completeWorkout(
+          workout: Workout(
+            date: workoutStartedAt ?? DateTime.now(),
+            distance: finalDistance,
+            duration: finalDuration,
+            xp: earnedXp,
+            sport: finishedActivity,
+            route: savedRoute,
+            elevationGain: gainedElevation,
+            xpBreakdown: breakdown,
+            startedAt: workoutStartedAt,
+            sessionId: workoutSessionId,
+          ),
+          initialXp: xp,
+          selectedSport: selectedSport,
+          initialWorkouts: workouts,
+        );
+        if (!mounted) return;
+        xp = result.xp;
+        workouts
+          ..clear()
+          ..addAll(result.workouts);
+      } else {
+        await _storageService.clearDraft();
+      }
+      if (!mounted) return;
       setState(() {
         tracking = false;
         paused = false;
+        recoveredWorkout = false;
         workoutFinished = true;
-
-        // Keep the result separately, then clear the active tracker.
         finishedDistance = finalDistance;
         finishedDuration = finalDuration;
         finishedXp = earnedXp;
@@ -474,7 +661,6 @@ class _PaceHomeState extends State<PaceHome> with WidgetsBindingObserver {
         finishedRoute = savedRoute;
         finishedElevation = gainedElevation;
         finishedXpBreakdown = breakdown;
-
         distance = 0;
         speed = 0;
         pace = 0;
@@ -484,33 +670,21 @@ class _PaceHomeState extends State<PaceHome> with WidgetsBindingObserver {
         route.clear();
         gpsStatus = 'Тренировка завершена';
       });
-
-      if (wasSaved) {
-        setState(() {
-          xp += earnedXp;
-          workouts.insert(
-            0,
-            Workout(
-              date: workoutStartedAt ?? DateTime.now(),
-              distance: finalDistance,
-              duration: finalDuration,
-              xp: earnedXp,
-              sport: finishedActivity,
-              route: savedRoute,
-              elevationGain: gainedElevation,
-              xpBreakdown: breakdown,
-              startedAt: workoutStartedAt,
-            ),
-          );
-        });
-        await _saveProgress();
-
-        _message(
-          'Тренировка сохранена: ${finalDistance.toStringAsFixed(2)} км · +$earnedXp XP',
-        );
-      } else {
-        _message('Тренировка короче 50 м — результат не добавлен в историю.');
-      }
+      _message(
+        wasSaved
+            ? 'Тренировка сохранена: ${finalDistance.toStringAsFixed(2)} км · +$earnedXp XP'
+            : 'Тренировка короче 50 м — результат не добавлен в историю.',
+      );
+    } catch (_) {
+      if (!mounted) return;
+      setState(() {
+        paused = true;
+        elapsed = activeDuration;
+        gpsStatus = 'Не удалось сохранить. Повтори завершение.';
+      });
+      _message(
+        'Не удалось сохранить тренировку. Черновик оставлен для повторной попытки.',
+      );
     } finally {
       if (mounted) setState(() => finishing = false);
     }
@@ -520,6 +694,12 @@ class _PaceHomeState extends State<PaceHome> with WidgetsBindingObserver {
     setState(() {
       workoutFinished = false;
       finishedRoute = [];
+      workoutSessionId = null;
+      restoredDuration = Duration.zero;
+      stopwatch
+        ..stop()
+        ..reset();
+      recoveredWorkout = false;
       finishedXpBreakdown = null;
       finishedElevation = 0;
       workoutSpecialization = null;
@@ -616,6 +796,7 @@ class _PaceHomeState extends State<PaceHome> with WidgetsBindingObserver {
                       elapsed: elapsed,
                       speed: speed,
                       route: route,
+                      recoveredWorkout: recoveredWorkout,
                       tracking: tracking,
                       paused: paused,
                       starting: starting,
