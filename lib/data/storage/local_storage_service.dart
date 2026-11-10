@@ -1,8 +1,11 @@
+import '../../services/personal_record_engine.dart';
+
 import 'dart:convert';
 
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../models/workout.dart';
+import '../../models/achievement.dart';
 import '../../models/workout_draft.dart';
 
 class LocalStorageService {
@@ -11,11 +14,18 @@ class LocalStorageService {
   final Future<SharedPreferences> Function() _preferences;
   static const String _storageKey = 'pace_local_data';
   static const String draftKey = 'pace_active_workout';
-  Future<void> _pending = Future<void>.value();
+  static Future<void>? _pending;
 
   Future<T> _write<T>(Future<T> Function() operation) {
-    final task = _pending.catchError((Object _) {}).then((_) => operation());
-    _pending = task.then<void>((_) {}, onError: (Object _, StackTrace _) {});
+    final task = (_pending ?? Future<void>.value()).then((_) => operation());
+    final completion = task.then<void>(
+      (_) {},
+      onError: (Object _, StackTrace _) {},
+    );
+    _pending = completion;
+    completion.then((_) {
+      if (identical(_pending, completion)) _pending = null;
+    });
     return task;
   }
 
@@ -48,7 +58,16 @@ class LocalStorageService {
   });
 
   /// Commit the result first. A leftover draft is harmless thanks to sessionId.
-  Future<({int xp, List<Workout> workouts})> completeWorkout({
+  Future<
+    ({
+      int xp,
+      List<Workout> workouts,
+      AchievementState achievements,
+      int achievementXp,
+      int recordXp,
+    })
+  >
+  completeWorkout({
     required Workout workout,
     required int initialXp,
     required int selectedSport,
@@ -68,11 +87,31 @@ class LocalStorageService {
               .map((w) => Workout.fromJson(Map<String, dynamic>.from(w as Map)))
               .toList();
     var total = (data['xp'] as num?)?.toInt() ?? initialXp;
-    if (!history.any((w) => w.sessionId == workout.sessionId)) {
-      history.insert(0, workout);
-      total += workout.xp;
+    var achievements = AchievementEngine.restore(data['achievements'], history);
+    var achievementXp = 0;
+    var recordXp = 0;
+    final recordBest = PersonalRecordEngine.restore(data['records'], history);
+    final previous = history
+        .where((w) => w.sessionId == workout.sessionId)
+        .firstOrNull;
+    if (previous == null) {
+      final result = AchievementEngine.apply(achievements, history, workout);
+      achievements = result.state;
+      achievementXp = result.xp;
+      final records = PersonalRecordEngine.apply(recordBest, workout);
+      recordXp = records.xp;
+      final saved = workout.withAchievements(
+        result.xp,
+        result.awards.map((r) => r.id).toList(),
+        recordReward: records.xp,
+        recordResults: records.awards,
+      );
+      history.insert(0, saved);
+      total += saved.xp;
       data.addAll({
         'xp': total,
+        'records': PersonalRecordEngine.toJson(records.best),
+        'achievements': achievements.toJson(),
         'selectedSport': selectedSport,
         'workouts': history.map((w) => w.toJson()).toList(),
       });
@@ -84,7 +123,13 @@ class LocalStorageService {
     try {
       if (prefs.containsKey(draftKey)) await prefs.remove(draftKey);
     } catch (_) {}
-    return (xp: total, workouts: history);
+    return (
+      xp: total,
+      workouts: history,
+      achievements: achievements,
+      achievementXp: previous?.achievementXp ?? achievementXp,
+      recordXp: previous?.recordXp ?? recordXp,
+    );
   });
 
   Future<Map<String, dynamic>?> loadProgress() async {
@@ -108,10 +153,14 @@ class LocalStorageService {
       'workouts': workouts.map((workout) => workout.toJson()).toList(),
     };
 
-    final raw = jsonEncode(data);
     return _write(() async {
       final prefs = await _preferences();
-      if (!await prefs.setString(_storageKey, raw)) {
+      final previous = prefs.getString(_storageKey);
+      final merged = previous == null
+          ? <String, dynamic>{}
+          : Map<String, dynamic>.from(jsonDecode(previous) as Map);
+      merged.addAll(data);
+      if (!await prefs.setString(_storageKey, jsonEncode(merged))) {
         throw StateError('Progress not saved');
       }
     });

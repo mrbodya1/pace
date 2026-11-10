@@ -5,7 +5,9 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:sport_platform/data/storage/local_storage_service.dart';
+
 import 'support/test_app.dart';
+
 import 'package:sport_platform/app/theme/pace_theme.dart';
 import 'package:sport_platform/models/participant_sex.dart';
 import 'package:sport_platform/models/specialization.dart';
@@ -220,7 +222,7 @@ void main() {
         selectedSport: 0,
         initialWorkouts: [],
       );
-      expect(result.xp, 9460);
+      expect(result.xp, 9710);
       expect(result.workouts.length, 1);
       expect(await storage.loadDraft(), isNull);
       await storage.saveDraft(
@@ -228,11 +230,11 @@ void main() {
       ); // Simulate a crash before draft cleanup.
       final retry = await storage.completeWorkout(
         workout: completed('recovered-run'),
-        initialXp: 9460,
+        initialXp: 9710,
         selectedSport: 0,
         initialWorkouts: result.workouts,
       );
-      expect(retry.xp, 9460);
+      expect(retry.xp, 9710);
       expect(retry.workouts.length, 1);
       expect(await storage.loadDraft(), isNull);
     },
@@ -269,7 +271,7 @@ void main() {
           selectedSport: 0,
           initialWorkouts: [],
         )).xp,
-        9460,
+        9710,
       );
       expect(await storage.loadDraft(), isNull);
     },
@@ -310,13 +312,14 @@ void main() {
       final record = Workout.fromJson(
         Map<String, dynamic>.from((data['workouts'] as List).single as Map),
       );
-      expect(record.xp, 360);
+      expect(record.xp, 635);
+      expect(record.achievementXp, 275);
       expect(record.duration, const Duration(minutes: 30));
       expect(record.elevationGain, 100);
       expect(record.xpBreakdown!.specialization, Specialization.runner);
       expect(record.xpBreakdown!.participantSex, ParticipantSex.female);
       expect(record.sessionId, 'recovered-run');
-      expect(data['xp'], 9460);
+      expect(data['xp'], 9735);
       expect(prefs.getString('pace_active_workout'), isNull);
       await tester.pumpWidget(const SizedBox.shrink());
       await tester.pumpWidget(const TestPaceApp());
@@ -324,7 +327,7 @@ void main() {
       expect(find.text('Восстановлена тренировка'), findsNothing);
       expect(
         (jsonDecode(prefs.getString('pace_local_data')!) as Map)['xp'],
-        9460,
+        9735,
       );
       expect(tester.takeException(), isNull);
     },

@@ -6,8 +6,15 @@ import '../models/workout_xp.dart';
 import 'glass_widgets.dart';
 
 class WorkoutXpPanel extends StatelessWidget {
-  const WorkoutXpPanel({super.key, required this.value});
+  const WorkoutXpPanel({
+    super.key,
+    required this.value,
+    this.achievementXp = 0,
+    this.recordXp = 0,
+  });
   final WorkoutXp value;
+  final int achievementXp;
+  final int recordXp;
 
   String _number(double number) =>
       number.toStringAsFixed(1).replaceAll('.', ',');
@@ -70,7 +77,14 @@ class WorkoutXpPanel extends StatelessWidget {
           '+${_number(value.bonus)} XP',
         ),
         const Divider(height: 22),
-        _row('Итого', '${value.total} XP', accent: true),
+        if (achievementXp > 0)
+          _row('Новые достижения', '+$achievementXp XP', accent: true),
+        if (recordXp > 0) _row('Рекорды', '+$recordXp XP', accent: true),
+        _row(
+          'Итого',
+          '${value.total + achievementXp + recordXp} XP',
+          accent: true,
+        ),
         const SizedBox(height: 8),
         const Text(
           'Время без пауз. Итог округлён один раз.',

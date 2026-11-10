@@ -1,0 +1,4015 @@
+{
+  "version": 1,
+  "date": "2026-11-10",
+  "xpStatus": "confirmed",
+  "recordImprovementXp": 100,
+  "recordImprovementLimit": null,
+  "totalXpUnbounded": true,
+  "rows": [
+    {
+      "sport": "Все виды",
+      "metric": "Общее время",
+      "event": "За всё время",
+      "threshold": 100,
+      "unit": "ч",
+      "xp": 500,
+      "repeatable": false
+    },
+    {
+      "sport": "Все виды",
+      "metric": "Общее время",
+      "event": "За всё время",
+      "threshold": 500,
+      "unit": "ч",
+      "xp": 1500,
+      "repeatable": false
+    },
+    {
+      "sport": "Все виды",
+      "metric": "Общее время",
+      "event": "За всё время",
+      "threshold": 1000,
+      "unit": "ч",
+      "xp": 3000,
+      "repeatable": false
+    },
+    {
+      "sport": "Все виды",
+      "metric": "Общие тренировки",
+      "event": "За всё время",
+      "threshold": 100,
+      "unit": "тренировок",
+      "xp": 500,
+      "repeatable": false
+    },
+    {
+      "sport": "Все виды",
+      "metric": "Общие тренировки",
+      "event": "За всё время",
+      "threshold": 250,
+      "unit": "тренировок",
+      "xp": 1000,
+      "repeatable": false
+    },
+    {
+      "sport": "Все виды",
+      "metric": "Общие тренировки",
+      "event": "За всё время",
+      "threshold": 500,
+      "unit": "тренировок",
+      "xp": 2000,
+      "repeatable": false
+    },
+    {
+      "sport": "Все виды",
+      "metric": "Общие тренировки",
+      "event": "За всё время",
+      "threshold": 1000,
+      "unit": "тренировок",
+      "xp": 4000,
+      "repeatable": false
+    },
+    {
+      "sport": "Все виды",
+      "metric": "Общие километры",
+      "event": "За всё время",
+      "threshold": 1000,
+      "unit": "км",
+      "xp": 300,
+      "repeatable": false
+    },
+    {
+      "sport": "Все виды",
+      "metric": "Общие километры",
+      "event": "За всё время",
+      "threshold": 2500,
+      "unit": "км",
+      "xp": 500,
+      "repeatable": false
+    },
+    {
+      "sport": "Все виды",
+      "metric": "Общие километры",
+      "event": "За всё время",
+      "threshold": 5000,
+      "unit": "км",
+      "xp": 1000,
+      "repeatable": false
+    },
+    {
+      "sport": "Все виды",
+      "metric": "Общие километры",
+      "event": "За всё время",
+      "threshold": 10000,
+      "unit": "км",
+      "xp": 2000,
+      "repeatable": false
+    },
+    {
+      "sport": "Все виды",
+      "metric": "Общие километры",
+      "event": "За всё время",
+      "threshold": 25000,
+      "unit": "км",
+      "xp": 3500,
+      "repeatable": false
+    },
+    {
+      "sport": "Все виды",
+      "metric": "Общие километры",
+      "event": "За всё время",
+      "threshold": 50000,
+      "unit": "км",
+      "xp": 5000,
+      "repeatable": false
+    },
+    {
+      "sport": "Все виды",
+      "metric": "Разные виды спорта",
+      "event": "Завершённые тренировки",
+      "threshold": 2,
+      "unit": "видов",
+      "xp": 50,
+      "repeatable": false
+    },
+    {
+      "sport": "Все виды",
+      "metric": "Разные виды спорта",
+      "event": "Завершённые тренировки",
+      "threshold": 3,
+      "unit": "видов",
+      "xp": 100,
+      "repeatable": false
+    },
+    {
+      "sport": "Все виды",
+      "metric": "Разные виды спорта",
+      "event": "Завершённые тренировки",
+      "threshold": 5,
+      "unit": "видов",
+      "xp": 250,
+      "repeatable": false
+    },
+    {
+      "sport": "Все виды",
+      "metric": "Разные виды спорта",
+      "event": "Завершённые тренировки",
+      "threshold": 7,
+      "unit": "видов",
+      "xp": 500,
+      "repeatable": false
+    },
+    {
+      "sport": "Бег",
+      "metric": "Время по виду",
+      "event": "За всё время",
+      "threshold": 10,
+      "unit": "ч",
+      "xp": 50,
+      "repeatable": false
+    },
+    {
+      "sport": "Бег",
+      "metric": "Время по виду",
+      "event": "За всё время",
+      "threshold": 25,
+      "unit": "ч",
+      "xp": 100,
+      "repeatable": false
+    },
+    {
+      "sport": "Бег",
+      "metric": "Время по виду",
+      "event": "За всё время",
+      "threshold": 50,
+      "unit": "ч",
+      "xp": 200,
+      "repeatable": false
+    },
+    {
+      "sport": "Бег",
+      "metric": "Время по виду",
+      "event": "За всё время",
+      "threshold": 100,
+      "unit": "ч",
+      "xp": 400,
+      "repeatable": false
+    },
+    {
+      "sport": "Бег",
+      "metric": "Время по виду",
+      "event": "За всё время",
+      "threshold": 250,
+      "unit": "ч",
+      "xp": 800,
+      "repeatable": false
+    },
+    {
+      "sport": "Бег",
+      "metric": "Время по виду",
+      "event": "За всё время",
+      "threshold": 500,
+      "unit": "ч",
+      "xp": 1500,
+      "repeatable": false
+    },
+    {
+      "sport": "Бег",
+      "metric": "Время по виду",
+      "event": "За всё время",
+      "threshold": 1000,
+      "unit": "ч",
+      "xp": 3000,
+      "repeatable": false
+    },
+    {
+      "sport": "Бег",
+      "metric": "Тренировки по виду",
+      "event": "За всё время",
+      "threshold": 1,
+      "unit": "тренировок",
+      "xp": 10,
+      "repeatable": false
+    },
+    {
+      "sport": "Бег",
+      "metric": "Тренировки по виду",
+      "event": "За всё время",
+      "threshold": 10,
+      "unit": "тренировок",
+      "xp": 50,
+      "repeatable": false
+    },
+    {
+      "sport": "Бег",
+      "metric": "Тренировки по виду",
+      "event": "За всё время",
+      "threshold": 25,
+      "unit": "тренировок",
+      "xp": 100,
+      "repeatable": false
+    },
+    {
+      "sport": "Бег",
+      "metric": "Тренировки по виду",
+      "event": "За всё время",
+      "threshold": 50,
+      "unit": "тренировок",
+      "xp": 200,
+      "repeatable": false
+    },
+    {
+      "sport": "Бег",
+      "metric": "Тренировки по виду",
+      "event": "За всё время",
+      "threshold": 100,
+      "unit": "тренировок",
+      "xp": 400,
+      "repeatable": false
+    },
+    {
+      "sport": "Бег",
+      "metric": "Тренировки по виду",
+      "event": "За всё время",
+      "threshold": 250,
+      "unit": "тренировок",
+      "xp": 800,
+      "repeatable": false
+    },
+    {
+      "sport": "Бег",
+      "metric": "Тренировки по виду",
+      "event": "За всё время",
+      "threshold": 500,
+      "unit": "тренировок",
+      "xp": 1500,
+      "repeatable": false
+    },
+    {
+      "sport": "Бег",
+      "metric": "Тренировки по виду",
+      "event": "За всё время",
+      "threshold": 1000,
+      "unit": "тренировок",
+      "xp": 3000,
+      "repeatable": false
+    },
+    {
+      "sport": "Бег",
+      "metric": "Километры по виду",
+      "event": "За всё время",
+      "threshold": 25,
+      "unit": "км",
+      "xp": 50,
+      "repeatable": false
+    },
+    {
+      "sport": "Бег",
+      "metric": "Километры по виду",
+      "event": "За всё время",
+      "threshold": 50,
+      "unit": "км",
+      "xp": 100,
+      "repeatable": false
+    },
+    {
+      "sport": "Бег",
+      "metric": "Километры по виду",
+      "event": "За всё время",
+      "threshold": 100,
+      "unit": "км",
+      "xp": 200,
+      "repeatable": false
+    },
+    {
+      "sport": "Бег",
+      "metric": "Километры по виду",
+      "event": "За всё время",
+      "threshold": 250,
+      "unit": "км",
+      "xp": 400,
+      "repeatable": false
+    },
+    {
+      "sport": "Бег",
+      "metric": "Километры по виду",
+      "event": "За всё время",
+      "threshold": 500,
+      "unit": "км",
+      "xp": 700,
+      "repeatable": false
+    },
+    {
+      "sport": "Бег",
+      "metric": "Километры по виду",
+      "event": "За всё время",
+      "threshold": 1000,
+      "unit": "км",
+      "xp": 1200,
+      "repeatable": false
+    },
+    {
+      "sport": "Бег",
+      "metric": "Дистанция тренировки",
+      "event": "За одну тренировку",
+      "threshold": 0.4,
+      "unit": "км",
+      "xp": 10,
+      "repeatable": false
+    },
+    {
+      "sport": "Бег",
+      "metric": "Дистанция тренировки",
+      "event": "За одну тренировку",
+      "threshold": 0.8,
+      "unit": "км",
+      "xp": 20,
+      "repeatable": false
+    },
+    {
+      "sport": "Бег",
+      "metric": "Дистанция тренировки",
+      "event": "За одну тренировку",
+      "threshold": 1,
+      "unit": "км",
+      "xp": 25,
+      "repeatable": false
+    },
+    {
+      "sport": "Бег",
+      "metric": "Дистанция тренировки",
+      "event": "За одну тренировку",
+      "threshold": 1.5,
+      "unit": "км",
+      "xp": 35,
+      "repeatable": false
+    },
+    {
+      "sport": "Бег",
+      "metric": "Дистанция тренировки",
+      "event": "За одну тренировку",
+      "threshold": 3,
+      "unit": "км",
+      "xp": 50,
+      "repeatable": false
+    },
+    {
+      "sport": "Бег",
+      "metric": "Дистанция тренировки",
+      "event": "За одну тренировку",
+      "threshold": 5,
+      "unit": "км",
+      "xp": 100,
+      "repeatable": false
+    },
+    {
+      "sport": "Бег",
+      "metric": "Дистанция тренировки",
+      "event": "За одну тренировку",
+      "threshold": 10,
+      "unit": "км",
+      "xp": 150,
+      "repeatable": false
+    },
+    {
+      "sport": "Бег",
+      "metric": "Дистанция тренировки",
+      "event": "За одну тренировку",
+      "threshold": 15,
+      "unit": "км",
+      "xp": 250,
+      "repeatable": false
+    },
+    {
+      "sport": "Бег",
+      "metric": "Дистанция тренировки",
+      "event": "За одну тренировку",
+      "threshold": 21.0975,
+      "unit": "км",
+      "xp": 400,
+      "repeatable": false
+    },
+    {
+      "sport": "Бег",
+      "metric": "Дистанция тренировки",
+      "event": "За одну тренировку",
+      "threshold": 30,
+      "unit": "км",
+      "xp": 500,
+      "repeatable": false
+    },
+    {
+      "sport": "Бег",
+      "metric": "Дистанция тренировки",
+      "event": "За одну тренировку",
+      "threshold": 42.195,
+      "unit": "км",
+      "xp": 600,
+      "repeatable": false
+    },
+    {
+      "sport": "Бег",
+      "metric": "Дистанция тренировки",
+      "event": "За одну тренировку",
+      "threshold": 50,
+      "unit": "км",
+      "xp": 1000,
+      "repeatable": false
+    },
+    {
+      "sport": "Бег",
+      "metric": "Дистанция тренировки",
+      "event": "За одну тренировку",
+      "threshold": 100,
+      "unit": "км",
+      "xp": 1500,
+      "repeatable": false
+    },
+    {
+      "sport": "Бег",
+      "metric": "Набор за тренировку",
+      "event": "За одну тренировку",
+      "threshold": 100,
+      "unit": "м",
+      "xp": 25,
+      "repeatable": false
+    },
+    {
+      "sport": "Бег",
+      "metric": "Набор за тренировку",
+      "event": "За одну тренировку",
+      "threshold": 250,
+      "unit": "м",
+      "xp": 50,
+      "repeatable": false
+    },
+    {
+      "sport": "Бег",
+      "metric": "Набор за тренировку",
+      "event": "За одну тренировку",
+      "threshold": 500,
+      "unit": "м",
+      "xp": 100,
+      "repeatable": false
+    },
+    {
+      "sport": "Бег",
+      "metric": "Набор за тренировку",
+      "event": "За одну тренировку",
+      "threshold": 1000,
+      "unit": "м",
+      "xp": 200,
+      "repeatable": false
+    },
+    {
+      "sport": "Бег",
+      "metric": "Набор за тренировку",
+      "event": "За одну тренировку",
+      "threshold": 1500,
+      "unit": "м",
+      "xp": 300,
+      "repeatable": false
+    },
+    {
+      "sport": "Бег",
+      "metric": "Набор за тренировку",
+      "event": "За одну тренировку",
+      "threshold": 2000,
+      "unit": "м",
+      "xp": 500,
+      "repeatable": false
+    },
+    {
+      "sport": "Бег",
+      "metric": "Накопленный набор",
+      "event": "За всё время",
+      "threshold": 1000,
+      "unit": "м",
+      "xp": 50,
+      "repeatable": false
+    },
+    {
+      "sport": "Бег",
+      "metric": "Накопленный набор",
+      "event": "За всё время",
+      "threshold": 5000,
+      "unit": "м",
+      "xp": 100,
+      "repeatable": false
+    },
+    {
+      "sport": "Бег",
+      "metric": "Накопленный набор",
+      "event": "За всё время",
+      "threshold": 10000,
+      "unit": "м",
+      "xp": 200,
+      "repeatable": false
+    },
+    {
+      "sport": "Бег",
+      "metric": "Накопленный набор",
+      "event": "За всё время",
+      "threshold": 25000,
+      "unit": "м",
+      "xp": 400,
+      "repeatable": false
+    },
+    {
+      "sport": "Бег",
+      "metric": "Накопленный набор",
+      "event": "За всё время",
+      "threshold": 50000,
+      "unit": "м",
+      "xp": 700,
+      "repeatable": false
+    },
+    {
+      "sport": "Бег",
+      "metric": "Накопленный набор",
+      "event": "За всё время",
+      "threshold": 100000,
+      "unit": "м",
+      "xp": 1200,
+      "repeatable": false
+    },
+    {
+      "sport": "Бег",
+      "metric": "Рекорд на дистанции",
+      "event": "Первый результат",
+      "threshold": 0.1,
+      "unit": "км",
+      "xp": 50,
+      "repeatable": false
+    },
+    {
+      "sport": "Бег",
+      "metric": "Рекорд на дистанции",
+      "event": "Каждое улучшение (без лимита)",
+      "threshold": 0.1,
+      "unit": "км",
+      "xp": 100,
+      "repeatable": true
+    },
+    {
+      "sport": "Бег",
+      "metric": "Рекорд на дистанции",
+      "event": "Первый результат",
+      "threshold": 0.2,
+      "unit": "км",
+      "xp": 50,
+      "repeatable": false
+    },
+    {
+      "sport": "Бег",
+      "metric": "Рекорд на дистанции",
+      "event": "Каждое улучшение (без лимита)",
+      "threshold": 0.2,
+      "unit": "км",
+      "xp": 100,
+      "repeatable": true
+    },
+    {
+      "sport": "Бег",
+      "metric": "Рекорд на дистанции",
+      "event": "Первый результат",
+      "threshold": 0.4,
+      "unit": "км",
+      "xp": 50,
+      "repeatable": false
+    },
+    {
+      "sport": "Бег",
+      "metric": "Рекорд на дистанции",
+      "event": "Каждое улучшение (без лимита)",
+      "threshold": 0.4,
+      "unit": "км",
+      "xp": 100,
+      "repeatable": true
+    },
+    {
+      "sport": "Бег",
+      "metric": "Рекорд на дистанции",
+      "event": "Первый результат",
+      "threshold": 0.8,
+      "unit": "км",
+      "xp": 50,
+      "repeatable": false
+    },
+    {
+      "sport": "Бег",
+      "metric": "Рекорд на дистанции",
+      "event": "Каждое улучшение (без лимита)",
+      "threshold": 0.8,
+      "unit": "км",
+      "xp": 100,
+      "repeatable": true
+    },
+    {
+      "sport": "Бег",
+      "metric": "Рекорд на дистанции",
+      "event": "Первый результат",
+      "threshold": 1,
+      "unit": "км",
+      "xp": 50,
+      "repeatable": false
+    },
+    {
+      "sport": "Бег",
+      "metric": "Рекорд на дистанции",
+      "event": "Каждое улучшение (без лимита)",
+      "threshold": 1,
+      "unit": "км",
+      "xp": 100,
+      "repeatable": true
+    },
+    {
+      "sport": "Бег",
+      "metric": "Рекорд на дистанции",
+      "event": "Первый результат",
+      "threshold": 1.5,
+      "unit": "км",
+      "xp": 50,
+      "repeatable": false
+    },
+    {
+      "sport": "Бег",
+      "metric": "Рекорд на дистанции",
+      "event": "Каждое улучшение (без лимита)",
+      "threshold": 1.5,
+      "unit": "км",
+      "xp": 100,
+      "repeatable": true
+    },
+    {
+      "sport": "Бег",
+      "metric": "Рекорд на дистанции",
+      "event": "Первый результат",
+      "threshold": 3,
+      "unit": "км",
+      "xp": 50,
+      "repeatable": false
+    },
+    {
+      "sport": "Бег",
+      "metric": "Рекорд на дистанции",
+      "event": "Каждое улучшение (без лимита)",
+      "threshold": 3,
+      "unit": "км",
+      "xp": 100,
+      "repeatable": true
+    },
+    {
+      "sport": "Бег",
+      "metric": "Рекорд на дистанции",
+      "event": "Первый результат",
+      "threshold": 5,
+      "unit": "км",
+      "xp": 50,
+      "repeatable": false
+    },
+    {
+      "sport": "Бег",
+      "metric": "Рекорд на дистанции",
+      "event": "Каждое улучшение (без лимита)",
+      "threshold": 5,
+      "unit": "км",
+      "xp": 100,
+      "repeatable": true
+    },
+    {
+      "sport": "Бег",
+      "metric": "Рекорд на дистанции",
+      "event": "Первый результат",
+      "threshold": 10,
+      "unit": "км",
+      "xp": 50,
+      "repeatable": false
+    },
+    {
+      "sport": "Бег",
+      "metric": "Рекорд на дистанции",
+      "event": "Каждое улучшение (без лимита)",
+      "threshold": 10,
+      "unit": "км",
+      "xp": 100,
+      "repeatable": true
+    },
+    {
+      "sport": "Бег",
+      "metric": "Рекорд на дистанции",
+      "event": "Первый результат",
+      "threshold": 15,
+      "unit": "км",
+      "xp": 50,
+      "repeatable": false
+    },
+    {
+      "sport": "Бег",
+      "metric": "Рекорд на дистанции",
+      "event": "Каждое улучшение (без лимита)",
+      "threshold": 15,
+      "unit": "км",
+      "xp": 100,
+      "repeatable": true
+    },
+    {
+      "sport": "Бег",
+      "metric": "Рекорд на дистанции",
+      "event": "Первый результат",
+      "threshold": 21.0975,
+      "unit": "км",
+      "xp": 50,
+      "repeatable": false
+    },
+    {
+      "sport": "Бег",
+      "metric": "Рекорд на дистанции",
+      "event": "Каждое улучшение (без лимита)",
+      "threshold": 21.0975,
+      "unit": "км",
+      "xp": 100,
+      "repeatable": true
+    },
+    {
+      "sport": "Бег",
+      "metric": "Рекорд на дистанции",
+      "event": "Первый результат",
+      "threshold": 42.195,
+      "unit": "км",
+      "xp": 50,
+      "repeatable": false
+    },
+    {
+      "sport": "Бег",
+      "metric": "Рекорд на дистанции",
+      "event": "Каждое улучшение (без лимита)",
+      "threshold": 42.195,
+      "unit": "км",
+      "xp": 100,
+      "repeatable": true
+    },
+    {
+      "sport": "Бег",
+      "metric": "Рекорд на дистанции",
+      "event": "Первый результат",
+      "threshold": 50,
+      "unit": "км",
+      "xp": 50,
+      "repeatable": false
+    },
+    {
+      "sport": "Бег",
+      "metric": "Рекорд на дистанции",
+      "event": "Каждое улучшение (без лимита)",
+      "threshold": 50,
+      "unit": "км",
+      "xp": 100,
+      "repeatable": true
+    },
+    {
+      "sport": "Бег",
+      "metric": "Рекорд на дистанции",
+      "event": "Первый результат",
+      "threshold": 100,
+      "unit": "км",
+      "xp": 50,
+      "repeatable": false
+    },
+    {
+      "sport": "Бег",
+      "metric": "Рекорд на дистанции",
+      "event": "Каждое улучшение (без лимита)",
+      "threshold": 100,
+      "unit": "км",
+      "xp": 100,
+      "repeatable": true
+    },
+    {
+      "sport": "Трейл",
+      "metric": "Время по виду",
+      "event": "За всё время",
+      "threshold": 10,
+      "unit": "ч",
+      "xp": 50,
+      "repeatable": false
+    },
+    {
+      "sport": "Трейл",
+      "metric": "Время по виду",
+      "event": "За всё время",
+      "threshold": 25,
+      "unit": "ч",
+      "xp": 100,
+      "repeatable": false
+    },
+    {
+      "sport": "Трейл",
+      "metric": "Время по виду",
+      "event": "За всё время",
+      "threshold": 50,
+      "unit": "ч",
+      "xp": 200,
+      "repeatable": false
+    },
+    {
+      "sport": "Трейл",
+      "metric": "Время по виду",
+      "event": "За всё время",
+      "threshold": 100,
+      "unit": "ч",
+      "xp": 400,
+      "repeatable": false
+    },
+    {
+      "sport": "Трейл",
+      "metric": "Время по виду",
+      "event": "За всё время",
+      "threshold": 250,
+      "unit": "ч",
+      "xp": 800,
+      "repeatable": false
+    },
+    {
+      "sport": "Трейл",
+      "metric": "Время по виду",
+      "event": "За всё время",
+      "threshold": 500,
+      "unit": "ч",
+      "xp": 1500,
+      "repeatable": false
+    },
+    {
+      "sport": "Трейл",
+      "metric": "Время по виду",
+      "event": "За всё время",
+      "threshold": 1000,
+      "unit": "ч",
+      "xp": 3000,
+      "repeatable": false
+    },
+    {
+      "sport": "Трейл",
+      "metric": "Тренировки по виду",
+      "event": "За всё время",
+      "threshold": 1,
+      "unit": "тренировок",
+      "xp": 10,
+      "repeatable": false
+    },
+    {
+      "sport": "Трейл",
+      "metric": "Тренировки по виду",
+      "event": "За всё время",
+      "threshold": 10,
+      "unit": "тренировок",
+      "xp": 50,
+      "repeatable": false
+    },
+    {
+      "sport": "Трейл",
+      "metric": "Тренировки по виду",
+      "event": "За всё время",
+      "threshold": 25,
+      "unit": "тренировок",
+      "xp": 100,
+      "repeatable": false
+    },
+    {
+      "sport": "Трейл",
+      "metric": "Тренировки по виду",
+      "event": "За всё время",
+      "threshold": 50,
+      "unit": "тренировок",
+      "xp": 200,
+      "repeatable": false
+    },
+    {
+      "sport": "Трейл",
+      "metric": "Тренировки по виду",
+      "event": "За всё время",
+      "threshold": 100,
+      "unit": "тренировок",
+      "xp": 400,
+      "repeatable": false
+    },
+    {
+      "sport": "Трейл",
+      "metric": "Тренировки по виду",
+      "event": "За всё время",
+      "threshold": 250,
+      "unit": "тренировок",
+      "xp": 800,
+      "repeatable": false
+    },
+    {
+      "sport": "Трейл",
+      "metric": "Тренировки по виду",
+      "event": "За всё время",
+      "threshold": 500,
+      "unit": "тренировок",
+      "xp": 1500,
+      "repeatable": false
+    },
+    {
+      "sport": "Трейл",
+      "metric": "Тренировки по виду",
+      "event": "За всё время",
+      "threshold": 1000,
+      "unit": "тренировок",
+      "xp": 3000,
+      "repeatable": false
+    },
+    {
+      "sport": "Трейл",
+      "metric": "Километры по виду",
+      "event": "За всё время",
+      "threshold": 25,
+      "unit": "км",
+      "xp": 50,
+      "repeatable": false
+    },
+    {
+      "sport": "Трейл",
+      "metric": "Километры по виду",
+      "event": "За всё время",
+      "threshold": 50,
+      "unit": "км",
+      "xp": 100,
+      "repeatable": false
+    },
+    {
+      "sport": "Трейл",
+      "metric": "Километры по виду",
+      "event": "За всё время",
+      "threshold": 100,
+      "unit": "км",
+      "xp": 200,
+      "repeatable": false
+    },
+    {
+      "sport": "Трейл",
+      "metric": "Километры по виду",
+      "event": "За всё время",
+      "threshold": 250,
+      "unit": "км",
+      "xp": 400,
+      "repeatable": false
+    },
+    {
+      "sport": "Трейл",
+      "metric": "Километры по виду",
+      "event": "За всё время",
+      "threshold": 500,
+      "unit": "км",
+      "xp": 700,
+      "repeatable": false
+    },
+    {
+      "sport": "Трейл",
+      "metric": "Километры по виду",
+      "event": "За всё время",
+      "threshold": 1000,
+      "unit": "км",
+      "xp": 1200,
+      "repeatable": false
+    },
+    {
+      "sport": "Трейл",
+      "metric": "Дистанция тренировки",
+      "event": "За одну тренировку",
+      "threshold": 1,
+      "unit": "км",
+      "xp": 10,
+      "repeatable": false
+    },
+    {
+      "sport": "Трейл",
+      "metric": "Дистанция тренировки",
+      "event": "За одну тренировку",
+      "threshold": 3,
+      "unit": "км",
+      "xp": 25,
+      "repeatable": false
+    },
+    {
+      "sport": "Трейл",
+      "metric": "Дистанция тренировки",
+      "event": "За одну тренировку",
+      "threshold": 5,
+      "unit": "км",
+      "xp": 50,
+      "repeatable": false
+    },
+    {
+      "sport": "Трейл",
+      "metric": "Дистанция тренировки",
+      "event": "За одну тренировку",
+      "threshold": 10,
+      "unit": "км",
+      "xp": 100,
+      "repeatable": false
+    },
+    {
+      "sport": "Трейл",
+      "metric": "Дистанция тренировки",
+      "event": "За одну тренировку",
+      "threshold": 15,
+      "unit": "км",
+      "xp": 150,
+      "repeatable": false
+    },
+    {
+      "sport": "Трейл",
+      "metric": "Дистанция тренировки",
+      "event": "За одну тренировку",
+      "threshold": 21.0975,
+      "unit": "км",
+      "xp": 250,
+      "repeatable": false
+    },
+    {
+      "sport": "Трейл",
+      "metric": "Дистанция тренировки",
+      "event": "За одну тренировку",
+      "threshold": 30,
+      "unit": "км",
+      "xp": 400,
+      "repeatable": false
+    },
+    {
+      "sport": "Трейл",
+      "metric": "Дистанция тренировки",
+      "event": "За одну тренировку",
+      "threshold": 50,
+      "unit": "км",
+      "xp": 600,
+      "repeatable": false
+    },
+    {
+      "sport": "Трейл",
+      "metric": "Дистанция тренировки",
+      "event": "За одну тренировку",
+      "threshold": 80,
+      "unit": "км",
+      "xp": 1000,
+      "repeatable": false
+    },
+    {
+      "sport": "Трейл",
+      "metric": "Дистанция тренировки",
+      "event": "За одну тренировку",
+      "threshold": 100,
+      "unit": "км",
+      "xp": 1500,
+      "repeatable": false
+    },
+    {
+      "sport": "Трейл",
+      "metric": "Набор за тренировку",
+      "event": "За одну тренировку",
+      "threshold": 100,
+      "unit": "м",
+      "xp": 25,
+      "repeatable": false
+    },
+    {
+      "sport": "Трейл",
+      "metric": "Набор за тренировку",
+      "event": "За одну тренировку",
+      "threshold": 250,
+      "unit": "м",
+      "xp": 50,
+      "repeatable": false
+    },
+    {
+      "sport": "Трейл",
+      "metric": "Набор за тренировку",
+      "event": "За одну тренировку",
+      "threshold": 500,
+      "unit": "м",
+      "xp": 100,
+      "repeatable": false
+    },
+    {
+      "sport": "Трейл",
+      "metric": "Набор за тренировку",
+      "event": "За одну тренировку",
+      "threshold": 1000,
+      "unit": "м",
+      "xp": 200,
+      "repeatable": false
+    },
+    {
+      "sport": "Трейл",
+      "metric": "Набор за тренировку",
+      "event": "За одну тренировку",
+      "threshold": 1500,
+      "unit": "м",
+      "xp": 300,
+      "repeatable": false
+    },
+    {
+      "sport": "Трейл",
+      "metric": "Набор за тренировку",
+      "event": "За одну тренировку",
+      "threshold": 2000,
+      "unit": "м",
+      "xp": 500,
+      "repeatable": false
+    },
+    {
+      "sport": "Трейл",
+      "metric": "Накопленный набор",
+      "event": "За всё время",
+      "threshold": 1000,
+      "unit": "м",
+      "xp": 50,
+      "repeatable": false
+    },
+    {
+      "sport": "Трейл",
+      "metric": "Накопленный набор",
+      "event": "За всё время",
+      "threshold": 5000,
+      "unit": "м",
+      "xp": 100,
+      "repeatable": false
+    },
+    {
+      "sport": "Трейл",
+      "metric": "Накопленный набор",
+      "event": "За всё время",
+      "threshold": 10000,
+      "unit": "м",
+      "xp": 200,
+      "repeatable": false
+    },
+    {
+      "sport": "Трейл",
+      "metric": "Накопленный набор",
+      "event": "За всё время",
+      "threshold": 25000,
+      "unit": "м",
+      "xp": 400,
+      "repeatable": false
+    },
+    {
+      "sport": "Трейл",
+      "metric": "Накопленный набор",
+      "event": "За всё время",
+      "threshold": 50000,
+      "unit": "м",
+      "xp": 700,
+      "repeatable": false
+    },
+    {
+      "sport": "Трейл",
+      "metric": "Накопленный набор",
+      "event": "За всё время",
+      "threshold": 100000,
+      "unit": "м",
+      "xp": 1200,
+      "repeatable": false
+    },
+    {
+      "sport": "Трейл",
+      "metric": "Рекорд на дистанции",
+      "event": "Первый результат",
+      "threshold": 5,
+      "unit": "км",
+      "xp": 50,
+      "repeatable": false
+    },
+    {
+      "sport": "Трейл",
+      "metric": "Рекорд на дистанции",
+      "event": "Каждое улучшение (без лимита)",
+      "threshold": 5,
+      "unit": "км",
+      "xp": 100,
+      "repeatable": true
+    },
+    {
+      "sport": "Трейл",
+      "metric": "Рекорд на дистанции",
+      "event": "Первый результат",
+      "threshold": 10,
+      "unit": "км",
+      "xp": 50,
+      "repeatable": false
+    },
+    {
+      "sport": "Трейл",
+      "metric": "Рекорд на дистанции",
+      "event": "Каждое улучшение (без лимита)",
+      "threshold": 10,
+      "unit": "км",
+      "xp": 100,
+      "repeatable": true
+    },
+    {
+      "sport": "Трейл",
+      "metric": "Рекорд на дистанции",
+      "event": "Первый результат",
+      "threshold": 15,
+      "unit": "км",
+      "xp": 50,
+      "repeatable": false
+    },
+    {
+      "sport": "Трейл",
+      "metric": "Рекорд на дистанции",
+      "event": "Каждое улучшение (без лимита)",
+      "threshold": 15,
+      "unit": "км",
+      "xp": 100,
+      "repeatable": true
+    },
+    {
+      "sport": "Трейл",
+      "metric": "Рекорд на дистанции",
+      "event": "Первый результат",
+      "threshold": 21.0975,
+      "unit": "км",
+      "xp": 50,
+      "repeatable": false
+    },
+    {
+      "sport": "Трейл",
+      "metric": "Рекорд на дистанции",
+      "event": "Каждое улучшение (без лимита)",
+      "threshold": 21.0975,
+      "unit": "км",
+      "xp": 100,
+      "repeatable": true
+    },
+    {
+      "sport": "Трейл",
+      "metric": "Рекорд на дистанции",
+      "event": "Первый результат",
+      "threshold": 30,
+      "unit": "км",
+      "xp": 50,
+      "repeatable": false
+    },
+    {
+      "sport": "Трейл",
+      "metric": "Рекорд на дистанции",
+      "event": "Каждое улучшение (без лимита)",
+      "threshold": 30,
+      "unit": "км",
+      "xp": 100,
+      "repeatable": true
+    },
+    {
+      "sport": "Трейл",
+      "metric": "Рекорд на дистанции",
+      "event": "Первый результат",
+      "threshold": 50,
+      "unit": "км",
+      "xp": 50,
+      "repeatable": false
+    },
+    {
+      "sport": "Трейл",
+      "metric": "Рекорд на дистанции",
+      "event": "Каждое улучшение (без лимита)",
+      "threshold": 50,
+      "unit": "км",
+      "xp": 100,
+      "repeatable": true
+    },
+    {
+      "sport": "Трейл",
+      "metric": "Рекорд на дистанции",
+      "event": "Первый результат",
+      "threshold": 80,
+      "unit": "км",
+      "xp": 50,
+      "repeatable": false
+    },
+    {
+      "sport": "Трейл",
+      "metric": "Рекорд на дистанции",
+      "event": "Каждое улучшение (без лимита)",
+      "threshold": 80,
+      "unit": "км",
+      "xp": 100,
+      "repeatable": true
+    },
+    {
+      "sport": "Трейл",
+      "metric": "Рекорд на дистанции",
+      "event": "Первый результат",
+      "threshold": 100,
+      "unit": "км",
+      "xp": 50,
+      "repeatable": false
+    },
+    {
+      "sport": "Трейл",
+      "metric": "Рекорд на дистанции",
+      "event": "Каждое улучшение (без лимита)",
+      "threshold": 100,
+      "unit": "км",
+      "xp": 100,
+      "repeatable": true
+    },
+    {
+      "sport": "Ходьба",
+      "metric": "Время по виду",
+      "event": "За всё время",
+      "threshold": 10,
+      "unit": "ч",
+      "xp": 50,
+      "repeatable": false
+    },
+    {
+      "sport": "Ходьба",
+      "metric": "Время по виду",
+      "event": "За всё время",
+      "threshold": 25,
+      "unit": "ч",
+      "xp": 100,
+      "repeatable": false
+    },
+    {
+      "sport": "Ходьба",
+      "metric": "Время по виду",
+      "event": "За всё время",
+      "threshold": 50,
+      "unit": "ч",
+      "xp": 200,
+      "repeatable": false
+    },
+    {
+      "sport": "Ходьба",
+      "metric": "Время по виду",
+      "event": "За всё время",
+      "threshold": 100,
+      "unit": "ч",
+      "xp": 400,
+      "repeatable": false
+    },
+    {
+      "sport": "Ходьба",
+      "metric": "Время по виду",
+      "event": "За всё время",
+      "threshold": 250,
+      "unit": "ч",
+      "xp": 800,
+      "repeatable": false
+    },
+    {
+      "sport": "Ходьба",
+      "metric": "Время по виду",
+      "event": "За всё время",
+      "threshold": 500,
+      "unit": "ч",
+      "xp": 1500,
+      "repeatable": false
+    },
+    {
+      "sport": "Ходьба",
+      "metric": "Время по виду",
+      "event": "За всё время",
+      "threshold": 1000,
+      "unit": "ч",
+      "xp": 3000,
+      "repeatable": false
+    },
+    {
+      "sport": "Ходьба",
+      "metric": "Тренировки по виду",
+      "event": "За всё время",
+      "threshold": 1,
+      "unit": "тренировок",
+      "xp": 10,
+      "repeatable": false
+    },
+    {
+      "sport": "Ходьба",
+      "metric": "Тренировки по виду",
+      "event": "За всё время",
+      "threshold": 10,
+      "unit": "тренировок",
+      "xp": 50,
+      "repeatable": false
+    },
+    {
+      "sport": "Ходьба",
+      "metric": "Тренировки по виду",
+      "event": "За всё время",
+      "threshold": 25,
+      "unit": "тренировок",
+      "xp": 100,
+      "repeatable": false
+    },
+    {
+      "sport": "Ходьба",
+      "metric": "Тренировки по виду",
+      "event": "За всё время",
+      "threshold": 50,
+      "unit": "тренировок",
+      "xp": 200,
+      "repeatable": false
+    },
+    {
+      "sport": "Ходьба",
+      "metric": "Тренировки по виду",
+      "event": "За всё время",
+      "threshold": 100,
+      "unit": "тренировок",
+      "xp": 400,
+      "repeatable": false
+    },
+    {
+      "sport": "Ходьба",
+      "metric": "Тренировки по виду",
+      "event": "За всё время",
+      "threshold": 250,
+      "unit": "тренировок",
+      "xp": 800,
+      "repeatable": false
+    },
+    {
+      "sport": "Ходьба",
+      "metric": "Тренировки по виду",
+      "event": "За всё время",
+      "threshold": 500,
+      "unit": "тренировок",
+      "xp": 1500,
+      "repeatable": false
+    },
+    {
+      "sport": "Ходьба",
+      "metric": "Тренировки по виду",
+      "event": "За всё время",
+      "threshold": 1000,
+      "unit": "тренировок",
+      "xp": 3000,
+      "repeatable": false
+    },
+    {
+      "sport": "Ходьба",
+      "metric": "Километры по виду",
+      "event": "За всё время",
+      "threshold": 25,
+      "unit": "км",
+      "xp": 50,
+      "repeatable": false
+    },
+    {
+      "sport": "Ходьба",
+      "metric": "Километры по виду",
+      "event": "За всё время",
+      "threshold": 50,
+      "unit": "км",
+      "xp": 100,
+      "repeatable": false
+    },
+    {
+      "sport": "Ходьба",
+      "metric": "Километры по виду",
+      "event": "За всё время",
+      "threshold": 100,
+      "unit": "км",
+      "xp": 200,
+      "repeatable": false
+    },
+    {
+      "sport": "Ходьба",
+      "metric": "Километры по виду",
+      "event": "За всё время",
+      "threshold": 250,
+      "unit": "км",
+      "xp": 400,
+      "repeatable": false
+    },
+    {
+      "sport": "Ходьба",
+      "metric": "Километры по виду",
+      "event": "За всё время",
+      "threshold": 500,
+      "unit": "км",
+      "xp": 700,
+      "repeatable": false
+    },
+    {
+      "sport": "Ходьба",
+      "metric": "Километры по виду",
+      "event": "За всё время",
+      "threshold": 1000,
+      "unit": "км",
+      "xp": 1200,
+      "repeatable": false
+    },
+    {
+      "sport": "Ходьба",
+      "metric": "Дистанция тренировки",
+      "event": "За одну тренировку",
+      "threshold": 0.5,
+      "unit": "км",
+      "xp": 10,
+      "repeatable": false
+    },
+    {
+      "sport": "Ходьба",
+      "metric": "Дистанция тренировки",
+      "event": "За одну тренировку",
+      "threshold": 1,
+      "unit": "км",
+      "xp": 25,
+      "repeatable": false
+    },
+    {
+      "sport": "Ходьба",
+      "metric": "Дистанция тренировки",
+      "event": "За одну тренировку",
+      "threshold": 3,
+      "unit": "км",
+      "xp": 50,
+      "repeatable": false
+    },
+    {
+      "sport": "Ходьба",
+      "metric": "Дистанция тренировки",
+      "event": "За одну тренировку",
+      "threshold": 5,
+      "unit": "км",
+      "xp": 100,
+      "repeatable": false
+    },
+    {
+      "sport": "Ходьба",
+      "metric": "Дистанция тренировки",
+      "event": "За одну тренировку",
+      "threshold": 10,
+      "unit": "км",
+      "xp": 150,
+      "repeatable": false
+    },
+    {
+      "sport": "Ходьба",
+      "metric": "Дистанция тренировки",
+      "event": "За одну тренировку",
+      "threshold": 15,
+      "unit": "км",
+      "xp": 250,
+      "repeatable": false
+    },
+    {
+      "sport": "Ходьба",
+      "metric": "Дистанция тренировки",
+      "event": "За одну тренировку",
+      "threshold": 20,
+      "unit": "км",
+      "xp": 400,
+      "repeatable": false
+    },
+    {
+      "sport": "Ходьба",
+      "metric": "Дистанция тренировки",
+      "event": "За одну тренировку",
+      "threshold": 30,
+      "unit": "км",
+      "xp": 600,
+      "repeatable": false
+    },
+    {
+      "sport": "Ходьба",
+      "metric": "Дистанция тренировки",
+      "event": "За одну тренировку",
+      "threshold": 42.195,
+      "unit": "км",
+      "xp": 800,
+      "repeatable": false
+    },
+    {
+      "sport": "Ходьба",
+      "metric": "Дистанция тренировки",
+      "event": "За одну тренировку",
+      "threshold": 50,
+      "unit": "км",
+      "xp": 1000,
+      "repeatable": false
+    },
+    {
+      "sport": "Ходьба",
+      "metric": "Набор за тренировку",
+      "event": "За одну тренировку",
+      "threshold": 100,
+      "unit": "м",
+      "xp": 25,
+      "repeatable": false
+    },
+    {
+      "sport": "Ходьба",
+      "metric": "Набор за тренировку",
+      "event": "За одну тренировку",
+      "threshold": 250,
+      "unit": "м",
+      "xp": 50,
+      "repeatable": false
+    },
+    {
+      "sport": "Ходьба",
+      "metric": "Набор за тренировку",
+      "event": "За одну тренировку",
+      "threshold": 500,
+      "unit": "м",
+      "xp": 100,
+      "repeatable": false
+    },
+    {
+      "sport": "Ходьба",
+      "metric": "Набор за тренировку",
+      "event": "За одну тренировку",
+      "threshold": 1000,
+      "unit": "м",
+      "xp": 200,
+      "repeatable": false
+    },
+    {
+      "sport": "Ходьба",
+      "metric": "Набор за тренировку",
+      "event": "За одну тренировку",
+      "threshold": 1500,
+      "unit": "м",
+      "xp": 300,
+      "repeatable": false
+    },
+    {
+      "sport": "Ходьба",
+      "metric": "Набор за тренировку",
+      "event": "За одну тренировку",
+      "threshold": 2000,
+      "unit": "м",
+      "xp": 500,
+      "repeatable": false
+    },
+    {
+      "sport": "Ходьба",
+      "metric": "Накопленный набор",
+      "event": "За всё время",
+      "threshold": 1000,
+      "unit": "м",
+      "xp": 50,
+      "repeatable": false
+    },
+    {
+      "sport": "Ходьба",
+      "metric": "Накопленный набор",
+      "event": "За всё время",
+      "threshold": 5000,
+      "unit": "м",
+      "xp": 100,
+      "repeatable": false
+    },
+    {
+      "sport": "Ходьба",
+      "metric": "Накопленный набор",
+      "event": "За всё время",
+      "threshold": 10000,
+      "unit": "м",
+      "xp": 200,
+      "repeatable": false
+    },
+    {
+      "sport": "Ходьба",
+      "metric": "Накопленный набор",
+      "event": "За всё время",
+      "threshold": 25000,
+      "unit": "м",
+      "xp": 400,
+      "repeatable": false
+    },
+    {
+      "sport": "Ходьба",
+      "metric": "Накопленный набор",
+      "event": "За всё время",
+      "threshold": 50000,
+      "unit": "м",
+      "xp": 700,
+      "repeatable": false
+    },
+    {
+      "sport": "Ходьба",
+      "metric": "Накопленный набор",
+      "event": "За всё время",
+      "threshold": 100000,
+      "unit": "м",
+      "xp": 1200,
+      "repeatable": false
+    },
+    {
+      "sport": "Ходьба",
+      "metric": "Рекорд на дистанции",
+      "event": "Первый результат",
+      "threshold": 1,
+      "unit": "км",
+      "xp": 50,
+      "repeatable": false
+    },
+    {
+      "sport": "Ходьба",
+      "metric": "Рекорд на дистанции",
+      "event": "Каждое улучшение (без лимита)",
+      "threshold": 1,
+      "unit": "км",
+      "xp": 100,
+      "repeatable": true
+    },
+    {
+      "sport": "Ходьба",
+      "metric": "Рекорд на дистанции",
+      "event": "Первый результат",
+      "threshold": 3,
+      "unit": "км",
+      "xp": 50,
+      "repeatable": false
+    },
+    {
+      "sport": "Ходьба",
+      "metric": "Рекорд на дистанции",
+      "event": "Каждое улучшение (без лимита)",
+      "threshold": 3,
+      "unit": "км",
+      "xp": 100,
+      "repeatable": true
+    },
+    {
+      "sport": "Ходьба",
+      "metric": "Рекорд на дистанции",
+      "event": "Первый результат",
+      "threshold": 5,
+      "unit": "км",
+      "xp": 50,
+      "repeatable": false
+    },
+    {
+      "sport": "Ходьба",
+      "metric": "Рекорд на дистанции",
+      "event": "Каждое улучшение (без лимита)",
+      "threshold": 5,
+      "unit": "км",
+      "xp": 100,
+      "repeatable": true
+    },
+    {
+      "sport": "Ходьба",
+      "metric": "Рекорд на дистанции",
+      "event": "Первый результат",
+      "threshold": 10,
+      "unit": "км",
+      "xp": 50,
+      "repeatable": false
+    },
+    {
+      "sport": "Ходьба",
+      "metric": "Рекорд на дистанции",
+      "event": "Каждое улучшение (без лимита)",
+      "threshold": 10,
+      "unit": "км",
+      "xp": 100,
+      "repeatable": true
+    },
+    {
+      "sport": "Ходьба",
+      "metric": "Рекорд на дистанции",
+      "event": "Первый результат",
+      "threshold": 20,
+      "unit": "км",
+      "xp": 50,
+      "repeatable": false
+    },
+    {
+      "sport": "Ходьба",
+      "metric": "Рекорд на дистанции",
+      "event": "Каждое улучшение (без лимита)",
+      "threshold": 20,
+      "unit": "км",
+      "xp": 100,
+      "repeatable": true
+    },
+    {
+      "sport": "Ходьба",
+      "metric": "Рекорд на дистанции",
+      "event": "Первый результат",
+      "threshold": 30,
+      "unit": "км",
+      "xp": 50,
+      "repeatable": false
+    },
+    {
+      "sport": "Ходьба",
+      "metric": "Рекорд на дистанции",
+      "event": "Каждое улучшение (без лимита)",
+      "threshold": 30,
+      "unit": "км",
+      "xp": 100,
+      "repeatable": true
+    },
+    {
+      "sport": "Ходьба",
+      "metric": "Рекорд на дистанции",
+      "event": "Первый результат",
+      "threshold": 50,
+      "unit": "км",
+      "xp": 50,
+      "repeatable": false
+    },
+    {
+      "sport": "Ходьба",
+      "metric": "Рекорд на дистанции",
+      "event": "Каждое улучшение (без лимита)",
+      "threshold": 50,
+      "unit": "км",
+      "xp": 100,
+      "repeatable": true
+    },
+    {
+      "sport": "Лыжи",
+      "metric": "Время по виду",
+      "event": "За всё время",
+      "threshold": 10,
+      "unit": "ч",
+      "xp": 50,
+      "repeatable": false
+    },
+    {
+      "sport": "Лыжи",
+      "metric": "Время по виду",
+      "event": "За всё время",
+      "threshold": 25,
+      "unit": "ч",
+      "xp": 100,
+      "repeatable": false
+    },
+    {
+      "sport": "Лыжи",
+      "metric": "Время по виду",
+      "event": "За всё время",
+      "threshold": 50,
+      "unit": "ч",
+      "xp": 200,
+      "repeatable": false
+    },
+    {
+      "sport": "Лыжи",
+      "metric": "Время по виду",
+      "event": "За всё время",
+      "threshold": 100,
+      "unit": "ч",
+      "xp": 400,
+      "repeatable": false
+    },
+    {
+      "sport": "Лыжи",
+      "metric": "Время по виду",
+      "event": "За всё время",
+      "threshold": 250,
+      "unit": "ч",
+      "xp": 800,
+      "repeatable": false
+    },
+    {
+      "sport": "Лыжи",
+      "metric": "Время по виду",
+      "event": "За всё время",
+      "threshold": 500,
+      "unit": "ч",
+      "xp": 1500,
+      "repeatable": false
+    },
+    {
+      "sport": "Лыжи",
+      "metric": "Время по виду",
+      "event": "За всё время",
+      "threshold": 1000,
+      "unit": "ч",
+      "xp": 3000,
+      "repeatable": false
+    },
+    {
+      "sport": "Лыжи",
+      "metric": "Тренировки по виду",
+      "event": "За всё время",
+      "threshold": 1,
+      "unit": "тренировок",
+      "xp": 10,
+      "repeatable": false
+    },
+    {
+      "sport": "Лыжи",
+      "metric": "Тренировки по виду",
+      "event": "За всё время",
+      "threshold": 10,
+      "unit": "тренировок",
+      "xp": 50,
+      "repeatable": false
+    },
+    {
+      "sport": "Лыжи",
+      "metric": "Тренировки по виду",
+      "event": "За всё время",
+      "threshold": 25,
+      "unit": "тренировок",
+      "xp": 100,
+      "repeatable": false
+    },
+    {
+      "sport": "Лыжи",
+      "metric": "Тренировки по виду",
+      "event": "За всё время",
+      "threshold": 50,
+      "unit": "тренировок",
+      "xp": 200,
+      "repeatable": false
+    },
+    {
+      "sport": "Лыжи",
+      "metric": "Тренировки по виду",
+      "event": "За всё время",
+      "threshold": 100,
+      "unit": "тренировок",
+      "xp": 400,
+      "repeatable": false
+    },
+    {
+      "sport": "Лыжи",
+      "metric": "Тренировки по виду",
+      "event": "За всё время",
+      "threshold": 250,
+      "unit": "тренировок",
+      "xp": 800,
+      "repeatable": false
+    },
+    {
+      "sport": "Лыжи",
+      "metric": "Тренировки по виду",
+      "event": "За всё время",
+      "threshold": 500,
+      "unit": "тренировок",
+      "xp": 1500,
+      "repeatable": false
+    },
+    {
+      "sport": "Лыжи",
+      "metric": "Тренировки по виду",
+      "event": "За всё время",
+      "threshold": 1000,
+      "unit": "тренировок",
+      "xp": 3000,
+      "repeatable": false
+    },
+    {
+      "sport": "Лыжи",
+      "metric": "Километры по виду",
+      "event": "За всё время",
+      "threshold": 50,
+      "unit": "км",
+      "xp": 50,
+      "repeatable": false
+    },
+    {
+      "sport": "Лыжи",
+      "metric": "Километры по виду",
+      "event": "За всё время",
+      "threshold": 100,
+      "unit": "км",
+      "xp": 100,
+      "repeatable": false
+    },
+    {
+      "sport": "Лыжи",
+      "metric": "Километры по виду",
+      "event": "За всё время",
+      "threshold": 250,
+      "unit": "км",
+      "xp": 200,
+      "repeatable": false
+    },
+    {
+      "sport": "Лыжи",
+      "metric": "Километры по виду",
+      "event": "За всё время",
+      "threshold": 500,
+      "unit": "км",
+      "xp": 400,
+      "repeatable": false
+    },
+    {
+      "sport": "Лыжи",
+      "metric": "Километры по виду",
+      "event": "За всё время",
+      "threshold": 1000,
+      "unit": "км",
+      "xp": 700,
+      "repeatable": false
+    },
+    {
+      "sport": "Лыжи",
+      "metric": "Километры по виду",
+      "event": "За всё время",
+      "threshold": 2500,
+      "unit": "км",
+      "xp": 1200,
+      "repeatable": false
+    },
+    {
+      "sport": "Лыжи",
+      "metric": "Дистанция тренировки",
+      "event": "За одну тренировку",
+      "threshold": 1,
+      "unit": "км",
+      "xp": 10,
+      "repeatable": false
+    },
+    {
+      "sport": "Лыжи",
+      "metric": "Дистанция тренировки",
+      "event": "За одну тренировку",
+      "threshold": 3,
+      "unit": "км",
+      "xp": 25,
+      "repeatable": false
+    },
+    {
+      "sport": "Лыжи",
+      "metric": "Дистанция тренировки",
+      "event": "За одну тренировку",
+      "threshold": 5,
+      "unit": "км",
+      "xp": 50,
+      "repeatable": false
+    },
+    {
+      "sport": "Лыжи",
+      "metric": "Дистанция тренировки",
+      "event": "За одну тренировку",
+      "threshold": 10,
+      "unit": "км",
+      "xp": 100,
+      "repeatable": false
+    },
+    {
+      "sport": "Лыжи",
+      "metric": "Дистанция тренировки",
+      "event": "За одну тренировку",
+      "threshold": 15,
+      "unit": "км",
+      "xp": 150,
+      "repeatable": false
+    },
+    {
+      "sport": "Лыжи",
+      "metric": "Дистанция тренировки",
+      "event": "За одну тренировку",
+      "threshold": 20,
+      "unit": "км",
+      "xp": 250,
+      "repeatable": false
+    },
+    {
+      "sport": "Лыжи",
+      "metric": "Дистанция тренировки",
+      "event": "За одну тренировку",
+      "threshold": 30,
+      "unit": "км",
+      "xp": 400,
+      "repeatable": false
+    },
+    {
+      "sport": "Лыжи",
+      "metric": "Дистанция тренировки",
+      "event": "За одну тренировку",
+      "threshold": 50,
+      "unit": "км",
+      "xp": 600,
+      "repeatable": false
+    },
+    {
+      "sport": "Лыжи",
+      "metric": "Дистанция тренировки",
+      "event": "За одну тренировку",
+      "threshold": 70,
+      "unit": "км",
+      "xp": 1000,
+      "repeatable": false
+    },
+    {
+      "sport": "Лыжи",
+      "metric": "Дистанция тренировки",
+      "event": "За одну тренировку",
+      "threshold": 100,
+      "unit": "км",
+      "xp": 1500,
+      "repeatable": false
+    },
+    {
+      "sport": "Лыжи",
+      "metric": "Набор за тренировку",
+      "event": "За одну тренировку",
+      "threshold": 100,
+      "unit": "м",
+      "xp": 25,
+      "repeatable": false
+    },
+    {
+      "sport": "Лыжи",
+      "metric": "Набор за тренировку",
+      "event": "За одну тренировку",
+      "threshold": 250,
+      "unit": "м",
+      "xp": 50,
+      "repeatable": false
+    },
+    {
+      "sport": "Лыжи",
+      "metric": "Набор за тренировку",
+      "event": "За одну тренировку",
+      "threshold": 500,
+      "unit": "м",
+      "xp": 100,
+      "repeatable": false
+    },
+    {
+      "sport": "Лыжи",
+      "metric": "Набор за тренировку",
+      "event": "За одну тренировку",
+      "threshold": 1000,
+      "unit": "м",
+      "xp": 200,
+      "repeatable": false
+    },
+    {
+      "sport": "Лыжи",
+      "metric": "Набор за тренировку",
+      "event": "За одну тренировку",
+      "threshold": 1500,
+      "unit": "м",
+      "xp": 300,
+      "repeatable": false
+    },
+    {
+      "sport": "Лыжи",
+      "metric": "Набор за тренировку",
+      "event": "За одну тренировку",
+      "threshold": 2000,
+      "unit": "м",
+      "xp": 500,
+      "repeatable": false
+    },
+    {
+      "sport": "Лыжи",
+      "metric": "Накопленный набор",
+      "event": "За всё время",
+      "threshold": 1000,
+      "unit": "м",
+      "xp": 50,
+      "repeatable": false
+    },
+    {
+      "sport": "Лыжи",
+      "metric": "Накопленный набор",
+      "event": "За всё время",
+      "threshold": 5000,
+      "unit": "м",
+      "xp": 100,
+      "repeatable": false
+    },
+    {
+      "sport": "Лыжи",
+      "metric": "Накопленный набор",
+      "event": "За всё время",
+      "threshold": 10000,
+      "unit": "м",
+      "xp": 200,
+      "repeatable": false
+    },
+    {
+      "sport": "Лыжи",
+      "metric": "Накопленный набор",
+      "event": "За всё время",
+      "threshold": 25000,
+      "unit": "м",
+      "xp": 400,
+      "repeatable": false
+    },
+    {
+      "sport": "Лыжи",
+      "metric": "Накопленный набор",
+      "event": "За всё время",
+      "threshold": 50000,
+      "unit": "м",
+      "xp": 700,
+      "repeatable": false
+    },
+    {
+      "sport": "Лыжи",
+      "metric": "Накопленный набор",
+      "event": "За всё время",
+      "threshold": 100000,
+      "unit": "м",
+      "xp": 1200,
+      "repeatable": false
+    },
+    {
+      "sport": "Лыжи",
+      "metric": "Рекорд на дистанции",
+      "event": "Первый результат",
+      "threshold": 1,
+      "unit": "км",
+      "xp": 50,
+      "repeatable": false
+    },
+    {
+      "sport": "Лыжи",
+      "metric": "Рекорд на дистанции",
+      "event": "Каждое улучшение (без лимита)",
+      "threshold": 1,
+      "unit": "км",
+      "xp": 100,
+      "repeatable": true
+    },
+    {
+      "sport": "Лыжи",
+      "metric": "Рекорд на дистанции",
+      "event": "Первый результат",
+      "threshold": 3,
+      "unit": "км",
+      "xp": 50,
+      "repeatable": false
+    },
+    {
+      "sport": "Лыжи",
+      "metric": "Рекорд на дистанции",
+      "event": "Каждое улучшение (без лимита)",
+      "threshold": 3,
+      "unit": "км",
+      "xp": 100,
+      "repeatable": true
+    },
+    {
+      "sport": "Лыжи",
+      "metric": "Рекорд на дистанции",
+      "event": "Первый результат",
+      "threshold": 5,
+      "unit": "км",
+      "xp": 50,
+      "repeatable": false
+    },
+    {
+      "sport": "Лыжи",
+      "metric": "Рекорд на дистанции",
+      "event": "Каждое улучшение (без лимита)",
+      "threshold": 5,
+      "unit": "км",
+      "xp": 100,
+      "repeatable": true
+    },
+    {
+      "sport": "Лыжи",
+      "metric": "Рекорд на дистанции",
+      "event": "Первый результат",
+      "threshold": 10,
+      "unit": "км",
+      "xp": 50,
+      "repeatable": false
+    },
+    {
+      "sport": "Лыжи",
+      "metric": "Рекорд на дистанции",
+      "event": "Каждое улучшение (без лимита)",
+      "threshold": 10,
+      "unit": "км",
+      "xp": 100,
+      "repeatable": true
+    },
+    {
+      "sport": "Лыжи",
+      "metric": "Рекорд на дистанции",
+      "event": "Первый результат",
+      "threshold": 15,
+      "unit": "км",
+      "xp": 50,
+      "repeatable": false
+    },
+    {
+      "sport": "Лыжи",
+      "metric": "Рекорд на дистанции",
+      "event": "Каждое улучшение (без лимита)",
+      "threshold": 15,
+      "unit": "км",
+      "xp": 100,
+      "repeatable": true
+    },
+    {
+      "sport": "Лыжи",
+      "metric": "Рекорд на дистанции",
+      "event": "Первый результат",
+      "threshold": 20,
+      "unit": "км",
+      "xp": 50,
+      "repeatable": false
+    },
+    {
+      "sport": "Лыжи",
+      "metric": "Рекорд на дистанции",
+      "event": "Каждое улучшение (без лимита)",
+      "threshold": 20,
+      "unit": "км",
+      "xp": 100,
+      "repeatable": true
+    },
+    {
+      "sport": "Лыжи",
+      "metric": "Рекорд на дистанции",
+      "event": "Первый результат",
+      "threshold": 30,
+      "unit": "км",
+      "xp": 50,
+      "repeatable": false
+    },
+    {
+      "sport": "Лыжи",
+      "metric": "Рекорд на дистанции",
+      "event": "Каждое улучшение (без лимита)",
+      "threshold": 30,
+      "unit": "км",
+      "xp": 100,
+      "repeatable": true
+    },
+    {
+      "sport": "Лыжи",
+      "metric": "Рекорд на дистанции",
+      "event": "Первый результат",
+      "threshold": 50,
+      "unit": "км",
+      "xp": 50,
+      "repeatable": false
+    },
+    {
+      "sport": "Лыжи",
+      "metric": "Рекорд на дистанции",
+      "event": "Каждое улучшение (без лимита)",
+      "threshold": 50,
+      "unit": "км",
+      "xp": 100,
+      "repeatable": true
+    },
+    {
+      "sport": "Лыжи",
+      "metric": "Рекорд на дистанции",
+      "event": "Первый результат",
+      "threshold": 70,
+      "unit": "км",
+      "xp": 50,
+      "repeatable": false
+    },
+    {
+      "sport": "Лыжи",
+      "metric": "Рекорд на дистанции",
+      "event": "Каждое улучшение (без лимита)",
+      "threshold": 70,
+      "unit": "км",
+      "xp": 100,
+      "repeatable": true
+    },
+    {
+      "sport": "Велосипед",
+      "metric": "Время по виду",
+      "event": "За всё время",
+      "threshold": 10,
+      "unit": "ч",
+      "xp": 50,
+      "repeatable": false
+    },
+    {
+      "sport": "Велосипед",
+      "metric": "Время по виду",
+      "event": "За всё время",
+      "threshold": 25,
+      "unit": "ч",
+      "xp": 100,
+      "repeatable": false
+    },
+    {
+      "sport": "Велосипед",
+      "metric": "Время по виду",
+      "event": "За всё время",
+      "threshold": 50,
+      "unit": "ч",
+      "xp": 200,
+      "repeatable": false
+    },
+    {
+      "sport": "Велосипед",
+      "metric": "Время по виду",
+      "event": "За всё время",
+      "threshold": 100,
+      "unit": "ч",
+      "xp": 400,
+      "repeatable": false
+    },
+    {
+      "sport": "Велосипед",
+      "metric": "Время по виду",
+      "event": "За всё время",
+      "threshold": 250,
+      "unit": "ч",
+      "xp": 800,
+      "repeatable": false
+    },
+    {
+      "sport": "Велосипед",
+      "metric": "Время по виду",
+      "event": "За всё время",
+      "threshold": 500,
+      "unit": "ч",
+      "xp": 1500,
+      "repeatable": false
+    },
+    {
+      "sport": "Велосипед",
+      "metric": "Время по виду",
+      "event": "За всё время",
+      "threshold": 1000,
+      "unit": "ч",
+      "xp": 3000,
+      "repeatable": false
+    },
+    {
+      "sport": "Велосипед",
+      "metric": "Тренировки по виду",
+      "event": "За всё время",
+      "threshold": 1,
+      "unit": "тренировок",
+      "xp": 10,
+      "repeatable": false
+    },
+    {
+      "sport": "Велосипед",
+      "metric": "Тренировки по виду",
+      "event": "За всё время",
+      "threshold": 10,
+      "unit": "тренировок",
+      "xp": 50,
+      "repeatable": false
+    },
+    {
+      "sport": "Велосипед",
+      "metric": "Тренировки по виду",
+      "event": "За всё время",
+      "threshold": 25,
+      "unit": "тренировок",
+      "xp": 100,
+      "repeatable": false
+    },
+    {
+      "sport": "Велосипед",
+      "metric": "Тренировки по виду",
+      "event": "За всё время",
+      "threshold": 50,
+      "unit": "тренировок",
+      "xp": 200,
+      "repeatable": false
+    },
+    {
+      "sport": "Велосипед",
+      "metric": "Тренировки по виду",
+      "event": "За всё время",
+      "threshold": 100,
+      "unit": "тренировок",
+      "xp": 400,
+      "repeatable": false
+    },
+    {
+      "sport": "Велосипед",
+      "metric": "Тренировки по виду",
+      "event": "За всё время",
+      "threshold": 250,
+      "unit": "тренировок",
+      "xp": 800,
+      "repeatable": false
+    },
+    {
+      "sport": "Велосипед",
+      "metric": "Тренировки по виду",
+      "event": "За всё время",
+      "threshold": 500,
+      "unit": "тренировок",
+      "xp": 1500,
+      "repeatable": false
+    },
+    {
+      "sport": "Велосипед",
+      "metric": "Тренировки по виду",
+      "event": "За всё время",
+      "threshold": 1000,
+      "unit": "тренировок",
+      "xp": 3000,
+      "repeatable": false
+    },
+    {
+      "sport": "Велосипед",
+      "metric": "Километры по виду",
+      "event": "За всё время",
+      "threshold": 100,
+      "unit": "км",
+      "xp": 50,
+      "repeatable": false
+    },
+    {
+      "sport": "Велосипед",
+      "metric": "Километры по виду",
+      "event": "За всё время",
+      "threshold": 250,
+      "unit": "км",
+      "xp": 100,
+      "repeatable": false
+    },
+    {
+      "sport": "Велосипед",
+      "metric": "Километры по виду",
+      "event": "За всё время",
+      "threshold": 500,
+      "unit": "км",
+      "xp": 200,
+      "repeatable": false
+    },
+    {
+      "sport": "Велосипед",
+      "metric": "Километры по виду",
+      "event": "За всё время",
+      "threshold": 1000,
+      "unit": "км",
+      "xp": 400,
+      "repeatable": false
+    },
+    {
+      "sport": "Велосипед",
+      "metric": "Километры по виду",
+      "event": "За всё время",
+      "threshold": 2500,
+      "unit": "км",
+      "xp": 700,
+      "repeatable": false
+    },
+    {
+      "sport": "Велосипед",
+      "metric": "Километры по виду",
+      "event": "За всё время",
+      "threshold": 5000,
+      "unit": "км",
+      "xp": 1200,
+      "repeatable": false
+    },
+    {
+      "sport": "Велосипед",
+      "metric": "Дистанция тренировки",
+      "event": "За одну тренировку",
+      "threshold": 1,
+      "unit": "км",
+      "xp": 10,
+      "repeatable": false
+    },
+    {
+      "sport": "Велосипед",
+      "metric": "Дистанция тренировки",
+      "event": "За одну тренировку",
+      "threshold": 5,
+      "unit": "км",
+      "xp": 25,
+      "repeatable": false
+    },
+    {
+      "sport": "Велосипед",
+      "metric": "Дистанция тренировки",
+      "event": "За одну тренировку",
+      "threshold": 10,
+      "unit": "км",
+      "xp": 50,
+      "repeatable": false
+    },
+    {
+      "sport": "Велосипед",
+      "metric": "Дистанция тренировки",
+      "event": "За одну тренировку",
+      "threshold": 20,
+      "unit": "км",
+      "xp": 100,
+      "repeatable": false
+    },
+    {
+      "sport": "Велосипед",
+      "metric": "Дистанция тренировки",
+      "event": "За одну тренировку",
+      "threshold": 30,
+      "unit": "км",
+      "xp": 150,
+      "repeatable": false
+    },
+    {
+      "sport": "Велосипед",
+      "metric": "Дистанция тренировки",
+      "event": "За одну тренировку",
+      "threshold": 50,
+      "unit": "км",
+      "xp": 250,
+      "repeatable": false
+    },
+    {
+      "sport": "Велосипед",
+      "metric": "Дистанция тренировки",
+      "event": "За одну тренировку",
+      "threshold": 75,
+      "unit": "км",
+      "xp": 400,
+      "repeatable": false
+    },
+    {
+      "sport": "Велосипед",
+      "metric": "Дистанция тренировки",
+      "event": "За одну тренировку",
+      "threshold": 100,
+      "unit": "км",
+      "xp": 600,
+      "repeatable": false
+    },
+    {
+      "sport": "Велосипед",
+      "metric": "Дистанция тренировки",
+      "event": "За одну тренировку",
+      "threshold": 150,
+      "unit": "км",
+      "xp": 1000,
+      "repeatable": false
+    },
+    {
+      "sport": "Велосипед",
+      "metric": "Дистанция тренировки",
+      "event": "За одну тренировку",
+      "threshold": 200,
+      "unit": "км",
+      "xp": 1500,
+      "repeatable": false
+    },
+    {
+      "sport": "Велосипед",
+      "metric": "Набор за тренировку",
+      "event": "За одну тренировку",
+      "threshold": 100,
+      "unit": "м",
+      "xp": 25,
+      "repeatable": false
+    },
+    {
+      "sport": "Велосипед",
+      "metric": "Набор за тренировку",
+      "event": "За одну тренировку",
+      "threshold": 250,
+      "unit": "м",
+      "xp": 50,
+      "repeatable": false
+    },
+    {
+      "sport": "Велосипед",
+      "metric": "Набор за тренировку",
+      "event": "За одну тренировку",
+      "threshold": 500,
+      "unit": "м",
+      "xp": 100,
+      "repeatable": false
+    },
+    {
+      "sport": "Велосипед",
+      "metric": "Набор за тренировку",
+      "event": "За одну тренировку",
+      "threshold": 1000,
+      "unit": "м",
+      "xp": 200,
+      "repeatable": false
+    },
+    {
+      "sport": "Велосипед",
+      "metric": "Набор за тренировку",
+      "event": "За одну тренировку",
+      "threshold": 1500,
+      "unit": "м",
+      "xp": 300,
+      "repeatable": false
+    },
+    {
+      "sport": "Велосипед",
+      "metric": "Набор за тренировку",
+      "event": "За одну тренировку",
+      "threshold": 2000,
+      "unit": "м",
+      "xp": 500,
+      "repeatable": false
+    },
+    {
+      "sport": "Велосипед",
+      "metric": "Накопленный набор",
+      "event": "За всё время",
+      "threshold": 1000,
+      "unit": "м",
+      "xp": 50,
+      "repeatable": false
+    },
+    {
+      "sport": "Велосипед",
+      "metric": "Накопленный набор",
+      "event": "За всё время",
+      "threshold": 5000,
+      "unit": "м",
+      "xp": 100,
+      "repeatable": false
+    },
+    {
+      "sport": "Велосипед",
+      "metric": "Накопленный набор",
+      "event": "За всё время",
+      "threshold": 10000,
+      "unit": "м",
+      "xp": 200,
+      "repeatable": false
+    },
+    {
+      "sport": "Велосипед",
+      "metric": "Накопленный набор",
+      "event": "За всё время",
+      "threshold": 25000,
+      "unit": "м",
+      "xp": 400,
+      "repeatable": false
+    },
+    {
+      "sport": "Велосипед",
+      "metric": "Накопленный набор",
+      "event": "За всё время",
+      "threshold": 50000,
+      "unit": "м",
+      "xp": 700,
+      "repeatable": false
+    },
+    {
+      "sport": "Велосипед",
+      "metric": "Накопленный набор",
+      "event": "За всё время",
+      "threshold": 100000,
+      "unit": "м",
+      "xp": 1200,
+      "repeatable": false
+    },
+    {
+      "sport": "Велосипед",
+      "metric": "Рекорд на дистанции",
+      "event": "Первый результат",
+      "threshold": 1,
+      "unit": "км",
+      "xp": 50,
+      "repeatable": false
+    },
+    {
+      "sport": "Велосипед",
+      "metric": "Рекорд на дистанции",
+      "event": "Каждое улучшение (без лимита)",
+      "threshold": 1,
+      "unit": "км",
+      "xp": 100,
+      "repeatable": true
+    },
+    {
+      "sport": "Велосипед",
+      "metric": "Рекорд на дистанции",
+      "event": "Первый результат",
+      "threshold": 5,
+      "unit": "км",
+      "xp": 50,
+      "repeatable": false
+    },
+    {
+      "sport": "Велосипед",
+      "metric": "Рекорд на дистанции",
+      "event": "Каждое улучшение (без лимита)",
+      "threshold": 5,
+      "unit": "км",
+      "xp": 100,
+      "repeatable": true
+    },
+    {
+      "sport": "Велосипед",
+      "metric": "Рекорд на дистанции",
+      "event": "Первый результат",
+      "threshold": 10,
+      "unit": "км",
+      "xp": 50,
+      "repeatable": false
+    },
+    {
+      "sport": "Велосипед",
+      "metric": "Рекорд на дистанции",
+      "event": "Каждое улучшение (без лимита)",
+      "threshold": 10,
+      "unit": "км",
+      "xp": 100,
+      "repeatable": true
+    },
+    {
+      "sport": "Велосипед",
+      "metric": "Рекорд на дистанции",
+      "event": "Первый результат",
+      "threshold": 20,
+      "unit": "км",
+      "xp": 50,
+      "repeatable": false
+    },
+    {
+      "sport": "Велосипед",
+      "metric": "Рекорд на дистанции",
+      "event": "Каждое улучшение (без лимита)",
+      "threshold": 20,
+      "unit": "км",
+      "xp": 100,
+      "repeatable": true
+    },
+    {
+      "sport": "Велосипед",
+      "metric": "Рекорд на дистанции",
+      "event": "Первый результат",
+      "threshold": 40,
+      "unit": "км",
+      "xp": 50,
+      "repeatable": false
+    },
+    {
+      "sport": "Велосипед",
+      "metric": "Рекорд на дистанции",
+      "event": "Каждое улучшение (без лимита)",
+      "threshold": 40,
+      "unit": "км",
+      "xp": 100,
+      "repeatable": true
+    },
+    {
+      "sport": "Велосипед",
+      "metric": "Рекорд на дистанции",
+      "event": "Первый результат",
+      "threshold": 50,
+      "unit": "км",
+      "xp": 50,
+      "repeatable": false
+    },
+    {
+      "sport": "Велосипед",
+      "metric": "Рекорд на дистанции",
+      "event": "Каждое улучшение (без лимита)",
+      "threshold": 50,
+      "unit": "км",
+      "xp": 100,
+      "repeatable": true
+    },
+    {
+      "sport": "Велосипед",
+      "metric": "Рекорд на дистанции",
+      "event": "Первый результат",
+      "threshold": 100,
+      "unit": "км",
+      "xp": 50,
+      "repeatable": false
+    },
+    {
+      "sport": "Велосипед",
+      "metric": "Рекорд на дистанции",
+      "event": "Каждое улучшение (без лимита)",
+      "threshold": 100,
+      "unit": "км",
+      "xp": 100,
+      "repeatable": true
+    },
+    {
+      "sport": "Велосипед",
+      "metric": "Рекорд на дистанции",
+      "event": "Первый результат",
+      "threshold": 150,
+      "unit": "км",
+      "xp": 50,
+      "repeatable": false
+    },
+    {
+      "sport": "Велосипед",
+      "metric": "Рекорд на дистанции",
+      "event": "Каждое улучшение (без лимита)",
+      "threshold": 150,
+      "unit": "км",
+      "xp": 100,
+      "repeatable": true
+    },
+    {
+      "sport": "Велосипед",
+      "metric": "Рекорд на дистанции",
+      "event": "Первый результат",
+      "threshold": 200,
+      "unit": "км",
+      "xp": 50,
+      "repeatable": false
+    },
+    {
+      "sport": "Велосипед",
+      "metric": "Рекорд на дистанции",
+      "event": "Каждое улучшение (без лимита)",
+      "threshold": 200,
+      "unit": "км",
+      "xp": 100,
+      "repeatable": true
+    },
+    {
+      "sport": "Роллеры",
+      "metric": "Время по виду",
+      "event": "За всё время",
+      "threshold": 10,
+      "unit": "ч",
+      "xp": 50,
+      "repeatable": false
+    },
+    {
+      "sport": "Роллеры",
+      "metric": "Время по виду",
+      "event": "За всё время",
+      "threshold": 25,
+      "unit": "ч",
+      "xp": 100,
+      "repeatable": false
+    },
+    {
+      "sport": "Роллеры",
+      "metric": "Время по виду",
+      "event": "За всё время",
+      "threshold": 50,
+      "unit": "ч",
+      "xp": 200,
+      "repeatable": false
+    },
+    {
+      "sport": "Роллеры",
+      "metric": "Время по виду",
+      "event": "За всё время",
+      "threshold": 100,
+      "unit": "ч",
+      "xp": 400,
+      "repeatable": false
+    },
+    {
+      "sport": "Роллеры",
+      "metric": "Время по виду",
+      "event": "За всё время",
+      "threshold": 250,
+      "unit": "ч",
+      "xp": 800,
+      "repeatable": false
+    },
+    {
+      "sport": "Роллеры",
+      "metric": "Время по виду",
+      "event": "За всё время",
+      "threshold": 500,
+      "unit": "ч",
+      "xp": 1500,
+      "repeatable": false
+    },
+    {
+      "sport": "Роллеры",
+      "metric": "Время по виду",
+      "event": "За всё время",
+      "threshold": 1000,
+      "unit": "ч",
+      "xp": 3000,
+      "repeatable": false
+    },
+    {
+      "sport": "Роллеры",
+      "metric": "Тренировки по виду",
+      "event": "За всё время",
+      "threshold": 1,
+      "unit": "тренировок",
+      "xp": 10,
+      "repeatable": false
+    },
+    {
+      "sport": "Роллеры",
+      "metric": "Тренировки по виду",
+      "event": "За всё время",
+      "threshold": 10,
+      "unit": "тренировок",
+      "xp": 50,
+      "repeatable": false
+    },
+    {
+      "sport": "Роллеры",
+      "metric": "Тренировки по виду",
+      "event": "За всё время",
+      "threshold": 25,
+      "unit": "тренировок",
+      "xp": 100,
+      "repeatable": false
+    },
+    {
+      "sport": "Роллеры",
+      "metric": "Тренировки по виду",
+      "event": "За всё время",
+      "threshold": 50,
+      "unit": "тренировок",
+      "xp": 200,
+      "repeatable": false
+    },
+    {
+      "sport": "Роллеры",
+      "metric": "Тренировки по виду",
+      "event": "За всё время",
+      "threshold": 100,
+      "unit": "тренировок",
+      "xp": 400,
+      "repeatable": false
+    },
+    {
+      "sport": "Роллеры",
+      "metric": "Тренировки по виду",
+      "event": "За всё время",
+      "threshold": 250,
+      "unit": "тренировок",
+      "xp": 800,
+      "repeatable": false
+    },
+    {
+      "sport": "Роллеры",
+      "metric": "Тренировки по виду",
+      "event": "За всё время",
+      "threshold": 500,
+      "unit": "тренировок",
+      "xp": 1500,
+      "repeatable": false
+    },
+    {
+      "sport": "Роллеры",
+      "metric": "Тренировки по виду",
+      "event": "За всё время",
+      "threshold": 1000,
+      "unit": "тренировок",
+      "xp": 3000,
+      "repeatable": false
+    },
+    {
+      "sport": "Роллеры",
+      "metric": "Километры по виду",
+      "event": "За всё время",
+      "threshold": 50,
+      "unit": "км",
+      "xp": 50,
+      "repeatable": false
+    },
+    {
+      "sport": "Роллеры",
+      "metric": "Километры по виду",
+      "event": "За всё время",
+      "threshold": 100,
+      "unit": "км",
+      "xp": 100,
+      "repeatable": false
+    },
+    {
+      "sport": "Роллеры",
+      "metric": "Километры по виду",
+      "event": "За всё время",
+      "threshold": 250,
+      "unit": "км",
+      "xp": 200,
+      "repeatable": false
+    },
+    {
+      "sport": "Роллеры",
+      "metric": "Километры по виду",
+      "event": "За всё время",
+      "threshold": 500,
+      "unit": "км",
+      "xp": 400,
+      "repeatable": false
+    },
+    {
+      "sport": "Роллеры",
+      "metric": "Километры по виду",
+      "event": "За всё время",
+      "threshold": 1000,
+      "unit": "км",
+      "xp": 700,
+      "repeatable": false
+    },
+    {
+      "sport": "Роллеры",
+      "metric": "Километры по виду",
+      "event": "За всё время",
+      "threshold": 2500,
+      "unit": "км",
+      "xp": 1200,
+      "repeatable": false
+    },
+    {
+      "sport": "Роллеры",
+      "metric": "Дистанция тренировки",
+      "event": "За одну тренировку",
+      "threshold": 1,
+      "unit": "км",
+      "xp": 10,
+      "repeatable": false
+    },
+    {
+      "sport": "Роллеры",
+      "metric": "Дистанция тренировки",
+      "event": "За одну тренировку",
+      "threshold": 3,
+      "unit": "км",
+      "xp": 25,
+      "repeatable": false
+    },
+    {
+      "sport": "Роллеры",
+      "metric": "Дистанция тренировки",
+      "event": "За одну тренировку",
+      "threshold": 5,
+      "unit": "км",
+      "xp": 50,
+      "repeatable": false
+    },
+    {
+      "sport": "Роллеры",
+      "metric": "Дистанция тренировки",
+      "event": "За одну тренировку",
+      "threshold": 10,
+      "unit": "км",
+      "xp": 100,
+      "repeatable": false
+    },
+    {
+      "sport": "Роллеры",
+      "metric": "Дистанция тренировки",
+      "event": "За одну тренировку",
+      "threshold": 15,
+      "unit": "км",
+      "xp": 150,
+      "repeatable": false
+    },
+    {
+      "sport": "Роллеры",
+      "metric": "Дистанция тренировки",
+      "event": "За одну тренировку",
+      "threshold": 20,
+      "unit": "км",
+      "xp": 250,
+      "repeatable": false
+    },
+    {
+      "sport": "Роллеры",
+      "metric": "Дистанция тренировки",
+      "event": "За одну тренировку",
+      "threshold": 30,
+      "unit": "км",
+      "xp": 400,
+      "repeatable": false
+    },
+    {
+      "sport": "Роллеры",
+      "metric": "Дистанция тренировки",
+      "event": "За одну тренировку",
+      "threshold": 40,
+      "unit": "км",
+      "xp": 600,
+      "repeatable": false
+    },
+    {
+      "sport": "Роллеры",
+      "metric": "Дистанция тренировки",
+      "event": "За одну тренировку",
+      "threshold": 50,
+      "unit": "км",
+      "xp": 1000,
+      "repeatable": false
+    },
+    {
+      "sport": "Роллеры",
+      "metric": "Дистанция тренировки",
+      "event": "За одну тренировку",
+      "threshold": 70,
+      "unit": "км",
+      "xp": 1500,
+      "repeatable": false
+    },
+    {
+      "sport": "Роллеры",
+      "metric": "Набор за тренировку",
+      "event": "За одну тренировку",
+      "threshold": 100,
+      "unit": "м",
+      "xp": 25,
+      "repeatable": false
+    },
+    {
+      "sport": "Роллеры",
+      "metric": "Набор за тренировку",
+      "event": "За одну тренировку",
+      "threshold": 250,
+      "unit": "м",
+      "xp": 50,
+      "repeatable": false
+    },
+    {
+      "sport": "Роллеры",
+      "metric": "Набор за тренировку",
+      "event": "За одну тренировку",
+      "threshold": 500,
+      "unit": "м",
+      "xp": 100,
+      "repeatable": false
+    },
+    {
+      "sport": "Роллеры",
+      "metric": "Набор за тренировку",
+      "event": "За одну тренировку",
+      "threshold": 1000,
+      "unit": "м",
+      "xp": 200,
+      "repeatable": false
+    },
+    {
+      "sport": "Роллеры",
+      "metric": "Набор за тренировку",
+      "event": "За одну тренировку",
+      "threshold": 1500,
+      "unit": "м",
+      "xp": 300,
+      "repeatable": false
+    },
+    {
+      "sport": "Роллеры",
+      "metric": "Набор за тренировку",
+      "event": "За одну тренировку",
+      "threshold": 2000,
+      "unit": "м",
+      "xp": 500,
+      "repeatable": false
+    },
+    {
+      "sport": "Роллеры",
+      "metric": "Накопленный набор",
+      "event": "За всё время",
+      "threshold": 1000,
+      "unit": "м",
+      "xp": 50,
+      "repeatable": false
+    },
+    {
+      "sport": "Роллеры",
+      "metric": "Накопленный набор",
+      "event": "За всё время",
+      "threshold": 5000,
+      "unit": "м",
+      "xp": 100,
+      "repeatable": false
+    },
+    {
+      "sport": "Роллеры",
+      "metric": "Накопленный набор",
+      "event": "За всё время",
+      "threshold": 10000,
+      "unit": "м",
+      "xp": 200,
+      "repeatable": false
+    },
+    {
+      "sport": "Роллеры",
+      "metric": "Накопленный набор",
+      "event": "За всё время",
+      "threshold": 25000,
+      "unit": "м",
+      "xp": 400,
+      "repeatable": false
+    },
+    {
+      "sport": "Роллеры",
+      "metric": "Накопленный набор",
+      "event": "За всё время",
+      "threshold": 50000,
+      "unit": "м",
+      "xp": 700,
+      "repeatable": false
+    },
+    {
+      "sport": "Роллеры",
+      "metric": "Накопленный набор",
+      "event": "За всё время",
+      "threshold": 100000,
+      "unit": "м",
+      "xp": 1200,
+      "repeatable": false
+    },
+    {
+      "sport": "Роллеры",
+      "metric": "Рекорд на дистанции",
+      "event": "Первый результат",
+      "threshold": 1,
+      "unit": "км",
+      "xp": 50,
+      "repeatable": false
+    },
+    {
+      "sport": "Роллеры",
+      "metric": "Рекорд на дистанции",
+      "event": "Каждое улучшение (без лимита)",
+      "threshold": 1,
+      "unit": "км",
+      "xp": 100,
+      "repeatable": true
+    },
+    {
+      "sport": "Роллеры",
+      "metric": "Рекорд на дистанции",
+      "event": "Первый результат",
+      "threshold": 3,
+      "unit": "км",
+      "xp": 50,
+      "repeatable": false
+    },
+    {
+      "sport": "Роллеры",
+      "metric": "Рекорд на дистанции",
+      "event": "Каждое улучшение (без лимита)",
+      "threshold": 3,
+      "unit": "км",
+      "xp": 100,
+      "repeatable": true
+    },
+    {
+      "sport": "Роллеры",
+      "metric": "Рекорд на дистанции",
+      "event": "Первый результат",
+      "threshold": 5,
+      "unit": "км",
+      "xp": 50,
+      "repeatable": false
+    },
+    {
+      "sport": "Роллеры",
+      "metric": "Рекорд на дистанции",
+      "event": "Каждое улучшение (без лимита)",
+      "threshold": 5,
+      "unit": "км",
+      "xp": 100,
+      "repeatable": true
+    },
+    {
+      "sport": "Роллеры",
+      "metric": "Рекорд на дистанции",
+      "event": "Первый результат",
+      "threshold": 10,
+      "unit": "км",
+      "xp": 50,
+      "repeatable": false
+    },
+    {
+      "sport": "Роллеры",
+      "metric": "Рекорд на дистанции",
+      "event": "Каждое улучшение (без лимита)",
+      "threshold": 10,
+      "unit": "км",
+      "xp": 100,
+      "repeatable": true
+    },
+    {
+      "sport": "Роллеры",
+      "metric": "Рекорд на дистанции",
+      "event": "Первый результат",
+      "threshold": 15,
+      "unit": "км",
+      "xp": 50,
+      "repeatable": false
+    },
+    {
+      "sport": "Роллеры",
+      "metric": "Рекорд на дистанции",
+      "event": "Каждое улучшение (без лимита)",
+      "threshold": 15,
+      "unit": "км",
+      "xp": 100,
+      "repeatable": true
+    },
+    {
+      "sport": "Роллеры",
+      "metric": "Рекорд на дистанции",
+      "event": "Первый результат",
+      "threshold": 20,
+      "unit": "км",
+      "xp": 50,
+      "repeatable": false
+    },
+    {
+      "sport": "Роллеры",
+      "metric": "Рекорд на дистанции",
+      "event": "Каждое улучшение (без лимита)",
+      "threshold": 20,
+      "unit": "км",
+      "xp": 100,
+      "repeatable": true
+    },
+    {
+      "sport": "Роллеры",
+      "metric": "Рекорд на дистанции",
+      "event": "Первый результат",
+      "threshold": 30,
+      "unit": "км",
+      "xp": 50,
+      "repeatable": false
+    },
+    {
+      "sport": "Роллеры",
+      "metric": "Рекорд на дистанции",
+      "event": "Каждое улучшение (без лимита)",
+      "threshold": 30,
+      "unit": "км",
+      "xp": 100,
+      "repeatable": true
+    },
+    {
+      "sport": "Роллеры",
+      "metric": "Рекорд на дистанции",
+      "event": "Первый результат",
+      "threshold": 50,
+      "unit": "км",
+      "xp": 50,
+      "repeatable": false
+    },
+    {
+      "sport": "Роллеры",
+      "metric": "Рекорд на дистанции",
+      "event": "Каждое улучшение (без лимита)",
+      "threshold": 50,
+      "unit": "км",
+      "xp": 100,
+      "repeatable": true
+    },
+    {
+      "sport": "Плавание",
+      "metric": "Время по виду",
+      "event": "За всё время",
+      "threshold": 10,
+      "unit": "ч",
+      "xp": 50,
+      "repeatable": false
+    },
+    {
+      "sport": "Плавание",
+      "metric": "Время по виду",
+      "event": "За всё время",
+      "threshold": 25,
+      "unit": "ч",
+      "xp": 100,
+      "repeatable": false
+    },
+    {
+      "sport": "Плавание",
+      "metric": "Время по виду",
+      "event": "За всё время",
+      "threshold": 50,
+      "unit": "ч",
+      "xp": 200,
+      "repeatable": false
+    },
+    {
+      "sport": "Плавание",
+      "metric": "Время по виду",
+      "event": "За всё время",
+      "threshold": 100,
+      "unit": "ч",
+      "xp": 400,
+      "repeatable": false
+    },
+    {
+      "sport": "Плавание",
+      "metric": "Время по виду",
+      "event": "За всё время",
+      "threshold": 250,
+      "unit": "ч",
+      "xp": 800,
+      "repeatable": false
+    },
+    {
+      "sport": "Плавание",
+      "metric": "Время по виду",
+      "event": "За всё время",
+      "threshold": 500,
+      "unit": "ч",
+      "xp": 1500,
+      "repeatable": false
+    },
+    {
+      "sport": "Плавание",
+      "metric": "Время по виду",
+      "event": "За всё время",
+      "threshold": 1000,
+      "unit": "ч",
+      "xp": 3000,
+      "repeatable": false
+    },
+    {
+      "sport": "Плавание",
+      "metric": "Тренировки по виду",
+      "event": "За всё время",
+      "threshold": 1,
+      "unit": "тренировок",
+      "xp": 10,
+      "repeatable": false
+    },
+    {
+      "sport": "Плавание",
+      "metric": "Тренировки по виду",
+      "event": "За всё время",
+      "threshold": 10,
+      "unit": "тренировок",
+      "xp": 50,
+      "repeatable": false
+    },
+    {
+      "sport": "Плавание",
+      "metric": "Тренировки по виду",
+      "event": "За всё время",
+      "threshold": 25,
+      "unit": "тренировок",
+      "xp": 100,
+      "repeatable": false
+    },
+    {
+      "sport": "Плавание",
+      "metric": "Тренировки по виду",
+      "event": "За всё время",
+      "threshold": 50,
+      "unit": "тренировок",
+      "xp": 200,
+      "repeatable": false
+    },
+    {
+      "sport": "Плавание",
+      "metric": "Тренировки по виду",
+      "event": "За всё время",
+      "threshold": 100,
+      "unit": "тренировок",
+      "xp": 400,
+      "repeatable": false
+    },
+    {
+      "sport": "Плавание",
+      "metric": "Тренировки по виду",
+      "event": "За всё время",
+      "threshold": 250,
+      "unit": "тренировок",
+      "xp": 800,
+      "repeatable": false
+    },
+    {
+      "sport": "Плавание",
+      "metric": "Тренировки по виду",
+      "event": "За всё время",
+      "threshold": 500,
+      "unit": "тренировок",
+      "xp": 1500,
+      "repeatable": false
+    },
+    {
+      "sport": "Плавание",
+      "metric": "Тренировки по виду",
+      "event": "За всё время",
+      "threshold": 1000,
+      "unit": "тренировок",
+      "xp": 3000,
+      "repeatable": false
+    },
+    {
+      "sport": "Плавание",
+      "metric": "Километры по виду",
+      "event": "За всё время",
+      "threshold": 5,
+      "unit": "км",
+      "xp": 50,
+      "repeatable": false
+    },
+    {
+      "sport": "Плавание",
+      "metric": "Километры по виду",
+      "event": "За всё время",
+      "threshold": 10,
+      "unit": "км",
+      "xp": 100,
+      "repeatable": false
+    },
+    {
+      "sport": "Плавание",
+      "metric": "Километры по виду",
+      "event": "За всё время",
+      "threshold": 25,
+      "unit": "км",
+      "xp": 200,
+      "repeatable": false
+    },
+    {
+      "sport": "Плавание",
+      "metric": "Километры по виду",
+      "event": "За всё время",
+      "threshold": 50,
+      "unit": "км",
+      "xp": 400,
+      "repeatable": false
+    },
+    {
+      "sport": "Плавание",
+      "metric": "Километры по виду",
+      "event": "За всё время",
+      "threshold": 100,
+      "unit": "км",
+      "xp": 700,
+      "repeatable": false
+    },
+    {
+      "sport": "Плавание",
+      "metric": "Километры по виду",
+      "event": "За всё время",
+      "threshold": 250,
+      "unit": "км",
+      "xp": 1200,
+      "repeatable": false
+    },
+    {
+      "sport": "Плавание",
+      "metric": "Дистанция тренировки",
+      "event": "За одну тренировку",
+      "threshold": 0.05,
+      "unit": "км",
+      "xp": 10,
+      "repeatable": false
+    },
+    {
+      "sport": "Плавание",
+      "metric": "Дистанция тренировки",
+      "event": "За одну тренировку",
+      "threshold": 0.1,
+      "unit": "км",
+      "xp": 25,
+      "repeatable": false
+    },
+    {
+      "sport": "Плавание",
+      "metric": "Дистанция тренировки",
+      "event": "За одну тренировку",
+      "threshold": 0.2,
+      "unit": "км",
+      "xp": 50,
+      "repeatable": false
+    },
+    {
+      "sport": "Плавание",
+      "metric": "Дистанция тренировки",
+      "event": "За одну тренировку",
+      "threshold": 0.4,
+      "unit": "км",
+      "xp": 100,
+      "repeatable": false
+    },
+    {
+      "sport": "Плавание",
+      "metric": "Дистанция тренировки",
+      "event": "За одну тренировку",
+      "threshold": 0.8,
+      "unit": "км",
+      "xp": 150,
+      "repeatable": false
+    },
+    {
+      "sport": "Плавание",
+      "metric": "Дистанция тренировки",
+      "event": "За одну тренировку",
+      "threshold": 1,
+      "unit": "км",
+      "xp": 250,
+      "repeatable": false
+    },
+    {
+      "sport": "Плавание",
+      "metric": "Дистанция тренировки",
+      "event": "За одну тренировку",
+      "threshold": 1.5,
+      "unit": "км",
+      "xp": 300,
+      "repeatable": false
+    },
+    {
+      "sport": "Плавание",
+      "metric": "Дистанция тренировки",
+      "event": "За одну тренировку",
+      "threshold": 2,
+      "unit": "км",
+      "xp": 400,
+      "repeatable": false
+    },
+    {
+      "sport": "Плавание",
+      "metric": "Дистанция тренировки",
+      "event": "За одну тренировку",
+      "threshold": 3,
+      "unit": "км",
+      "xp": 500,
+      "repeatable": false
+    },
+    {
+      "sport": "Плавание",
+      "metric": "Дистанция тренировки",
+      "event": "За одну тренировку",
+      "threshold": 4,
+      "unit": "км",
+      "xp": 600,
+      "repeatable": false
+    },
+    {
+      "sport": "Плавание",
+      "metric": "Дистанция тренировки",
+      "event": "За одну тренировку",
+      "threshold": 5,
+      "unit": "км",
+      "xp": 700,
+      "repeatable": false
+    },
+    {
+      "sport": "Плавание",
+      "metric": "Дистанция тренировки",
+      "event": "За одну тренировку",
+      "threshold": 10,
+      "unit": "км",
+      "xp": 1000,
+      "repeatable": false
+    },
+    {
+      "sport": "Плавание",
+      "metric": "Рекорд на дистанции",
+      "event": "Первый результат",
+      "threshold": 0.05,
+      "unit": "км",
+      "xp": 50,
+      "repeatable": false
+    },
+    {
+      "sport": "Плавание",
+      "metric": "Рекорд на дистанции",
+      "event": "Каждое улучшение (без лимита)",
+      "threshold": 0.05,
+      "unit": "км",
+      "xp": 100,
+      "repeatable": true
+    },
+    {
+      "sport": "Плавание",
+      "metric": "Рекорд на дистанции",
+      "event": "Первый результат",
+      "threshold": 0.1,
+      "unit": "км",
+      "xp": 50,
+      "repeatable": false
+    },
+    {
+      "sport": "Плавание",
+      "metric": "Рекорд на дистанции",
+      "event": "Каждое улучшение (без лимита)",
+      "threshold": 0.1,
+      "unit": "км",
+      "xp": 100,
+      "repeatable": true
+    },
+    {
+      "sport": "Плавание",
+      "metric": "Рекорд на дистанции",
+      "event": "Первый результат",
+      "threshold": 0.2,
+      "unit": "км",
+      "xp": 50,
+      "repeatable": false
+    },
+    {
+      "sport": "Плавание",
+      "metric": "Рекорд на дистанции",
+      "event": "Каждое улучшение (без лимита)",
+      "threshold": 0.2,
+      "unit": "км",
+      "xp": 100,
+      "repeatable": true
+    },
+    {
+      "sport": "Плавание",
+      "metric": "Рекорд на дистанции",
+      "event": "Первый результат",
+      "threshold": 0.4,
+      "unit": "км",
+      "xp": 50,
+      "repeatable": false
+    },
+    {
+      "sport": "Плавание",
+      "metric": "Рекорд на дистанции",
+      "event": "Каждое улучшение (без лимита)",
+      "threshold": 0.4,
+      "unit": "км",
+      "xp": 100,
+      "repeatable": true
+    },
+    {
+      "sport": "Плавание",
+      "metric": "Рекорд на дистанции",
+      "event": "Первый результат",
+      "threshold": 0.8,
+      "unit": "км",
+      "xp": 50,
+      "repeatable": false
+    },
+    {
+      "sport": "Плавание",
+      "metric": "Рекорд на дистанции",
+      "event": "Каждое улучшение (без лимита)",
+      "threshold": 0.8,
+      "unit": "км",
+      "xp": 100,
+      "repeatable": true
+    },
+    {
+      "sport": "Плавание",
+      "metric": "Рекорд на дистанции",
+      "event": "Первый результат",
+      "threshold": 1,
+      "unit": "км",
+      "xp": 50,
+      "repeatable": false
+    },
+    {
+      "sport": "Плавание",
+      "metric": "Рекорд на дистанции",
+      "event": "Каждое улучшение (без лимита)",
+      "threshold": 1,
+      "unit": "км",
+      "xp": 100,
+      "repeatable": true
+    },
+    {
+      "sport": "Плавание",
+      "metric": "Рекорд на дистанции",
+      "event": "Первый результат",
+      "threshold": 1.5,
+      "unit": "км",
+      "xp": 50,
+      "repeatable": false
+    },
+    {
+      "sport": "Плавание",
+      "metric": "Рекорд на дистанции",
+      "event": "Каждое улучшение (без лимита)",
+      "threshold": 1.5,
+      "unit": "км",
+      "xp": 100,
+      "repeatable": true
+    },
+    {
+      "sport": "Плавание",
+      "metric": "Рекорд на дистанции",
+      "event": "Первый результат",
+      "threshold": 2,
+      "unit": "км",
+      "xp": 50,
+      "repeatable": false
+    },
+    {
+      "sport": "Плавание",
+      "metric": "Рекорд на дистанции",
+      "event": "Каждое улучшение (без лимита)",
+      "threshold": 2,
+      "unit": "км",
+      "xp": 100,
+      "repeatable": true
+    },
+    {
+      "sport": "Плавание",
+      "metric": "Рекорд на дистанции",
+      "event": "Первый результат",
+      "threshold": 3,
+      "unit": "км",
+      "xp": 50,
+      "repeatable": false
+    },
+    {
+      "sport": "Плавание",
+      "metric": "Рекорд на дистанции",
+      "event": "Каждое улучшение (без лимита)",
+      "threshold": 3,
+      "unit": "км",
+      "xp": 100,
+      "repeatable": true
+    },
+    {
+      "sport": "Плавание",
+      "metric": "Рекорд на дистанции",
+      "event": "Первый результат",
+      "threshold": 4,
+      "unit": "км",
+      "xp": 50,
+      "repeatable": false
+    },
+    {
+      "sport": "Плавание",
+      "metric": "Рекорд на дистанции",
+      "event": "Каждое улучшение (без лимита)",
+      "threshold": 4,
+      "unit": "км",
+      "xp": 100,
+      "repeatable": true
+    },
+    {
+      "sport": "Плавание",
+      "metric": "Рекорд на дистанции",
+      "event": "Первый результат",
+      "threshold": 5,
+      "unit": "км",
+      "xp": 50,
+      "repeatable": false
+    },
+    {
+      "sport": "Плавание",
+      "metric": "Рекорд на дистанции",
+      "event": "Каждое улучшение (без лимита)",
+      "threshold": 5,
+      "unit": "км",
+      "xp": 100,
+      "repeatable": true
+    },
+    {
+      "sport": "Плавание",
+      "metric": "Рекорд на дистанции",
+      "event": "Первый результат",
+      "threshold": 10,
+      "unit": "км",
+      "xp": 50,
+      "repeatable": false
+    },
+    {
+      "sport": "Плавание",
+      "metric": "Рекорд на дистанции",
+      "event": "Каждое улучшение (без лимита)",
+      "threshold": 10,
+      "unit": "км",
+      "xp": 100,
+      "repeatable": true
+    }
+  ]
+}

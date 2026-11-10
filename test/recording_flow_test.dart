@@ -5,7 +5,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+
 import 'support/test_app.dart';
+
 import 'package:sport_platform/models/sport_catalog.dart';
 import 'package:sport_platform/widgets/glass_widgets.dart';
 
@@ -127,14 +129,23 @@ void main() {
         ) as Map<String, dynamic>;
         expect((data['workouts'] as List).length, 1);
         expect(data['selectedSport'], 3);
-        expect(data.keys.toSet(), {'xp', 'selectedSport', 'workouts'});
+        expect(data.keys.toSet(), {
+          'xp',
+          'selectedSport',
+          'workouts',
+          'achievements',
+          'records',
+        });
         final record =
             (data['workouts'] as List).single as Map<String, dynamic>;
         expect(record['sport'], 'Лыжи');
         expect(data['xp'], record['xp'] as int);
         final breakdown = record['xpBreakdown'] as Map;
         expect(breakdown['version'], 1);
-        expect(breakdown['total'], record['xp']);
+        expect(
+          breakdown['total'],
+          (record['xp'] as int) - (record['achievementXp'] as int? ?? 0),
+        );
         expect(breakdown['specializationId'], isNull);
         expect(
           (breakdown['distance'] as num).toDouble(),

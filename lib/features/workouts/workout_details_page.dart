@@ -1,3 +1,5 @@
+import '../../models/personal_record.dart';
+
 import 'package:flutter/material.dart';
 
 import '../../app/theme/pace_theme.dart';
@@ -66,9 +68,27 @@ class WorkoutDetailsPage extends StatelessWidget {
             ],
             if (w.xpBreakdown != null) ...[
               const SizedBox(height: 18),
-              WorkoutXpPanel(value: w.xpBreakdown!),
+              WorkoutXpPanel(
+                value: w.xpBreakdown!,
+                achievementXp: w.achievementXp,
+                recordXp: w.recordXp,
+              ),
             ],
             const SizedBox(height: 24),
+            if (w.records.isNotEmpty) ...[
+              sectionTitle('РЕКОРДЫ ЭТОЙ ТРЕНИРОВКИ'),
+              const SizedBox(height: 12),
+              for (final r in w.records)
+                Padding(
+                  padding: const EdgeInsets.only(bottom: 10),
+                  child: GlassPanel(
+                    child: Text(
+                      '${RecordDistance(r.sport, r.meters).label} · ${r.timeLabel} · ${r.improvements == 0 ? "Первый результат" : "Улучшение"} +${r.xp} XP',
+                    ),
+                  ),
+                ),
+              const SizedBox(height: 14),
+            ],
             sectionTitle('МАРШРУТ'),
             const SizedBox(height: 12),
             GlassPanel(

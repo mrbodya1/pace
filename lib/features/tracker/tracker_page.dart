@@ -46,12 +46,16 @@ class TrackerPage extends StatelessWidget {
     this.elevationGain = 0,
     this.finishedElevation = 0,
     this.finishedXpBreakdown,
+    this.finishedAchievementXp = 0,
+    this.finishedRecordXp = 0,
     this.recoveredWorkout = false,
   });
 
   final double distance, pace, speed, finishedDistance;
   final double elevationGain, finishedElevation;
   final WorkoutXp? finishedXpBreakdown;
+  final int finishedAchievementXp;
+  final int finishedRecordXp;
   final bool recoveredWorkout;
   final Duration elapsed, finishedDuration;
   final List<Position> route;
@@ -430,7 +434,11 @@ class TrackerPage extends StatelessWidget {
               ],
               if (result && finishedXpBreakdown != null) ...[
                 const SizedBox(height: 18),
-                WorkoutXpPanel(value: finishedXpBreakdown!),
+                WorkoutXpPanel(
+                  value: finishedXpBreakdown!,
+                  achievementXp: finishedAchievementXp,
+                  recordXp: finishedRecordXp,
+                ),
               ],
               const SizedBox(height: 22),
               _WorkoutRoute(points: points),

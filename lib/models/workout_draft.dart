@@ -1,3 +1,5 @@
+import 'workout.dart';
+
 import 'dart:math';
 
 import 'package:geolocator/geolocator.dart';
@@ -16,6 +18,7 @@ class WorkoutDraft {
     required this.distanceMeters,
     required this.elevationMeters,
     required this.route,
+    this.timedRoute = const [],
     this.specialization,
     this.participantSex,
   });
@@ -26,6 +29,7 @@ class WorkoutDraft {
   final Duration activeDuration;
   final double distanceMeters, elevationMeters;
   final List<Position> route;
+  final List<RoutePoint> timedRoute;
   final Specialization? specialization;
   final ParticipantSex? participantSex;
 
@@ -48,6 +52,7 @@ class WorkoutDraft {
     'elevationMeters': elevationMeters,
     'specializationId': specialization?.name,
     'participantSex': participantSex?.name,
+    'timedRoute': timedRoute.map((p) => p.toJson()).toList(),
     'route': route
         .map(
           (p) => p.toJson().map(
@@ -76,6 +81,9 @@ class WorkoutDraft {
     }
     return WorkoutDraft(
       id: id,
+      timedRoute: (json['timedRoute'] as List? ?? [])
+          .map((p) => RoutePoint.fromJson(Map<String, dynamic>.from(p as Map)))
+          .toList(),
       sportIndex: sport,
       startedAt: DateTime.parse(json['startedAt'] as String),
       savedAt: DateTime.parse(json['savedAt'] as String),

@@ -4,7 +4,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+
 import 'support/test_app.dart';
+
 import 'package:sport_platform/models/workout.dart';
 import 'package:sport_platform/models/specialization.dart';
 import 'package:sport_platform/services/workout_xp_calculator.dart';
@@ -89,6 +91,8 @@ void main() {
         Map<String, dynamic>.from((data['workouts'] as List).single as Map),
       );
       expect(workout.elevationGain, 20);
+      expect(workout.timedRoute.every((p) => p.timestamp != null), isTrue);
+      expect(workout.timedRoute.map((p) => p.segment).toSet(), {0, 1});
       expect(workout.distance, closeTo(.08896, .001));
       expect(workout.xpBreakdown!.specialization, Specialization.trailrunner);
       expect(workout.xpBreakdown!.participantSex!.name, 'female');
@@ -99,7 +103,7 @@ void main() {
       expect(workout.route.last.altitude, 405);
       expect(workout.startedAt, isNotNull);
       expect(data['xp'], 9100 + workout.xp);
-      expect(workout.xp, workout.xpBreakdown!.total);
+      expect(workout.xp, workout.xpBreakdown!.total + workout.achievementXp);
       await tester.tap(find.text('Готово'));
       await tester.pumpAndSettle();
       await tester.pumpWidget(const SizedBox.shrink());
@@ -150,7 +154,7 @@ void main() {
       await tester.pumpAndSettle();
       await tester.scrollUntilVisible(find.text('За что начислены XP'), 200);
       await tester.scrollUntilVisible(find.text('480 XP'), 160);
-    await tester.pumpAndSettle();
+      await tester.pumpAndSettle();
       expect(find.text('480 XP'), findsOneWidget);
       expect(tester.takeException(), isNull);
     },

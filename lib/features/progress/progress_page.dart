@@ -1,7 +1,11 @@
+import 'records_view.dart';
+
 import 'package:flutter/material.dart';
 
 import '../../widgets/glass_tabs.dart';
 import '../../models/workout.dart';
+import '../../models/achievement.dart';
+import 'achievements_view.dart';
 import '../../models/sport_catalog.dart';
 import '../../widgets/common_widgets.dart';
 import '../workouts/workout_details_page.dart';
@@ -12,9 +16,11 @@ class ProgressPage extends StatefulWidget {
     required this.xp,
     required this.level,
     required this.workouts,
+    this.achievements,
   });
   final int xp, level;
   final List<Workout> workouts;
+  final AchievementState? achievements;
 
   @override
   State<ProgressPage> createState() => _ProgressPageState();
@@ -45,7 +51,7 @@ class _ProgressPageState extends State<ProgressPage> {
         )
         .toList();
     return DefaultTabController(
-      length: 3,
+      length: 4,
       animationDuration: MediaQuery.disableAnimationsOf(context)
           ? Duration.zero
           : const Duration(milliseconds: 360),
@@ -61,7 +67,9 @@ class _ProgressPageState extends State<ProgressPage> {
           ),
           const Padding(
             padding: EdgeInsets.symmetric(horizontal: 16),
-            child: GlassTabs(labels: ['Обзор', 'Тренировки', 'Достижения']),
+            child: GlassTabs(
+              labels: ['Обзор', 'Тренировки', 'Достижения', 'Рекорды'],
+            ),
           ),
           Expanded(
             child: TabBarView(
@@ -141,32 +149,11 @@ class _ProgressPageState extends State<ProgressPage> {
                         ),
                   ],
                 ),
-                ListView(
-                  key: const PageStorageKey('progress-achievements'),
-                  padding: const EdgeInsets.fromLTRB(22, 24, 22, 140),
-                  children: [
-                    sectionTitle('ТВОИ ЦЕЛИ'),
-                    const SizedBox(height: 14),
-                    achievement(
-                      Icons.directions_run_rounded,
-                      'Первый шаг',
-                      'Запиши первую тренировку',
-                      widget.workouts.isNotEmpty,
-                    ),
-                    achievement(
-                      Icons.route_rounded,
-                      'Первые 10 км',
-                      'Накопи 10 км',
-                      totalDistance >= 10,
-                    ),
-                    achievement(
-                      Icons.bolt_rounded,
-                      'Уровень 5',
-                      'Набери 9000 XP',
-                      widget.xp >= 9000,
-                    ),
-                  ],
+                AchievementsView(
+                  workouts: widget.workouts,
+                  state: widget.achievements,
                 ),
+                RecordsView(workouts: widget.workouts),
               ],
             ),
           ),

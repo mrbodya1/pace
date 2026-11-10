@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
 
 import 'models/workout.dart';
+import 'models/achievement.dart';
 import 'models/workout_draft.dart';
 import 'models/xp_progress.dart';
 import 'models/sport_catalog.dart';
@@ -60,6 +61,8 @@ class _PaceHomeState extends State<PaceHome> with WidgetsBindingObserver {
 
   final List<Workout> workouts = [];
   final List<Position> route = [];
+  final List<RoutePoint> timedRoute = [];
+  int timedSegment = 0;
 
   StreamSubscription<Position>? gpsSubscription;
   Future<void> gpsStopping = Future<void>.value();
@@ -92,6 +95,9 @@ class _PaceHomeState extends State<PaceHome> with WidgetsBindingObserver {
   double finishedDistance = 0;
   Duration finishedDuration = Duration.zero;
   int finishedXp = 0;
+  int finishedAchievementXp = 0;
+  int finishedRecordXp = 0;
+  AchievementState achievements = AchievementState();
   String finishedSport = 'Бег';
   bool finishedWasSaved = false;
 
@@ -206,6 +212,10 @@ class _PaceHomeState extends State<PaceHome> with WidgetsBindingObserver {
             (data['selectedSport'] as num?)?.toInt() ?? 0,
           );
         }
+        achievements = AchievementEngine.restore(
+          data?['achievements'],
+          savedWorkouts,
+        );
         workouts
           ..clear()
           ..addAll(savedWorkouts);
@@ -225,6 +235,10 @@ class _PaceHomeState extends State<PaceHome> with WidgetsBindingObserver {
           route
             ..clear()
             ..addAll(saved.route);
+          timedRoute
+            ..clear()
+            ..addAll(saved.timedRoute);
+          timedSegment = timedRoute.isEmpty ? 0 : timedRoute.last.segment;
           tracking = true;
           paused = true;
           recoveredWorkout = true;
@@ -270,6 +284,7 @@ class _PaceHomeState extends State<PaceHome> with WidgetsBindingObserver {
       specialization: workoutSpecialization,
       participantSex: workoutParticipantSex,
       route: List<Position>.from(route),
+      timedRoute: List<RoutePoint>.from(timedRoute),
     );
     try {
       await _storageService.saveDraft(draft);
@@ -379,6 +394,7 @@ class _PaceHomeState extends State<PaceHome> with WidgetsBindingObserver {
         await _stopGps();
         if (!mounted || !canStartGps) return;
         lastPosition = null;
+        timedSegment++;
         elevation.resetAnchor();
         stopwatch.start();
         setState(() {
@@ -433,6 +449,10 @@ class _PaceHomeState extends State<PaceHome> with WidgetsBindingObserver {
 
       route.clear();
       route.add(firstPosition);
+      timedSegment = 0;
+      timedRoute
+        ..clear()
+        ..add(_timedPoint(firstPosition));
 
       setState(() {
         distance = 0;
@@ -487,6 +507,14 @@ class _PaceHomeState extends State<PaceHome> with WidgetsBindingObserver {
     _message(reason);
   }
 
+  RoutePoint _timedPoint(Position p) => RoutePoint(
+    latitude: p.latitude,
+    longitude: p.longitude,
+    timestamp: p.timestamp,
+    accuracy: p.accuracy.isFinite ? p.accuracy : null,
+    segment: timedSegment,
+  );
+
   Future<void> _listenGps() async {
     await _stopGps();
     if (!mounted || !tracking || paused || finishing) return;
@@ -505,7 +533,11 @@ class _PaceHomeState extends State<PaceHome> with WidgetsBindingObserver {
             if (!mounted || !tracking || paused) return;
 
             // Keep usable emulator and real-device readings; reject only very poor fixes.
-            if (position.accuracy > 50) return;
+            if (position.accuracy > 50) {
+              timedSegment++;
+              return;
+            }
+            timedRoute.add(_timedPoint(position));
 
             final previous = lastPosition;
 
@@ -621,6 +653,8 @@ class _PaceHomeState extends State<PaceHome> with WidgetsBindingObserver {
           : null;
       final earnedXp = breakdown?.total ?? 0;
 
+      var achievementReward = 0;
+      var recordReward = 0;
       await _checkpoint(force: true);
       if (wasSaved) {
         final result = await _storageService.completeWorkout(
@@ -631,6 +665,7 @@ class _PaceHomeState extends State<PaceHome> with WidgetsBindingObserver {
             xp: earnedXp,
             sport: finishedActivity,
             route: savedRoute,
+            timedRoute: List<RoutePoint>.from(timedRoute),
             elevationGain: gainedElevation,
             xpBreakdown: breakdown,
             startedAt: workoutStartedAt,
@@ -642,6 +677,9 @@ class _PaceHomeState extends State<PaceHome> with WidgetsBindingObserver {
         );
         if (!mounted) return;
         xp = result.xp;
+        achievements = result.achievements;
+        achievementReward = result.achievementXp;
+        recordReward = result.recordXp;
         workouts
           ..clear()
           ..addAll(result.workouts);
@@ -656,7 +694,9 @@ class _PaceHomeState extends State<PaceHome> with WidgetsBindingObserver {
         workoutFinished = true;
         finishedDistance = finalDistance;
         finishedDuration = finalDuration;
-        finishedXp = earnedXp;
+        finishedXp = earnedXp + achievementReward + recordReward;
+        finishedAchievementXp = achievementReward;
+        finishedRecordXp = recordReward;
         finishedSport = finishedActivity;
         finishedWasSaved = wasSaved;
         finishedRoute = savedRoute;
@@ -673,7 +713,7 @@ class _PaceHomeState extends State<PaceHome> with WidgetsBindingObserver {
       });
       _message(
         wasSaved
-            ? 'Тренировка сохранена: ${finalDistance.toStringAsFixed(2)} км · +$earnedXp XP'
+            ? 'Тренировка сохранена: ${finalDistance.toStringAsFixed(2)} км · +${earnedXp + achievementReward + recordReward} XP'
             : 'Тренировка короче 50 м — результат не добавлен в историю.',
       );
     } catch (_) {
@@ -761,7 +801,12 @@ class _PaceHomeState extends State<PaceHome> with WidgetsBindingObserver {
         header: PaceHeader(onProfile: () => setState(() => tab = 3)),
       ),
       const CommunityPage(),
-      ProgressPage(xp: xp, level: level, workouts: workouts),
+      ProgressPage(
+        xp: xp,
+        level: level,
+        workouts: workouts,
+        achievements: achievements,
+      ),
       ProfilePage(
         xp: xp,
         sports: sports,
@@ -809,6 +854,8 @@ class _PaceHomeState extends State<PaceHome> with WidgetsBindingObserver {
                       finishedDistance: finishedDistance,
                       finishedDuration: finishedDuration,
                       finishedXp: finishedXp,
+                      finishedAchievementXp: finishedAchievementXp,
+                      finishedRecordXp: finishedRecordXp,
                       elevationGain: elevation.gain,
                       finishedElevation: finishedElevation,
                       finishedXpBreakdown: finishedXpBreakdown,

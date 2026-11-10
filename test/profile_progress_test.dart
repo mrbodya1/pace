@@ -3,7 +3,9 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+
 import 'support/test_app.dart';
+
 import 'package:sport_platform/widgets/glass_widgets.dart';
 
 void main() {
@@ -111,7 +113,7 @@ void main() {
     await tester.pumpAndSettle();
     await tester.tap(find.text('Достижения'));
     await tester.pumpAndSettle();
-    expect(find.text('Первый шаг'), findsOneWidget);
+    expect(find.textContaining('Достижения:'), findsOneWidget);
     expect(tester.takeException(), isNull);
   });
 }
