@@ -163,8 +163,8 @@ class _SignInPageState extends State<SignInPage> {
               ],
               const SizedBox(height: 24),
               const Text(
-                'Тренировки и XP сохраняются только на этом устройстве. '
-                'Вход пока не переносит их на другие устройства.',
+                'Тренировки и прогресс сохраняются в аккаунте. '
+                'Без связи новые записи остаются на устройстве до синхронизации.',
                 textAlign: TextAlign.center,
                 style: TextStyle(color: muted, height: 1.5),
               ),

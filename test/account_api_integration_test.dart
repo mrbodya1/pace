@@ -1,3 +1,7 @@
+import 'package:sport_platform/data/storage/local_storage_service.dart';
+import 'package:sport_platform/models/workout.dart';
+import 'package:sport_platform/services/progress_sync.dart';
+
 import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
@@ -35,6 +39,7 @@ void main() {
           '--http=127.0.0.1:$port',
           '--dir=${temporary.path}${Platform.pathSeparator}data',
           '--migrationsDir=${Directory.current.path}${Platform.pathSeparator}server${Platform.pathSeparator}pb_migrations',
+          '--hooksDir=${Directory.current.path}${Platform.pathSeparator}server${Platform.pathSeparator}pb_hooks',
         ], workingDirectory: temporary.path);
         // Consume logs without printing bootstrap URLs or authentication material.
         unawaited(server.stdout.drain<void>());
@@ -96,6 +101,103 @@ void main() {
         expect(recovered['city'], 'Екатеринбург');
         expect(recovered['specializationId'], 'skier');
         expect(recovered['sex'], 'female');
+        final progress = LocalStorageService.forAccount(restored);
+        await progress.completeWorkout(
+          workout: Workout(
+            date: DateTime.utc(2026, 11, 10),
+            distance: 5,
+            duration: const Duration(minutes: 30),
+            xp: 360,
+            sport: 'Бег',
+            sessionId: 'server-workout-one',
+          ),
+          initialXp: 0,
+          selectedSport: 0,
+          initialWorkouts: [],
+        );
+        await progress.synchronize();
+        expect((await progress.loadProgress())!['xp'], 610);
+        final serverSnapshot = await restored.requestProgress(
+          owner: restored.progressOwner!,
+        );
+        expect(serverSnapshot['revision'], 1);
+        await expectLater(
+          restored.requestProgress(
+            owner: restored.progressOwner!,
+            revision: 0,
+            data: Map<String, dynamic>.from(serverSnapshot['data'] as Map),
+          ),
+          throwsA(isA<ProgressConflict>()),
+        );
+        final broken = Map<String, dynamic>.from(serverSnapshot['data'] as Map)
+          ..['workouts'] = [];
+        await expectLater(
+          restored.requestProgress(
+            owner: restored.progressOwner!,
+            revision: 1,
+            data: broken,
+          ),
+          throwsA(isA<AccountError>()),
+        );
+        SharedPreferences.setMockInitialValues({});
+        final freshProgress = LocalStorageService.forAccount(restored);
+        await freshProgress.synchronize();
+        expect((await freshProgress.loadProgress())!['xp'], 610);
+        expect(
+          ProgressMerger.workouts((await freshProgress.loadProgress())!)
+              .single
+              .sessionId,
+          'server-workout-one',
+        );
+        Workout offlineWorkout(String id) => Workout(
+          date: DateTime.utc(2026, 11, 10),
+          distance: 5,
+          duration: const Duration(minutes: 30),
+          xp: 360,
+          sport: 'Бег',
+          sessionId: id,
+        );
+        final base = Map<String, dynamic>.from(serverSnapshot['data'] as Map);
+        Future<bool> compete(String id) async {
+          final candidate = ProgressMerger.merge(base, {
+            '_sync': {
+              'pending': [offlineWorkout(id).toJson()],
+            },
+          });
+          try {
+            await restored!.requestProgress(
+              owner: restored.progressOwner!,
+              revision: 1,
+              data: candidate,
+            );
+            return true;
+          } on ProgressConflict {
+            return false;
+          }
+        }
+
+        final racers = await Future.wait([
+          compete('device-a'),
+          compete('device-b'),
+        ]);
+        expect(racers.where((v) => v).length, 1);
+        final loser = racers[0] ? 'device-b' : 'device-a';
+        await freshProgress.completeWorkout(
+          workout: offlineWorkout(loser),
+          initialXp: 0,
+          selectedSport: 0,
+          initialWorkouts: [],
+        );
+        await freshProgress.synchronize();
+        expect((await freshProgress.loadProgress())!['xp'], 1330);
+        expect(
+          ProgressMerger.workouts((await freshProgress.loadProgress())!).length,
+          3,
+        );
+        final anonymousProgress = await client.get(
+          url.resolve('/api/pace/progress'),
+        );
+        expect(anonymousProgress.statusCode, 401);
         // Respect the default 2 auth requests / 3 seconds; keep production limits enabled.
         await Future<void>.delayed(const Duration(seconds: 4));
         final otherVault = MemorySessionVault();
@@ -107,6 +209,11 @@ void main() {
             passwordConfirm: 'other-password-123',
             name: 'Другой',
           );
+          final otherProgress = await other.requestProgress(
+            owner: other.progressOwner!,
+          );
+          expect(otherProgress['revision'], 0);
+          expect(otherProgress['data'], isNull);
           final otherProfile = await ProfileStorageService(accounts: other)
               .load();
           expect(otherProfile['bio'], isNull);

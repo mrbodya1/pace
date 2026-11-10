@@ -5,6 +5,8 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:http/http.dart' as http;
 
+class ProgressConflict implements Exception {}
+
 class AccountError implements Exception {
   const AccountError(this.message, {this.accountCreated = false});
   final String message;
@@ -89,6 +91,31 @@ class AccountService extends ChangeNotifier {
             !(baseUrl.scheme == 'http' && local && !kReleaseMode))) {
       throw const AccountError('Сервер аккаунтов ещё не настроен.');
     }
+  }
+
+  String? get progressOwner =>
+      account == null ? null : '$_server|${account!.id}';
+
+  Future<Map<String, dynamic>> requestProgress({
+    required String owner,
+    int? revision,
+    Map<String, dynamic>? data,
+  }) async {
+    final token = _token;
+    if (progressOwner != owner || token == null) {
+      throw const AccountError('Аккаунт изменился. Войди снова.');
+    }
+    final result = await _request(
+      'progress',
+      revision == null ? {} : {'revision': revision, 'data': data},
+      token: token,
+      method: revision == null ? 'GET' : 'PUT',
+      customPath: '/api/pace/progress',
+    );
+    if (progressOwner != owner || _token != token) {
+      throw const AccountError('Аккаунт изменился. Повтори синхронизацию.');
+    }
+    return result;
   }
 
   String get _server => baseUrl.toString().replaceFirst(RegExp(r'/+$'), '');
@@ -301,6 +328,7 @@ class AccountService extends ChangeNotifier {
     Map<String, dynamic> body, {
     String? token,
     String method = 'POST',
+    String? customPath,
   }) async {
     _checkUrl();
     http.Response response;
@@ -308,14 +336,18 @@ class AccountService extends ChangeNotifier {
       final request =
           http.Request(
               method,
-              Uri.parse('$_server/api/collections/pace_users/$action'),
+              Uri.parse(
+                customPath == null
+                    ? '$_server/api/collections/pace_users/$action'
+                    : '$_server$customPath',
+              ),
             )
             ..followRedirects = false
             ..headers.addAll({
               'Content-Type': 'application/json',
               'Authorization': ?token,
             })
-            ..body = jsonEncode(body);
+            ..body = method == 'GET' ? '' : jsonEncode(body);
       Future<http.Response> send() async =>
           http.Response.fromStream(await _client.send(request));
       response = await send().timeout(const Duration(seconds: 15));
@@ -324,6 +356,14 @@ class AccountService extends ChangeNotifier {
         action == 'records'
             ? 'Нет ответа сервера. Если аккаунт уже создан, попробуй войти.'
             : 'Нет связи с сервером. Проверь интернет и повтори попытку.',
+      );
+    }
+    if (customPath != null && response.statusCode == 409) {
+      throw ProgressConflict();
+    }
+    if (customPath != null && response.statusCode == 404) {
+      throw const AccountError(
+        'Перезапусти сервер PACE, чтобы включить синхронизацию тренировок.',
       );
     }
     if (action == 'auth-refresh' &&

@@ -1,3 +1,5 @@
+import 'services/account_service.dart';
+
 import 'dart:async';
 
 import 'package:flutter/material.dart';
@@ -46,7 +48,9 @@ class PaceApp extends StatelessWidget {
 }
 
 class PaceHome extends StatefulWidget {
-  const PaceHome({super.key});
+  const PaceHome({super.key, this.storage, this.accounts});
+  final LocalStorageService? storage;
+  final AccountService? accounts;
 
   @override
   State<PaceHome> createState() => _PaceHomeState();
@@ -57,7 +61,14 @@ class _PaceHomeState extends State<PaceHome> with WidgetsBindingObserver {
   int xp = 0;
   int selectedSport = 0;
 
-  final LocalStorageService _storageService = LocalStorageService();
+  late final accounts = widget.accounts ?? AccountService.instance;
+  late final LocalStorageService _storageService =
+      widget.storage ??
+      (accounts.account == null
+          ? LocalStorageService()
+          : LocalStorageService.forAccount(accounts));
+  bool syncingProgress = false;
+  String? syncStatus;
 
   final List<Workout> workouts = [];
   final List<Position> route = [];
@@ -247,6 +258,7 @@ class _PaceHomeState extends State<PaceHome> with WidgetsBindingObserver {
         }
         loadingProgress = false;
       });
+      unawaited(_syncProgress());
     } catch (_) {
       if (!mounted) return;
       setState(() {
@@ -256,6 +268,58 @@ class _PaceHomeState extends State<PaceHome> with WidgetsBindingObserver {
       _message(
         'Не удалось загрузить прогресс. Перезапусти PACE перед новой записью.',
       );
+    }
+  }
+
+  Future<void> _syncProgress() async {
+    if (!_storageService.supportsSync || syncingProgress || loadingProgress) {
+      return;
+    }
+    if (_storageService.owner != accounts.progressOwner) return;
+    setState(() {
+      syncingProgress = true;
+      syncStatus = 'Обновляем прогресс…';
+    });
+    try {
+      await _storageService.synchronize();
+      final data = await _storageService.loadProgress();
+      if (!mounted || _storageService.owner != accounts.progressOwner) return;
+      final history = (data?['workouts'] as List? ?? [])
+          .map((v) => Workout.fromJson(Map<String, dynamic>.from(v as Map)))
+          .toList();
+      final pending =
+          ((data?['_sync'] as Map?)?['pending'] as List? ?? []).length;
+      setState(() {
+        xp = (data?['xp'] as num?)?.toInt() ?? 0;
+        achievements = AchievementEngine.restore(
+          data?['achievements'],
+          history,
+        );
+        workouts
+          ..clear()
+          ..addAll(history);
+        final completed = history
+            .where((w) => w.sessionId == workoutSessionId)
+            .firstOrNull;
+        if (workoutFinished && completed != null) {
+          finishedXp = completed.xp;
+          finishedAchievementXp = completed.achievementXp;
+          finishedRecordXp = completed.recordXp;
+        }
+        syncStatus = pending == 0
+            ? 'Прогресс сохранён в аккаунте'
+            : 'На устройстве · ожидают отправки: $pending';
+      });
+    } catch (error) {
+      if (mounted) {
+        setState(
+          () => syncStatus = error is AccountError
+              ? 'На устройстве. ${error.message}'
+              : 'Прогресс на устройстве. Не удалось синхронизировать — повтори позже.',
+        );
+      }
+    } finally {
+      if (mounted) setState(() => syncingProgress = false);
     }
   }
 
@@ -337,6 +401,9 @@ class _PaceHomeState extends State<PaceHome> with WidgetsBindingObserver {
         gpsStatus = 'Фоновая запись маршрута';
       }
     }
+    if (state == AppLifecycleState.resumed && !loadingProgress) {
+      unawaited(_syncProgress());
+    }
     if (mounted) setState(() {});
   }
 
@@ -410,7 +477,7 @@ class _PaceHomeState extends State<PaceHome> with WidgetsBindingObserver {
 
       Map<String, dynamic> profile;
       try {
-        profile = await ProfileStorageService().load();
+        profile = await ProfileStorageService(accounts: accounts).load();
       } catch (_) {
         _message('Не удалось прочитать специализацию. Попробуй начать снова.');
         return;
@@ -716,6 +783,7 @@ class _PaceHomeState extends State<PaceHome> with WidgetsBindingObserver {
             ? 'Тренировка сохранена: ${finalDistance.toStringAsFixed(2)} км · +${earnedXp + achievementReward + recordReward} XP'
             : 'Тренировка короче 50 м — результат не добавлен в историю.',
       );
+      if (wasSaved) unawaited(_syncProgress());
     } catch (_) {
       if (!mounted) return;
       setState(() {
@@ -806,8 +874,12 @@ class _PaceHomeState extends State<PaceHome> with WidgetsBindingObserver {
         level: level,
         workouts: workouts,
         achievements: achievements,
+        syncStatus: syncStatus,
+        syncing: syncingProgress,
+        onSync: _storageService.supportsSync ? _syncProgress : null,
       ),
       ProfilePage(
+        accounts: accounts,
         xp: xp,
         sports: sports,
         sportIcons: sportIcons,

@@ -45,7 +45,7 @@ function Request($method, $path, $body, $token, $expected) {
 }
 
 try {
-    $argsList = @('serve', "--http=127.0.0.1:$port", "--dir=`"$(Join-Path $testRoot 'data')`"", "--migrationsDir=`"$(Join-Path $PSScriptRoot 'pb_migrations')`"")
+    $argsList = @('serve', "--http=127.0.0.1:$port", "--dir=`"$(Join-Path $testRoot 'data')`"", "--migrationsDir=`"$(Join-Path $PSScriptRoot 'pb_migrations')`"", "--hooksDir=`"$(Join-Path $PSScriptRoot 'pb_hooks')`"")
     $process = Start-Process -FilePath $executable -ArgumentList $argsList -WorkingDirectory $testRoot -WindowStyle Hidden -PassThru -RedirectStandardOutput (Join-Path $testRoot 'stdout.log') -RedirectStandardError (Join-Path $testRoot 'stderr.log')
     $ready = $false
     for ($attempt = 0; $attempt -lt 80; $attempt++) {

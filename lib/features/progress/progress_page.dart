@@ -17,10 +17,16 @@ class ProgressPage extends StatefulWidget {
     required this.level,
     required this.workouts,
     this.achievements,
+    this.syncStatus,
+    this.onSync,
+    this.syncing = false,
   });
   final int xp, level;
   final List<Workout> workouts;
   final AchievementState? achievements;
+  final String? syncStatus;
+  final Future<void> Function()? onSync;
+  final bool syncing;
 
   @override
   State<ProgressPage> createState() => _ProgressPageState();
@@ -65,6 +71,28 @@ class _ProgressPageState extends State<ProgressPage> {
               style: TextStyle(fontSize: 32, fontWeight: FontWeight.w600),
             ),
           ),
+          if (widget.onSync != null)
+            Padding(
+              padding: const EdgeInsets.fromLTRB(22, 0, 22, 12),
+              child: Row(
+                children: [
+                  Expanded(
+                    child: Semantics(
+                      liveRegion: true,
+                      child: Text(
+                        widget.syncStatus ?? 'Прогресс сохранён на устройстве',
+                        key: const ValueKey('progress-sync-status'),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 8),
+                  TextButton(
+                    onPressed: widget.syncing ? null : widget.onSync,
+                    child: Text(widget.syncing ? 'Обновляем…' : 'Обновить'),
+                  ),
+                ],
+              ),
+            ),
           const Padding(
             padding: EdgeInsets.symmetric(horizontal: 16),
             child: GlassTabs(

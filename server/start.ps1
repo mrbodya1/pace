@@ -10,7 +10,7 @@ if ($LASTEXITCODE -ne 0 -or $version -notmatch '\b0\.41\.1\b') {
 }
 Push-Location $serverRoot
 try {
-    & $executable serve '--http=127.0.0.1:8090' "--dir=$(Join-Path $serverRoot 'pb_data')" "--migrationsDir=$(Join-Path $serverRoot 'pb_migrations')"
+    & $executable serve '--http=127.0.0.1:8090' "--dir=$(Join-Path $serverRoot 'pb_data')" "--migrationsDir=$(Join-Path $serverRoot 'pb_migrations')" "--hooksDir=$(Join-Path $serverRoot 'pb_hooks')"
     if ($LASTEXITCODE -ne 0) { throw "PocketBase stopped with code $LASTEXITCODE" }
 } finally {
     Pop-Location

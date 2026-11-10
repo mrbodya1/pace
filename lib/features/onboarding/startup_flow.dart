@@ -35,9 +35,7 @@ class _StartupFlowState extends State<StartupFlow> {
   }
 
   void _accountChanged() {
-    if (entered && accounts.account == null) {
-      setState(() => entered = false);
-    }
+    if (entered) setState(() => entered = accounts.account != null);
   }
 
   Future<void> _restore() async {
@@ -106,7 +104,7 @@ class _StartupFlowState extends State<StartupFlow> {
       );
     }
     final stage = entered
-        ? 'home'
+        ? 'home:${accounts.progressOwner}'
         : introduced
         ? 'auth'
         : 'welcome';

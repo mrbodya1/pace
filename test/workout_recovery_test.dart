@@ -42,6 +42,8 @@ Workout completed(String id) => Workout(
 class RejectingPreferences extends Fake implements SharedPreferences {
   RejectingPreferences(this.delegate);
   final SharedPreferences delegate;
+  @override
+  Future<void> reload() => delegate.reload();
   bool rejectProgress = true;
   @override
   String? getString(String key) => delegate.getString(key);
