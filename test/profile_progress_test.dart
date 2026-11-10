@@ -107,7 +107,7 @@ void main() {
     await tester.tap(find.text('Бег'));
     await tester.pumpAndSettle();
     expect(find.text('5,20 км'), findsOneWidget);
-    expect(find.text('СРЕДНИЙ ТЕМП'), findsOneWidget);
+    expect(find.text('Темп, мин/км'), findsOneWidget);
     expect(find.text('32:18'), findsOneWidget);
     await tester.pageBack();
     await tester.pumpAndSettle();

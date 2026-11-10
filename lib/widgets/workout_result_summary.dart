@@ -4,10 +4,16 @@ import '../app/theme/pace_theme.dart';
 import '../models/workout.dart';
 import '../models/xp_progress.dart';
 import 'glass_widgets.dart';
+import 'workout_xp_panel.dart';
 
 class WorkoutResultSummary extends StatelessWidget {
-  const WorkoutResultSummary({super.key, required this.workout});
+  const WorkoutResultSummary({
+    super.key,
+    required this.workout,
+    this.historical = false,
+  });
   final Workout workout;
+  final bool historical;
   String _number(int n) => n.toString().replaceAllMapped(
     RegExp(r'(\d)(?=(\d{3})+(?!\d))'),
     (m) => '${m[1]} ',
@@ -35,6 +41,85 @@ class WorkoutResultSummary extends StatelessWidget {
         after - before == workout.xp;
     final progress = valid ? XpProgress(after) : null;
     final previous = valid ? XpProgress(before) : null;
+    if (historical) {
+      return GlassPanel(
+        key: const ValueKey('history-xp-summary'),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const Text(
+              'ЗАРАБОТАНО ЗА ТРЕНИРОВКУ',
+              style: TextStyle(color: muted, fontSize: 12, letterSpacing: 1),
+            ),
+            const SizedBox(height: 8),
+            Text(
+              '+${_number(workout.xp)} XP',
+              key: const ValueKey('history-total-xp'),
+              style: const TextStyle(
+                color: lime,
+                fontSize: 34,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+            if (progress != null && previous != null) ...[
+              const Divider(height: 28),
+              const Text(
+                'Уровень после тренировки',
+                style: TextStyle(color: muted, fontSize: 12),
+              ),
+              const SizedBox(height: 6),
+              Text(
+                progress.level == previous.level
+                    ? '${progress.level}'
+                    : '${previous.level} → ${progress.level}',
+                key: const ValueKey('history-level'),
+                style: const TextStyle(
+                  color: lime,
+                  fontSize: 20,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+            ],
+            const SizedBox(height: 12),
+            ExpansionTile(
+              key: PageStorageKey(
+                'history-xp-${workout.sessionId ?? workout.date.toIso8601String()}',
+              ),
+              tilePadding: EdgeInsets.zero,
+              shape: const Border(),
+              collapsedShape: const Border(),
+              title: const Text(
+                'Расчёт XP',
+                key: ValueKey('history-xp-heading'),
+              ),
+              children: [
+                if (workout.xpBreakdown != null)
+                  WorkoutXpPanel(
+                    value: workout.xpBreakdown!,
+                    achievementXp: workout.achievementXp,
+                    recordXp: workout.recordXp,
+                    framed: false,
+                  )
+                else ...[
+                  _line(
+                    'Тренировка',
+                    workout.xp - workout.achievementXp - workout.recordXp,
+                  ),
+                  _line(
+                    'Достижения · ${workout.achievementIds.length}',
+                    workout.achievementXp,
+                  ),
+                  _line(
+                    'Рекорды · ${workout.records.length}',
+                    workout.recordXp,
+                  ),
+                ],
+              ],
+            ),
+          ],
+        ),
+      );
+    }
     return GlassPanel(
       key: const ValueKey('workout-result-summary'),
       child: Column(

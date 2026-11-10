@@ -1,3 +1,5 @@
+import 'package:flutter/foundation.dart';
+
 import 'records_view.dart';
 
 import 'package:flutter/material.dart';
@@ -16,6 +18,7 @@ class ProgressPage extends StatefulWidget {
     required this.xp,
     required this.level,
     required this.workouts,
+    this.historyUpdates,
     this.achievements,
     this.syncStatus,
     this.onSync,
@@ -23,6 +26,7 @@ class ProgressPage extends StatefulWidget {
   });
   final int xp, level;
   final List<Workout> workouts;
+  final ValueListenable<List<Workout>>? historyUpdates;
   final AchievementState? achievements;
   final String? syncStatus;
   final Future<void> Function()? onSync;
@@ -143,6 +147,7 @@ class _ProgressPageState extends State<ProgressPage> {
                     if (sports.isNotEmpty) ...[
                       DropdownButtonFormField<String>(
                         initialValue: sport ?? '',
+                        isExpanded: true,
                         decoration: const InputDecoration(
                           labelText: 'Вид спорта',
                         ),
@@ -169,7 +174,11 @@ class _ProgressPageState extends State<ProgressPage> {
                           child: GestureDetector(
                             onTap: () => Navigator.of(context).push<void>(
                               MaterialPageRoute(
-                                builder: (_) => WorkoutDetailsPage(workout: w),
+                                builder: (_) => WorkoutDetailsPage(
+                                  workout: w,
+                                  history: widget.workouts,
+                                  historyUpdates: widget.historyUpdates,
+                                ),
                               ),
                             ),
                             child: workoutCard(w),

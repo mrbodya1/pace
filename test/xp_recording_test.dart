@@ -152,6 +152,13 @@ void main() {
         ),
       );
       await tester.pumpAndSettle();
+      await tester.scrollUntilVisible(
+        find.byKey(const ValueKey('history-xp-heading')),
+        200,
+      );
+      await tester.pumpAndSettle();
+      await tester.tap(find.byKey(const ValueKey('history-xp-heading')));
+      await tester.pumpAndSettle();
       await tester.scrollUntilVisible(find.text('За что начислены XP'), 200);
       await tester.scrollUntilVisible(find.text('480 XP'), 160);
       await tester.pumpAndSettle();

@@ -71,6 +71,7 @@ class _PaceHomeState extends State<PaceHome> with WidgetsBindingObserver {
   String? syncStatus;
 
   final List<Workout> workouts = [];
+  final historyUpdates = ValueNotifier<List<Workout>>(const []);
   final List<Position> route = [];
   final List<RoutePoint> timedRoute = [];
   int timedSegment = 0;
@@ -231,6 +232,7 @@ class _PaceHomeState extends State<PaceHome> with WidgetsBindingObserver {
         workouts
           ..clear()
           ..addAll(savedWorkouts);
+        historyUpdates.value = List<Workout>.unmodifiable(workouts);
         if (draft != null) {
           final saved = draft;
           workoutSessionId = saved.id;
@@ -299,6 +301,7 @@ class _PaceHomeState extends State<PaceHome> with WidgetsBindingObserver {
         workouts
           ..clear()
           ..addAll(history);
+        historyUpdates.value = List<Workout>.unmodifiable(workouts);
         final completed = history
             .where((w) => w.sessionId == workoutSessionId)
             .firstOrNull;
@@ -756,6 +759,7 @@ class _PaceHomeState extends State<PaceHome> with WidgetsBindingObserver {
         workouts
           ..clear()
           ..addAll(result.workouts);
+        historyUpdates.value = List<Workout>.unmodifiable(workouts);
       } else {
         await _storageService.clearDraft();
       }
@@ -860,6 +864,7 @@ class _PaceHomeState extends State<PaceHome> with WidgetsBindingObserver {
   @override
   void dispose() {
     WidgetsBinding.instance.removeObserver(this);
+    historyUpdates.dispose();
     clock?.cancel();
     unawaited(_stopGps().catchError((Object _) {}));
     stopwatch.stop();
@@ -875,6 +880,7 @@ class _PaceHomeState extends State<PaceHome> with WidgetsBindingObserver {
         levelStart: levelStart,
         levelEnd: levelEnd,
         workouts: workouts,
+        historyUpdates: historyUpdates,
         header: PaceHeader(onProfile: () => setState(() => tab = 3)),
       ),
       const CommunityPage(),
@@ -882,6 +888,7 @@ class _PaceHomeState extends State<PaceHome> with WidgetsBindingObserver {
         xp: xp,
         level: level,
         workouts: workouts,
+        historyUpdates: historyUpdates,
         achievements: achievements,
         syncStatus: syncStatus,
         syncing: syncingProgress,

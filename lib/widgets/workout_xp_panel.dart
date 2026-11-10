@@ -11,10 +11,12 @@ class WorkoutXpPanel extends StatelessWidget {
     required this.value,
     this.achievementXp = 0,
     this.recordXp = 0,
+    this.framed = true,
   });
   final WorkoutXp value;
   final int achievementXp;
   final int recordXp;
+  final bool framed;
 
   String _number(double number) =>
       number.toStringAsFixed(1).replaceAll('.', ',');
@@ -48,9 +50,8 @@ class WorkoutXpPanel extends StatelessWidget {
   );
 
   @override
-  Widget build(BuildContext context) => GlassPanel(
-    key: const ValueKey('workout-xp-breakdown'),
-    child: Column(
+  Widget build(BuildContext context) {
+    final content = Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         const Text(
@@ -91,6 +92,12 @@ class WorkoutXpPanel extends StatelessWidget {
           style: TextStyle(color: muted, fontSize: 12),
         ),
       ],
-    ),
-  );
+    );
+    return framed
+        ? GlassPanel(
+            key: const ValueKey('workout-xp-breakdown'),
+            child: content,
+          )
+        : content;
+  }
 }

@@ -1,3 +1,5 @@
+import 'package:flutter/foundation.dart';
+
 import '../progress/levels_page.dart';
 
 import 'package:flutter/cupertino.dart';
@@ -17,11 +19,13 @@ class HomePage extends StatelessWidget {
     required this.levelStart,
     required this.levelEnd,
     required this.workouts,
+    this.historyUpdates,
     required this.header,
   });
 
   final int xp, level, levelStart, levelEnd;
   final List<Workout> workouts;
+  final ValueListenable<List<Workout>>? historyUpdates;
   final Widget header;
 
   @override
@@ -110,7 +114,12 @@ class HomePage extends StatelessWidget {
             child: GestureDetector(
               onTap: () => Navigator.of(context).push<void>(
                 MaterialPageRoute(
-                  builder: (_) => WorkoutDetailsPage(workout: workouts.first),
+                  builder: (_) => WorkoutDetailsPage(
+                    workout: workouts.first,
+                    fromHistory: false,
+                    history: workouts,
+                    historyUpdates: historyUpdates,
+                  ),
                 ),
               ),
               child: workoutCard(workouts.first, showRoute: false),
