@@ -1,3 +1,5 @@
+import '../../widgets/reward_badge.dart';
+
 import 'package:flutter/material.dart';
 
 import '../../app/theme/pace_theme.dart';
@@ -6,16 +8,24 @@ import '../../models/workout.dart';
 import '../../widgets/glass_widgets.dart';
 
 class AchievementsView extends StatefulWidget {
-  const AchievementsView({super.key, required this.workouts, this.state});
+  const AchievementsView({
+    super.key,
+    required this.workouts,
+    this.state,
+    this.initialSport,
+    this.initialMetric,
+    this.selectedId,
+  });
   final List<Workout> workouts;
   final AchievementState? state;
+  final String? initialSport, initialMetric, selectedId;
   @override
   State<AchievementsView> createState() => _AchievementsViewState();
 }
 
 class _AchievementsViewState extends State<AchievementsView> {
-  String? sport;
-  String? metric;
+  late String? sport = widget.initialSport;
+  late String? metric = widget.initialMetric;
   @override
   Widget build(BuildContext context) {
     final state =
@@ -28,6 +38,11 @@ class _AchievementsViewState extends State<AchievementsView> {
               (metric == null || r.metric == metric),
         )
         .toList();
+    final selected = rules.indexWhere((r) => r.id == widget.selectedId);
+    if (selected > 0) {
+      final rule = rules.removeAt(selected);
+      rules.insert(0, rule);
+    }
     final earned = rules.where((r) => state.unlocked.containsKey(r.id)).length;
     return ListView.builder(
       key: const PageStorageKey('earned-achievements'),
@@ -101,17 +116,26 @@ class _AchievementsViewState extends State<AchievementsView> {
                 Row(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Icon(
-                      unlock == null
-                          ? Icons.lock_outline_rounded
-                          : Icons.check_circle_rounded,
-                      color: unlock == null ? muted : lime,
+                    RewardBadge.achievement(
+                      rule,
+                      earned: unlock != null,
+                      size: 56,
                     ),
                     const SizedBox(width: 12),
                     Expanded(
-                      child: Text(
-                        '${rule.sport} · ${rule.metric}',
-                        style: const TextStyle(fontWeight: FontWeight.w600),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          if (rule.id == widget.selectedId)
+                            const Text(
+                              'Выбранное достижение',
+                              style: TextStyle(color: lime, fontSize: 12),
+                            ),
+                          Text(
+                            '${rule.sport} · ${rule.metric}',
+                            style: const TextStyle(fontWeight: FontWeight.w600),
+                          ),
+                        ],
                       ),
                     ),
                   ],

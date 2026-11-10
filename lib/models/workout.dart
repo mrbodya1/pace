@@ -46,6 +46,7 @@ class Workout {
   final double distance;
   final Duration duration;
   final int xp;
+  final int? xpBefore, xpAfter;
   final String sport;
   final int achievementXp;
   final List<String> achievementIds;
@@ -64,6 +65,8 @@ class Workout {
     required this.duration,
     required this.xp,
     required this.sport,
+    this.xpBefore,
+    this.xpAfter,
     this.route = const [],
     this.timedRoute = const [],
     this.recordXp = 0,
@@ -81,11 +84,14 @@ class Workout {
     List<String> ids, {
     int recordReward = 0,
     List<PersonalRecord> recordResults = const [],
+    int? xpBefore,
   }) => Workout(
     date: date,
     distance: distance,
     duration: duration,
     xp: xp + reward + recordReward,
+    xpBefore: xpBefore ?? this.xpBefore,
+    xpAfter: xpBefore == null ? xpAfter : xpBefore + xp + reward + recordReward,
     sport: sport,
     route: route,
     timedRoute: timedRoute,
@@ -104,6 +110,8 @@ class Workout {
     'distance': distance,
     'durationSeconds': duration.inSeconds,
     'xp': xp,
+    if (xpBefore != null) 'xpBefore': xpBefore,
+    if (xpAfter != null) 'xpAfter': xpAfter,
     'sport': sport,
     if (achievementXp != 0) 'achievementXp': achievementXp,
     if (achievementIds.isNotEmpty) 'achievementIds': achievementIds,
@@ -130,6 +138,8 @@ class Workout {
       distance: (json['distance'] as num).toDouble(),
       duration: Duration(seconds: (json['durationSeconds'] as num).toInt()),
       xp: (json['xp'] as num).toInt(),
+      xpBefore: (json['xpBefore'] as num?)?.toInt(),
+      xpAfter: (json['xpAfter'] as num?)?.toInt(),
       sport: json['sport'] as String,
       achievementXp: (json['achievementXp'] as num?)?.toInt() ?? 0,
       achievementIds: List<String>.from(json['achievementIds'] as List? ?? []),

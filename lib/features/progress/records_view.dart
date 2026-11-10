@@ -1,3 +1,5 @@
+import '../../widgets/reward_badge.dart';
+
 import 'package:flutter/material.dart';
 
 import '../../app/theme/pace_theme.dart';
@@ -6,14 +8,20 @@ import '../../models/workout.dart';
 import '../../widgets/glass_widgets.dart';
 
 class RecordsView extends StatefulWidget {
-  const RecordsView({super.key, required this.workouts});
+  const RecordsView({
+    super.key,
+    required this.workouts,
+    this.initialSport,
+    this.selectedId,
+  });
   final List<Workout> workouts;
+  final String? initialSport, selectedId;
   @override
   State<RecordsView> createState() => _RecordsViewState();
 }
 
 class _RecordsViewState extends State<RecordsView> {
-  String? sport;
+  late String? sport = widget.initialSport;
   @override
   Widget build(BuildContext context) {
     final best = <String, PersonalRecord>{};
@@ -28,6 +36,11 @@ class _RecordsViewState extends State<RecordsView> {
     final rules = RecordDistance.catalog
         .where((r) => sport == null || r.sport == sport)
         .toList();
+    final selected = rules.indexWhere((r) => r.id == widget.selectedId);
+    if (selected > 0) {
+      final rule = rules.removeAt(selected);
+      rules.insert(0, rule);
+    }
     return ListView.builder(
       key: const PageStorageKey('personal-records'),
       padding: const EdgeInsets.fromLTRB(22, 24, 22, 140),
@@ -77,9 +90,31 @@ class _RecordsViewState extends State<RecordsView> {
         return Padding(
           padding: const EdgeInsets.only(bottom: 12),
           child: GlassPanel(
+            key: ValueKey('record-${rule.id}'),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
+                Row(
+                  children: [
+                    RewardBadge.record(
+                      rule.meters,
+                      earned: r != null,
+                      size: 56,
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: Text(
+                        rule.id == widget.selectedId
+                            ? 'Выбранный рекорд'
+                            : r == null
+                            ? 'Ещё впереди'
+                            : 'Личный рекорд',
+                        style: const TextStyle(color: muted),
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 8),
                 Text(
                   '${rule.sport} · ${rule.label}',
                   style: const TextStyle(fontWeight: FontWeight.w600),

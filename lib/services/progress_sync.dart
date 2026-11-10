@@ -186,6 +186,8 @@ abstract final class ProgressMerger {
     json.remove('achievementIds');
     json.remove('recordXp');
     json.remove('records');
+    json.remove('xpBefore');
+    json.remove('xpAfter');
     if ((json['xp'] as int) < 0) throw const FormatException('Invalid base XP');
     return Workout.fromJson(json);
   }
@@ -210,6 +212,7 @@ abstract final class ProgressMerger {
       achievements.awards.map((r) => r.id).toList(),
       recordReward: records.xp,
       recordResults: records.awards,
+      xpBefore: data['xp'] as int,
     );
     data['xp'] = (data['xp'] as int) + saved.xp;
     data['workouts'] = [saved.toJson(), ...history.map((w) => w.toJson())];

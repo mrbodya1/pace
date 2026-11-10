@@ -167,6 +167,7 @@ class LocalStorageService {
         result.awards.map((r) => r.id).toList(),
         recordReward: records.xp,
         recordResults: records.awards,
+        xpBefore: total,
       );
       history.insert(0, saved);
       total += saved.xp;

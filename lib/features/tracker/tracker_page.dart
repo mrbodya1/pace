@@ -1,3 +1,11 @@
+import '../../models/achievement.dart';
+import '../../models/personal_record.dart';
+import '../../widgets/workout_rewards.dart';
+import '../../widgets/workout_result_summary.dart';
+import '../../widgets/pace_page_scaffold.dart';
+import '../progress/achievements_view.dart';
+import '../progress/records_view.dart';
+
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
@@ -48,6 +56,9 @@ class TrackerPage extends StatelessWidget {
     this.finishedXpBreakdown,
     this.finishedAchievementXp = 0,
     this.finishedRecordXp = 0,
+    this.finishedWorkout,
+    this.history = const [],
+    this.achievementState,
     this.recoveredWorkout = false,
   });
 
@@ -56,6 +67,9 @@ class TrackerPage extends StatelessWidget {
   final WorkoutXp? finishedXpBreakdown;
   final int finishedAchievementXp;
   final int finishedRecordXp;
+  final Workout? finishedWorkout;
+  final List<Workout> history;
+  final AchievementState? achievementState;
   final bool recoveredWorkout;
   final Duration elapsed, finishedDuration;
   final List<Position> route;
@@ -75,6 +89,40 @@ class TrackerPage extends StatelessWidget {
   final VoidCallback onNewWorkout, onStartWorkout, onPauseWorkout, onClose;
   final Future<void> Function() onFinishWorkout;
   final ValueChanged<int> onSelectSport;
+
+  List<Workout> get _awardHistory =>
+      history.isNotEmpty ? history : [?finishedWorkout];
+  void _openAchievement(BuildContext context, AchievementRule rule) {
+    Navigator.of(context).push<void>(
+      MaterialPageRoute(
+        builder: (_) => PacePageScaffold(
+          title: 'Достижения',
+          body: AchievementsView(
+            workouts: _awardHistory,
+            state: achievementState,
+            initialSport: rule.sport,
+            initialMetric: rule.metric,
+            selectedId: rule.id,
+          ),
+        ),
+      ),
+    );
+  }
+
+  void _openRecord(BuildContext context, PersonalRecord record) {
+    Navigator.of(context).push<void>(
+      MaterialPageRoute(
+        builder: (_) => PacePageScaffold(
+          title: 'Личные рекорды',
+          body: RecordsView(
+            workouts: _awardHistory,
+            initialSport: record.sport,
+            selectedId: record.id,
+          ),
+        ),
+      ),
+    );
+  }
 
   Future<void> _chooseSport(BuildContext context) async {
     final selected = await showModalBottomSheet<int>(
@@ -414,7 +462,9 @@ class TrackerPage extends StatelessWidget {
               ),
               if (result) ...[
                 const SizedBox(height: 18),
-                if (finishedWasSaved)
+                if (finishedWasSaved && finishedWorkout != null)
+                  WorkoutResultSummary(workout: finishedWorkout!)
+                else if (finishedWasSaved)
                   Center(
                     child: Text(
                       '+$finishedXp XP',
@@ -434,14 +484,36 @@ class TrackerPage extends StatelessWidget {
               ],
               if (result && finishedXpBreakdown != null) ...[
                 const SizedBox(height: 18),
-                WorkoutXpPanel(
-                  value: finishedXpBreakdown!,
-                  achievementXp: finishedAchievementXp,
-                  recordXp: finishedRecordXp,
+                GlassPanel(
+                  padding: EdgeInsets.zero,
+                  child: ExpansionTile(
+                    key: PageStorageKey(
+                      'xp-details-${finishedWorkout?.sessionId ?? "result"}',
+                    ),
+                    initiallyExpanded: false,
+                    shape: const Border(),
+                    collapsedShape: const Border(),
+                    title: const Text('Расчёт XP'),
+                    children: [
+                      WorkoutXpPanel(
+                        value: finishedXpBreakdown!,
+                        achievementXp: finishedAchievementXp,
+                        recordXp: finishedRecordXp,
+                      ),
+                    ],
+                  ),
                 ),
               ],
               const SizedBox(height: 22),
               _WorkoutRoute(points: points),
+              if (result && finishedWasSaved && finishedWorkout != null) ...[
+                const SizedBox(height: 20),
+                WorkoutRewards(
+                  workout: finishedWorkout!,
+                  onAchievement: (rule) => _openAchievement(context, rule),
+                  onRecord: (record) => _openRecord(context, record),
+                ),
+              ],
               if (!result) ...[
                 const SizedBox(height: 18),
                 Text(
@@ -473,8 +545,16 @@ class TrackerPage extends StatelessWidget {
           SizedBox(
             width: double.infinity,
             child: FilledButton(
+              key: const ValueKey('finished-done'),
+              style: FilledButton.styleFrom(
+                backgroundColor: lime,
+                foregroundColor: bg,
+              ),
               onPressed: onClose,
-              child: const Text('Готово'),
+              child: const Text(
+                'Готово',
+                style: TextStyle(color: bg, fontWeight: FontWeight.w600),
+              ),
             ),
           ),
           TextButton(

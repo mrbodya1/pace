@@ -84,6 +84,7 @@ class _PaceHomeState extends State<PaceHome> with WidgetsBindingObserver {
   ParticipantSex? workoutParticipantSex;
   DateTime? workoutStartedAt;
   WorkoutXp? finishedXpBreakdown;
+  Workout? finishedWorkout;
   double finishedElevation = 0;
 
   Duration restoredDuration = Duration.zero;
@@ -302,6 +303,7 @@ class _PaceHomeState extends State<PaceHome> with WidgetsBindingObserver {
             .where((w) => w.sessionId == workoutSessionId)
             .firstOrNull;
         if (workoutFinished && completed != null) {
+          finishedWorkout = completed;
           finishedXp = completed.xp;
           finishedAchievementXp = completed.achievementXp;
           finishedRecordXp = completed.recordXp;
@@ -720,6 +722,7 @@ class _PaceHomeState extends State<PaceHome> with WidgetsBindingObserver {
           : null;
       final earnedXp = breakdown?.total ?? 0;
 
+      Workout? committed;
       var achievementReward = 0;
       var recordReward = 0;
       await _checkpoint(force: true);
@@ -745,6 +748,9 @@ class _PaceHomeState extends State<PaceHome> with WidgetsBindingObserver {
         if (!mounted) return;
         xp = result.xp;
         achievements = result.achievements;
+        committed = result.workouts
+            .where((w) => w.sessionId == workoutSessionId)
+            .single;
         achievementReward = result.achievementXp;
         recordReward = result.recordXp;
         workouts
@@ -761,14 +767,16 @@ class _PaceHomeState extends State<PaceHome> with WidgetsBindingObserver {
         workoutFinished = true;
         finishedDistance = finalDistance;
         finishedDuration = finalDuration;
-        finishedXp = earnedXp + achievementReward + recordReward;
+        finishedWorkout = committed;
+        finishedXp =
+            committed?.xp ?? earnedXp + achievementReward + recordReward;
         finishedAchievementXp = achievementReward;
         finishedRecordXp = recordReward;
         finishedSport = finishedActivity;
         finishedWasSaved = wasSaved;
         finishedRoute = savedRoute;
         finishedElevation = gainedElevation;
-        finishedXpBreakdown = breakdown;
+        finishedXpBreakdown = committed?.xpBreakdown ?? breakdown;
         distance = 0;
         speed = 0;
         pace = 0;
@@ -810,6 +818,7 @@ class _PaceHomeState extends State<PaceHome> with WidgetsBindingObserver {
         ..reset();
       recoveredWorkout = false;
       finishedXpBreakdown = null;
+      finishedWorkout = null;
       finishedElevation = 0;
       workoutSpecialization = null;
       workoutParticipantSex = null;
@@ -926,6 +935,9 @@ class _PaceHomeState extends State<PaceHome> with WidgetsBindingObserver {
                       finishedDistance: finishedDistance,
                       finishedDuration: finishedDuration,
                       finishedXp: finishedXp,
+                      finishedWorkout: finishedWorkout,
+                      history: workouts,
+                      achievementState: achievements,
                       finishedAchievementXp: finishedAchievementXp,
                       finishedRecordXp: finishedRecordXp,
                       elevationGain: elevation.gain,

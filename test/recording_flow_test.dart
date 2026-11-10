@@ -1,3 +1,5 @@
+import 'package:sport_platform/features/tracker/tracker_page.dart';
+
 import 'dart:async';
 import 'dart:convert';
 
@@ -139,6 +141,14 @@ void main() {
         final record =
             (data['workouts'] as List).single as Map<String, dynamic>;
         expect(record['sport'], 'Лыжи');
+        final resultPage = tester.widget<TrackerPage>(find.byType(TrackerPage));
+        expect(resultPage.finishedWorkout?.sessionId, record['sessionId']);
+        expect(
+          resultPage.finishedWorkout?.achievementIds,
+          record['achievementIds'] ?? [],
+        );
+        expect(resultPage.finishedWorkout?.xpBefore, 0);
+        expect(resultPage.finishedWorkout?.xpAfter, record['xp']);
         expect(data['xp'], record['xp'] as int);
         final breakdown = record['xpBreakdown'] as Map;
         expect(breakdown['version'], 1);
