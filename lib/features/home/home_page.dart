@@ -1,3 +1,5 @@
+import '../progress/levels_page.dart';
+
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
@@ -58,6 +60,17 @@ class HomePage extends StatelessWidget {
           level: level,
           levelStart: levelStart,
           levelEnd: levelEnd,
+        ),
+        Align(
+          alignment: Alignment.center,
+          child: TextButton.icon(
+            key: const ValueKey('open-levels'),
+            onPressed: () => Navigator.of(
+              context,
+            ).push<void>(MaterialPageRoute(builder: (_) => LevelsPage(xp: xp))),
+            icon: const Icon(Icons.stairs_outlined),
+            label: const Text('Шкала уровней'),
+          ),
         ),
         const SizedBox(height: 18),
         IntrinsicHeight(
