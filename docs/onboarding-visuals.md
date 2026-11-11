@@ -1,5 +1,7 @@
 # Иллюстрации стартовых карточек PACE
 
+Актуальная версия — прозрачные v2 и фон средствами Flutter (10 ноября 2026), см. раздел в конце. Записи v1 ниже сохраняют историю исходных иллюстраций.
+
 9 ноября 2026. Все четыре иллюстрации созданы встроенным image_gen (не CLI), 1024×1536 PNG, непрозрачный фон. Финальные файлы находятся в D:/Developments/sport_platform/assets/images/onboarding/. Исходные персонажи не изменялись.
 
 Главный экран — сгенерированная композиция телефона по рендеру текущего PaceHome с демонстрационной фикстурой, не данные аккаунта пользователя. Сообщество — иллюстративный концепт будущего раздела; функции клубов/ивентов этим изменением не реализованы. Иллюстрация +400 XP и 4→5 показывает идею развития, а не меняет формулу XP.
@@ -37,3 +39,65 @@ Use case: ads-marketing / infographic. Create ONE premium polished 2:3 portrait 
 ```text
 Use case: ui-mockup / ads-marketing. Create ONE high-quality portrait 2:3 onboarding background illustration for PACE, a sports tracking app. Show an elegant dark glass smartphone floating upright in slight three-quarter view, containing a beautifully typeset Russian COMMUNITY screen. Brand palette almost black navy #080B10, graphite panels #191C29, lime #C7F36B, white and muted grey type. Screen title 'Сообщество'. Three clearly differentiated sections or cards: 'Клубы' with a small group of runners and label 'Беговой клуб'; 'События' with a small trail landscape image and label 'Совместная тренировка'; 'Сообщества' with small sports avatars and label 'Люди твоего спорта'. Bottom navigation five simple clean icons including lime active people icon. Photorealistic 3D phone product render, editorial sports photography only inside the screen thumbnails, no people outside phone. Phone fills upper 65 percent of canvas, all section headings readable and comfortably inside screen, screen frontal enough to read; no oversized phone crop. Subtle lime rim glow behind phone, dark background smoothly fading to empty navy in bottom 35 percent for headline overlay. Keep top 10 percent quiet for app controls. No additional marketing headline, no footer, no watermarks, no illegible pseudo-text, no claims of live metrics.
 ```
+
+
+## Прозрачные иллюстрации v2 — 10 ноября 2026
+
+По просьбе пользователя фон отделён от объектов. Все четыре текущие иллюстрации подготовлены встроенным image_gen в режиме редактирования/background-extraction, transparent_background=true, не CLI/API. Применён навык imagegen. Объекты проверены в итоговом Flutter-рендере на тёмном фоне; дополнительно тест декодирует реальные пиксели PNG и проверяет прозрачные углы/фон и наличие видимого объекта.
+
+Сохранённые файлы (RGBA PNG):
+
+| Файл в D:/Developments/sport_platform/assets/images/onboarding/ | Размер |
+| --- | --- |
+| home-v2.png | 1024×1536 |
+| specializations-v2.png | 1312×1199 |
+| experience-v2.png | 1099×1431 |
+| community-v2.png | 1024×1536 |
+
+Исходные v1 не перезаписаны. В pubspec.yaml теперь перечислены только четыре v2 вместо всего каталога onboarding: старые исходники остаются в репозитории, но не дублируются в пакете приложения. Персонажи/телефоны/кольцо XP остаются предметными иллюстрациями; вокруг них прозрачность, свет на самих объектах сохранён.
+
+WelcomeStories рисует общий фон кодом: тёмный LinearGradient и мягкий лаймовый RadialGradient на весь экран. Иллюстрация теперь принадлежит содержимому страницы PageView вместе с текстом. На узких экранах она стоит над текстом; при ширине от 760 — справа от текста. BoxFit.contain сохраняет целые устройства, головы, лыжи/колёса и переход 4→5. Убрано прежнее наложение заголовков на экран телефона/уровни и затемнение иллюстраций полноэкранными масками. При нехватке высоты/увеличенном шрифте содержимое прокручивается; кнопки и прогресс остаются доступны. Тексты, порядок четырёх карточек, пропуск, завершение и вход не менялись. Сообщество остаётся концептом будущих функций, +400 и 4→5 — иллюстрация, не обещание награды.
+
+Проверка: 8 PNG-снимков настоящего Flutter-рендера (4 страницы при 390×844 и 1200×800) просмотрены. Это не проверка на телефоне и не браузерная проверка. Тестовый снимок заранее загружает картинки через precacheImage: pumpAndSettle сам по себе не гарантирует завершения асинхронного декодирования asset перед захватом.
+
+### Точные промпты v2
+
+Для home-v2 (единственный референс/edit target: home-v1.png):
+
+```text
+Use case: background-extraction. Image 1 is the edit target: existing PACE onboarding phone illustration. Extract ONLY the entire smartphone as a clean isolated cutout on a genuinely transparent alpha background. Preserve the phone silhouette, angle, black metal/glass materials, exact screen UI, all Cyrillic text, icons and colors unchanged. Do not redesign or rewrite the screen. Remove the entire surrounding navy studio background, floor, reflections on floor, haze, exterior glow and excess empty lower canvas. Keep subtle lime rim lighting ON the device itself. Keep the phone fully visible, no cropped corners, with a small transparent margin on all sides, phone occupying most of the output height. No floor, no opaque rectangle, no baked checkerboard, no added text, no watermark. Output is a transparent PNG foreground asset for a responsive Flutter story, whose navy gradient and glow will be drawn in code.
+```
+
+Для остальных трёх: один соответствующий v1 — единственный edit target. Полный промпт состоит из общего начала, указанной ниже спецификации и общего окончания.
+
+Общее начало:
+
+```text
+Use case: background-extraction. Image 1 is the sole edit target: an approved PACE onboarding illustration.
+```
+
+specializations-v2:
+
+```text
+Extract the complete group of EXACTLY THREE athletes: male Nordic skier with both skis and poles, male runner, female cyclist with complete bicycle. Preserve each face, pose, clothes, equipment and black/lime palette exactly. Remove ALL backdrop, floor and reflections between and below them, including transparent holes around poles, bicycle frame and wheels. Do not cut off heads, shoes, skis or wheels. Group tightly framed with small transparent margins, no large empty lower area.
+```
+
+experience-v2:
+
+```text
+Extract the whole existing graphic: lime metal XP ring, its original dark inset disc, exact '+400 XP' and 'ОПЫТ' lettering, 'НОВЫЙ УРОВЕНЬ', the original level chips 4 and 5 and connecting arrow. Preserve typography, spacing, colors, shapes and materials. Keep the dark disc INSIDE the ring because it is part of the object; remove the full backdrop outside the artwork. Letters below the ring must remain crisp separated foreground elements, with true transparency in the gaps. Tightly frame all artwork with small transparent margins.
+```
+
+community-v2:
+
+```text
+Extract ONLY the entire smartphone. Preserve exact phone angle, silhouette, screen layout, photos, icons and all existing Cyrillic text unchanged. Remove ALL exterior navy background, floor, reflections and outside glow. Keep the whole phone, no cropped corners, tightly framed with small transparent margins.
+```
+
+Общее окончание:
+
+```text
+Produce a genuinely transparent alpha PNG foreground cutout to composite over a Flutter-coded navy gradient. No opaque or semi-opaque background plane, no checkerboard painted into pixels, no studio haze, no background lighting, no floor shadow, no exterior marketing text or watermark. Keep soft antialiased edges and lime rim lighting only ON the objects. This is extraction, not a redesign. The app will add any atmospheric glow separately in code.
+```
+
+Новый onboarding_visual_test.dart проверяет альфа-канал всех четырёх файлов, полноэкранный фон, перелистывание/завершение при 390×844, 1200×800 и 320×640 с двойным шрифтом. Финальные 10 тестов (4 новых + 6 startup_flow_test) прошли с кодом 0, в том числе без preview-переменной и системного шрифта. git diff --check чистый. Анализ двух затронутых Dart-файлов вне ограниченной среды завершился без диагностик, код 0; подробности запуска в PACE-CONTEXT.md. Android APK с этой версией карточек пока не пересобирался; предыдущая успешная native-сборка относится к этапу исправления Kotlin.
