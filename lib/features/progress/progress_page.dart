@@ -86,6 +86,8 @@ class _ProgressPageState extends State<ProgressPage> {
                       child: Text(
                         widget.syncStatus ?? 'Прогресс сохранён на устройстве',
                         key: const ValueKey('progress-sync-status'),
+                        maxLines: 3,
+                        overflow: TextOverflow.ellipsis,
                       ),
                     ),
                   ),

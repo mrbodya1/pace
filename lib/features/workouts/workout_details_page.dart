@@ -171,6 +171,16 @@ class WorkoutDetailsPage extends StatelessWidget {
           ),
           const SizedBox(height: 6),
           Text(dateLabel, style: const TextStyle(color: muted)),
+          if (w.source == 'garmin-personal') ...[
+            const SizedBox(height: 8),
+            Text(
+              w.heartRateSamples.isEmpty
+                  ? 'Garmin · Пульс: нет данных'
+                  : 'Garmin · Пульс: есть запись',
+              key: const ValueKey('garmin-workout-source'),
+              style: const TextStyle(color: muted),
+            ),
+          ],
           const SizedBox(height: 22),
           Text(
             '${w.distance.toStringAsFixed(2).replaceAll('.', ',')} км',

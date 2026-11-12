@@ -152,6 +152,14 @@ void main() {
         );
         expect(tester.getTopLeft(reward).dx, tester.getTopLeft(title).dx);
         expect(find.text('Получено 12.11.2026 · +50 XP'), findsOneWidget);
+        final lockedRule = AchievementCatalog.rules
+            .where((r) => r.sport == 'Бег' && r.metric == 'Километры по виду')
+            .elementAt(1);
+        await tester.scrollUntilVisible(
+          find.byKey(ValueKey('achievement-${lockedRule.id}')),
+          160,
+          scrollable: find.byType(Scrollable).last,
+        );
         expect(find.byIcon(Icons.lock_rounded), findsWidgets);
         expect(tester.takeException(), isNull);
       },

@@ -1,4 +1,5 @@
 import 'services/account_service.dart';
+import 'services/garmin_import_service.dart';
 
 import 'dart:async';
 
@@ -69,6 +70,7 @@ class _PaceHomeState extends State<PaceHome> with WidgetsBindingObserver {
           : LocalStorageService.forAccount(accounts));
   bool syncingProgress = false;
   String? syncStatus;
+  final _garminRefreshGate = GarminRefreshGate();
 
   final List<Workout> workouts = [];
   final historyUpdates = ValueNotifier<List<Workout>>(const []);
@@ -261,7 +263,7 @@ class _PaceHomeState extends State<PaceHome> with WidgetsBindingObserver {
         }
         loadingProgress = false;
       });
-      unawaited(_syncProgress());
+      unawaited(_syncProgress(refreshGarmin: true));
     } catch (_) {
       if (!mounted) return;
       setState(() {
@@ -274,7 +276,10 @@ class _PaceHomeState extends State<PaceHome> with WidgetsBindingObserver {
     }
   }
 
-  Future<void> _syncProgress() async {
+  Future<void> _syncProgress({
+    bool refreshGarmin = false,
+    bool forceGarmin = false,
+  }) async {
     if (!_storageService.supportsSync || syncingProgress || loadingProgress) {
       return;
     }
@@ -285,6 +290,37 @@ class _PaceHomeState extends State<PaceHome> with WidgetsBindingObserver {
     });
     try {
       await _storageService.synchronize();
+      String? garminNotice;
+      if (accounts.hasSession &&
+          refreshGarmin &&
+          _garminRefreshGate.claim(DateTime.now(), force: forceGarmin)) {
+        try {
+          final profile = await ProfileStorageService(accounts: accounts)
+              .load();
+          final imported = await GarminImportService.importNew(
+            accounts: accounts,
+            storage: _storageService,
+            profile: profile,
+            refresh: true,
+            force: forceGarmin,
+            shouldContinue: () =>
+                mounted &&
+                _storageService.owner == accounts.progressOwner &&
+                (WidgetsBinding.instance.lifecycleState == null ||
+                    WidgetsBinding.instance.lifecycleState ==
+                        AppLifecycleState.resumed),
+          );
+          if (imported.imported > 0) {
+            await _storageService.synchronize();
+            garminNotice = 'Garmin: добавлено ${imported.imported}';
+          }
+          if (imported.conflicts > 0) {
+            garminNotice = 'Garmin: возможные дубли — ${imported.conflicts}';
+          }
+        } catch (_) {
+          garminNotice = 'Garmin пока не обновлён';
+        }
+      }
       final data = await _storageService.loadProgress();
       if (!mounted || _storageService.owner != accounts.progressOwner) return;
       final history = (data?['workouts'] as List? ?? [])
@@ -314,6 +350,7 @@ class _PaceHomeState extends State<PaceHome> with WidgetsBindingObserver {
         syncStatus = pending == 0
             ? 'Прогресс сохранён в аккаунте'
             : 'На устройстве · ожидают отправки: $pending';
+        if (garminNotice != null) syncStatus = '$syncStatus · $garminNotice';
       });
     } catch (error) {
       if (mounted) {
@@ -407,7 +444,7 @@ class _PaceHomeState extends State<PaceHome> with WidgetsBindingObserver {
       }
     }
     if (state == AppLifecycleState.resumed && !loadingProgress) {
-      unawaited(_syncProgress());
+      unawaited(_syncProgress(refreshGarmin: true));
     }
     if (mounted) setState(() {});
   }
@@ -733,6 +770,7 @@ class _PaceHomeState extends State<PaceHome> with WidgetsBindingObserver {
         final result = await _storageService.completeWorkout(
           workout: Workout(
             date: workoutStartedAt ?? DateTime.now(),
+            endedAt: DateTime.now().toUtc(),
             distance: finalDistance,
             duration: finalDuration,
             xp: earnedXp,
@@ -883,7 +921,7 @@ class _PaceHomeState extends State<PaceHome> with WidgetsBindingObserver {
         historyUpdates: historyUpdates,
         header: PaceHeader(onProfile: () => setState(() => tab = 3)),
       ),
-      const CommunityPage(),
+      CommunityPage(accounts: accounts, active: tab == 1),
       ProgressPage(
         xp: xp,
         level: level,
@@ -892,7 +930,9 @@ class _PaceHomeState extends State<PaceHome> with WidgetsBindingObserver {
         achievements: achievements,
         syncStatus: syncStatus,
         syncing: syncingProgress,
-        onSync: _storageService.supportsSync ? _syncProgress : null,
+        onSync: _storageService.supportsSync
+            ? () => _syncProgress(refreshGarmin: true, forceGarmin: true)
+            : null,
       ),
       ProfilePage(
         accounts: accounts,

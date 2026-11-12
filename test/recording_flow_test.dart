@@ -12,6 +12,8 @@ import 'support/test_app.dart';
 
 import 'package:sport_platform/models/sport_catalog.dart';
 import 'package:sport_platform/widgets/glass_widgets.dart';
+import 'package:sport_platform/widgets/glass_tabs.dart';
+import 'package:sport_platform/features/community/community_page.dart';
 
 class AlphaGps extends GeolocatorPlatform {
   final positions = StreamController<Position>.broadcast(sync: true);
@@ -192,7 +194,17 @@ void main() {
       await tester.pumpAndSettle();
       await tester.tap(find.text('Соревнования'));
       await tester.pumpAndSettle();
-      expect(find.text('Новая цель'), findsOneWidget);
+      expect(
+        DefaultTabController.of(
+          tester.element(
+            find.descendant(
+              of: find.byType(CommunityPage),
+              matching: find.byType(GlassTabs),
+            ),
+          ),
+        ).index,
+        1,
+      );
       await tester.tap(find.byKey(const ValueKey('record-workout')));
       await tester.pumpAndSettle();
       await tester.tap(find.widgetWithText(TextButton, 'Ходьба'));
@@ -213,7 +225,17 @@ void main() {
       expect(find.widgetWithText(TextButton, 'Роллеры'), findsOneWidget);
       await tester.binding.handlePopRoute();
       await tester.pumpAndSettle();
-      expect(find.text('Новая цель'), findsOneWidget);
+      expect(
+        DefaultTabController.of(
+          tester.element(
+            find.descendant(
+              of: find.byType(CommunityPage),
+              matching: find.byType(GlassTabs),
+            ),
+          ),
+        ).index,
+        1,
+      );
       expect(tester.takeException(), isNull);
     },
   );

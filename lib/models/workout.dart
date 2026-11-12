@@ -41,6 +41,23 @@ class RoutePoint {
   }
 }
 
+class HeartRateSample {
+  const HeartRateSample(this.at, this.bpm);
+  final DateTime at;
+  final int bpm;
+  Map<String, dynamic> toJson() => {
+    'at': at.toUtc().toIso8601String(),
+    'bpm': bpm,
+  };
+  factory HeartRateSample.fromJson(Map<String, dynamic> json) {
+    final bpm = json['bpm'];
+    if (bpm is! int || bpm <= 0 || bpm >= 255) {
+      throw const FormatException('Invalid heart rate sample');
+    }
+    return HeartRateSample(DateTime.parse(json['at'] as String).toUtc(), bpm);
+  }
+}
+
 class Workout {
   final DateTime date;
   final double distance;
@@ -57,7 +74,11 @@ class Workout {
   final double? elevationGain;
   final WorkoutXp? xpBreakdown;
   final DateTime? startedAt;
+  final DateTime? endedAt;
   final String? sessionId;
+  final String? source, externalId, sourceFitHash;
+  final DateTime? importedAt;
+  final List<HeartRateSample> heartRateSamples;
 
   Workout({
     required this.date,
@@ -76,7 +97,13 @@ class Workout {
     this.elevationGain,
     this.xpBreakdown,
     this.startedAt,
+    this.endedAt,
     this.sessionId,
+    this.source,
+    this.externalId,
+    this.sourceFitHash,
+    this.importedAt,
+    this.heartRateSamples = const [],
   });
 
   Workout withAchievements(
@@ -100,7 +127,13 @@ class Workout {
     elevationGain: elevationGain,
     xpBreakdown: xpBreakdown,
     startedAt: startedAt,
+    endedAt: endedAt,
     sessionId: sessionId,
+    source: source,
+    externalId: externalId,
+    sourceFitHash: sourceFitHash,
+    importedAt: importedAt,
+    heartRateSamples: heartRateSamples,
     achievementXp: reward,
     achievementIds: ids,
   );
@@ -122,8 +155,18 @@ class Workout {
     'route': route.map((point) => point.toJson()).toList(),
     if (elevationGain != null) 'elevationGain': elevationGain,
     if (xpBreakdown != null) 'xpBreakdown': xpBreakdown!.toJson(),
-    if (startedAt != null) 'startedAt': startedAt!.toIso8601String(),
+    // Keep legacy JSON stable: its digest may be a synchronization identity.
+    if (startedAt != null)
+      'startedAt': (endedAt == null ? startedAt! : startedAt!.toUtc())
+          .toIso8601String(),
+    if (endedAt != null) 'endedAt': endedAt!.toUtc().toIso8601String(),
     if (sessionId != null) 'sessionId': sessionId,
+    if (source != null) 'source': source,
+    if (externalId != null) 'externalId': externalId,
+    if (sourceFitHash != null) 'sourceFitHash': sourceFitHash,
+    if (importedAt != null) 'importedAt': importedAt!.toUtc().toIso8601String(),
+    if (heartRateSamples.isNotEmpty)
+      'heartRateSamples': heartRateSamples.map((s) => s.toJson()).toList(),
   };
 
   factory Workout.fromJson(Map<String, dynamic> json) {
@@ -135,6 +178,9 @@ class Workout {
 
     return Workout(
       date: DateTime.parse(json['date'] as String),
+      endedAt: json['endedAt'] == null
+          ? null
+          : DateTime.parse(json['endedAt'] as String).toUtc(),
       distance: (json['distance'] as num).toDouble(),
       duration: Duration(seconds: (json['durationSeconds'] as num).toInt()),
       xp: (json['xp'] as num).toInt(),
@@ -163,6 +209,18 @@ class Workout {
           ? null
           : DateTime.parse(json['startedAt'] as String),
       sessionId: json['sessionId'] as String?,
+      source: json['source'] as String?,
+      externalId: json['externalId'] as String?,
+      sourceFitHash: json['sourceFitHash'] as String?,
+      importedAt: json['importedAt'] == null
+          ? null
+          : DateTime.parse(json['importedAt'] as String).toUtc(),
+      heartRateSamples: (json['heartRateSamples'] as List? ?? [])
+          .map(
+            (v) =>
+                HeartRateSample.fromJson(Map<String, dynamic>.from(v as Map)),
+          )
+          .toList(),
     );
   }
 }

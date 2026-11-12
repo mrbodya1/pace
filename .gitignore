@@ -68,3 +68,9 @@ android/key.properties
 
 # Generated Android Gradle reports
 /android/build/
+
+# Windows-encrypted private credentials must never be committed
+*.dpapi
+
+# Local Python bytecode
+__pycache__/

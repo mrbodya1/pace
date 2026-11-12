@@ -134,6 +134,7 @@ class LocalStorageService {
     required int initialXp,
     required int selectedSport,
     required List<Workout> initialWorkouts,
+    bool clearActiveDraft = true,
   }) => _write(() async {
     if (workout.sessionId == null || workout.sessionId!.isEmpty) {
       throw ArgumentError('A completed session requires an ID');
@@ -190,7 +191,9 @@ class LocalStorageService {
     }
     // History is authoritative if the process stops between these writes.
     try {
-      if (prefs.containsKey(_draftKey)) await _remove(prefs, _draftKey);
+      if (clearActiveDraft && prefs.containsKey(_draftKey)) {
+        await _remove(prefs, _draftKey);
+      }
     } catch (_) {}
     return (
       xp: total,

@@ -42,6 +42,7 @@ module.exports = {
       record.set("snapshot", body.data);
       record.set("revision", current.revision + 1);
       app.save(record);
+      require(`${__hooks}/lib/competition.js`).sync(app,e.auth.id,body.data);
       response = {revision: current.revision + 1, data: body.data};
     });
     return e.json(200, response);

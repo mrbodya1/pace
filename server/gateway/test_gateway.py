@@ -116,7 +116,7 @@ def main():
                       ('POST', '/api/collections/pace_users/auth-with-password'),
                       ('POST', '/api/collections/pace_users/auth-refresh'),
                       ('PATCH', '/api/collections/pace_users/records/aaaaaaaaaaaaaaa'),
-                      ('GET', '/api/pace/progress'), ('PUT', '/api/pace/progress')]
+                      ('GET', '/api/pace/progress'), ('PUT', '/api/pace/progress'), ('GET', '/api/pace/garmin'), ('POST', '/api/pace/garmin/refresh'), ('GET', '/api/pace/community'), ('POST', '/api/pace/community/action')]
             for method, path in routes:
                 status, data, headers = request(method, path, None if method == 'GET' else b'{}',
                                                 {'Authorization': 'fixture-token'})
@@ -143,7 +143,7 @@ def main():
                       ('/api/health%2f..%2f..%2f_/', 'GET'),
                       ('/api/collections/pace_users/records/aaaaaaaaaaaaaaa%2f..', 'PATCH'),
                       ('/api/pace/progress;anything', 'PUT'), ('/api/health', 'TRACE'),
-                      ('/api/health', 'CONNECT'), ('/api/settings', 'OPTIONS')]
+                      ('/api/health', 'CONNECT'), ('/api/settings', 'OPTIONS'), ('/api/pace/garmin', 'POST'), ('/api/pace/garmin?owner=x', 'GET'), ('/api/pace/garmin/', 'GET'), ('/api/pace/%67armin', 'GET'), ('/api/pace/garmin/refresh', 'GET'), ('/api/pace/garmin/refresh?force=true', 'POST'), ('/api/pace/garmin/refresh/', 'POST'), ('/api/pace/community?owner=x','GET'), ('/api/pace/community/','GET'), ('/api/pace/community','POST'), ('/api/pace/community/action','GET'), ('/api/pace/community/action?x=1','POST'), ('/api/collections/pace_clubs/records','POST')]
             for path, method in denied:
                 before = len(Backend.calls)
                 status, data, _ = request(method, path)
@@ -160,7 +160,7 @@ def main():
             assert value['xff'] == '203.0.113.20' and value['forwarded'] is None, value
             checked += 1
             for method, path, length in [('POST', '/api/collections/pace_users/records', 65537),
-                                         ('PUT', '/api/pace/progress', 33554433)]:
+                                         ('PUT', '/api/pace/progress', 33554433), ('POST', '/api/pace/garmin/refresh', 1025), ('POST','/api/pace/community/action',8193)]:
                 status, data, _ = request(method, path, b'x' * length)
                 assert status == 413, (path, status, data)
                 checked += 1

@@ -93,6 +93,8 @@ class AccountService extends ChangeNotifier {
     }
   }
 
+  bool get hasSession => account != null && _token != null;
+
   String? get progressOwner =>
       account == null ? null : '$_server|${account!.id}';
 
@@ -114,6 +116,68 @@ class AccountService extends ChangeNotifier {
     );
     if (progressOwner != owner || _token != token) {
       throw const AccountError('Аккаунт изменился. Повтори синхронизацию.');
+    }
+    return result;
+  }
+
+  Future<Map<String, dynamic>> requestGarminRefresh({
+    required String owner,
+    bool force = false,
+  }) async {
+    final token = _token;
+    if (progressOwner != owner || token == null) {
+      throw const AccountError('Аккаунт изменился. Войди снова.');
+    }
+    final result = await _request(
+      'garmin-refresh',
+      {'force': force},
+      token: token,
+      method: 'POST',
+      customPath: '/api/pace/garmin/refresh',
+    );
+    if (progressOwner != owner || _token != token) {
+      throw const AccountError('Аккаунт изменился. Повтори синхронизацию.');
+    }
+    return result;
+  }
+
+  Future<Map<String, dynamic>> requestGarmin({required String owner}) async {
+    final token = _token;
+    if (progressOwner != owner || token == null) {
+      throw const AccountError('Аккаунт изменился. Войди снова.');
+    }
+    final result = await _request(
+      'garmin',
+      {},
+      token: token,
+      method: 'GET',
+      customPath: '/api/pace/garmin',
+    );
+    if (progressOwner != owner || _token != token) {
+      throw const AccountError('Аккаунт изменился. Повтори синхронизацию.');
+    }
+    return result;
+  }
+
+  Future<Map<String, dynamic>> requestCommunity({
+    Map<String, dynamic>? action,
+  }) async {
+    final owner = progressOwner;
+    final token = _token;
+    if (owner == null || token == null) {
+      throw const AccountError('Войди в аккаунт PACE.');
+    }
+    final result = await _request(
+      'community',
+      action ?? {},
+      token: token,
+      method: action == null ? 'GET' : 'POST',
+      customPath: action == null
+          ? '/api/pace/community'
+          : '/api/pace/community/action',
+    );
+    if (progressOwner != owner || _token != token) {
+      throw const AccountError('Аккаунт изменился. Открой раздел заново.');
     }
     return result;
   }
@@ -358,13 +422,31 @@ class AccountService extends ChangeNotifier {
             : 'Нет связи с сервером. Проверь интернет и повтори попытку.',
       );
     }
-    if (customPath != null && response.statusCode == 409) {
+    if (action == 'progress' && response.statusCode == 409) {
       throw ProgressConflict();
     }
-    if (customPath != null && response.statusCode == 404) {
+    if (customPath != null &&
+        action != 'community' &&
+        response.statusCode == 404) {
       throw const AccountError(
         'Перезапусти сервер PACE, чтобы включить синхронизацию тренировок.',
       );
+    }
+    if (action == 'community' && response.statusCode >= 400) {
+      String message = 'Не удалось выполнить действие. Повтори попытку.';
+      if (response.statusCode == 404) {
+        message = 'Клуб или событие недоступно. Обнови список.';
+      }
+      if (response.statusCode == 401) message = 'Войди в аккаунт PACE снова.';
+      if (const [400, 403].contains(response.statusCode)) {
+        try {
+          final value = jsonDecode(utf8.decode(response.bodyBytes))['message'];
+          if (value is String && value.length <= 240) message = value;
+        } catch (_) {
+          /* Keep the safe fallback. */
+        }
+      }
+      throw AccountError(message);
     }
     if (action == 'auth-refresh' &&
         const [400, 401, 403].contains(response.statusCode)) {

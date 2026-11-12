@@ -59,6 +59,22 @@ http://:8091 {
 			method PATCH OPTIONS
 			expression `{http.request.orig_uri}.matches('^/api/collections/pace_users/records/[a-z0-9]{15}$')`
 		}
+		@garminRefresh {
+			method POST OPTIONS
+			expression `{http.request.orig_uri} == '/api/pace/garmin/refresh'`
+		}
+		@garmin {
+			method GET OPTIONS
+			expression `{http.request.orig_uri} == '/api/pace/garmin'`
+		}
+		@communityRead {
+			method GET OPTIONS
+			expression `{http.request.orig_uri} == '/api/pace/community'`
+		}
+		@communityWrite {
+			method POST OPTIONS
+			expression `{http.request.orig_uri} == '/api/pace/community/action'`
+		}
 		@progress {
 			method GET PUT OPTIONS
 			expression `{http.request.orig_uri} == '/api/pace/progress'`
@@ -78,6 +94,30 @@ http://:8091 {
 		handle @profile {
 			request_body {
 				max_size 64KB
+			}
+			import pace_upstream
+		}
+		handle @garminRefresh {
+			request_body {
+				max_size 1KB
+			}
+			import pace_upstream
+		}
+		handle @garmin {
+			request_body {
+				max_size 64KB
+			}
+			import pace_upstream
+		}
+		handle @communityRead {
+			request_body {
+				max_size 8KB
+			}
+			import pace_upstream
+		}
+		handle @communityWrite {
+			request_body {
+				max_size 8KB
 			}
 			import pace_upstream
 		}
