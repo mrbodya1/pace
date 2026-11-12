@@ -70,6 +70,28 @@ with tempfile.TemporaryDirectory(prefix='garmin-api-',dir=build) as temporary:
   (private/'inbox.json').write_text(json.dumps(inbox),encoding='utf-8')
   assert req('GET','/api/pace/garmin',token=token)[0]==503
   assert req('POST','/api/pace/garmin',{},token)[0] in [404,405]
-  print('GARMIN_INBOX_API_TESTS_PASSED=13; isolated temporary database; no real Garmin data')
+  assert req('GET','/api/pace/garmin/status')[0]==401
+  code,status=req('GET','/api/pace/garmin/status',token=token)
+  assert code==200 and status['available'] and set(status)=={'available','refresh'}
+  assert len(json.dumps(status))<256 and 'activities' not in status and owner not in json.dumps(status)
+  assert req('GET','/api/pace/garmin/status',token=other_token)[1]=={'available':False,'refresh':{'phase':'idle'}}
+  from datetime import datetime,timezone,timedelta
+  now=datetime.now(timezone.utc).isoformat()
+  (private/'refresh-state.json').write_text(json.dumps({'phase':'error','startedAt':now,'completedAt':now}),encoding='utf-8')
+  assert req('POST','/api/pace/garmin/refresh',{},token)[1]['phase']=='error'
+  assert req('POST','/api/pace/garmin/refresh',{'force':True},token)[1]['phase']=='error'
+  assert (private/'calls').read_text()=='1'
+  old=(datetime.now(timezone.utc)-timedelta(seconds=15)).isoformat()
+  (private/'refresh-state.json').write_text(json.dumps({'phase':'error','startedAt':old,'completedAt':old}),encoding='utf-8')
+  assert req('POST','/api/pace/garmin/refresh',{},token)[1]['phase']=='error'
+  assert (private/'calls').read_text()=='1'
+  code,retried=req('POST','/api/pace/garmin/refresh',{'force':True},token)
+  assert code==202 and retried.get('phase')=='running',(code,retried)
+  for attempt in range(50):
+   if (private/'calls').read_text()=='2':break
+   time.sleep(.1)
+  else:raise AssertionError('manual retry did not launch after error cooldown')
+  time.sleep(.5)
+  print('GARMIN_INBOX_API_TESTS_PASSED=23; isolated temporary database; no real Garmin data')
  finally:
   proc.terminate();proc.wait(timeout=10);log.close()

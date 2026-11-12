@@ -67,6 +67,10 @@ http://:8091 {
 			method GET OPTIONS
 			expression `{http.request.orig_uri} == '/api/pace/garmin'`
 		}
+		@garminStatus {
+			method GET OPTIONS
+			expression `{http.request.orig_uri} == '/api/pace/garmin/status'`
+		}
 		@communityRead {
 			method GET OPTIONS
 			expression `{http.request.orig_uri} == '/api/pace/community'`
@@ -106,6 +110,12 @@ http://:8091 {
 		handle @garmin {
 			request_body {
 				max_size 64KB
+			}
+			import pace_upstream
+		}
+		handle @garminStatus {
+			request_body {
+				max_size 1KB
 			}
 			import pace_upstream
 		}

@@ -116,7 +116,7 @@ def main():
                       ('POST', '/api/collections/pace_users/auth-with-password'),
                       ('POST', '/api/collections/pace_users/auth-refresh'),
                       ('PATCH', '/api/collections/pace_users/records/aaaaaaaaaaaaaaa'),
-                      ('GET', '/api/pace/progress'), ('PUT', '/api/pace/progress'), ('GET', '/api/pace/garmin'), ('POST', '/api/pace/garmin/refresh'), ('GET', '/api/pace/community'), ('POST', '/api/pace/community/action')]
+                      ('GET', '/api/pace/progress'), ('PUT', '/api/pace/progress'), ('GET', '/api/pace/garmin'), ('POST', '/api/pace/garmin/refresh'), ('GET', '/api/pace/community'), ('POST', '/api/pace/community/action'), ('GET','/api/pace/garmin/status')]
             for method, path in routes:
                 status, data, headers = request(method, path, None if method == 'GET' else b'{}',
                                                 {'Authorization': 'fixture-token'})
@@ -143,7 +143,7 @@ def main():
                       ('/api/health%2f..%2f..%2f_/', 'GET'),
                       ('/api/collections/pace_users/records/aaaaaaaaaaaaaaa%2f..', 'PATCH'),
                       ('/api/pace/progress;anything', 'PUT'), ('/api/health', 'TRACE'),
-                      ('/api/health', 'CONNECT'), ('/api/settings', 'OPTIONS'), ('/api/pace/garmin', 'POST'), ('/api/pace/garmin?owner=x', 'GET'), ('/api/pace/garmin/', 'GET'), ('/api/pace/%67armin', 'GET'), ('/api/pace/garmin/refresh', 'GET'), ('/api/pace/garmin/refresh?force=true', 'POST'), ('/api/pace/garmin/refresh/', 'POST'), ('/api/pace/community?owner=x','GET'), ('/api/pace/community/','GET'), ('/api/pace/community','POST'), ('/api/pace/community/action','GET'), ('/api/pace/community/action?x=1','POST'), ('/api/collections/pace_clubs/records','POST')]
+                      ('/api/health', 'CONNECT'), ('/api/settings', 'OPTIONS'), ('/api/pace/garmin', 'POST'), ('/api/pace/garmin?owner=x', 'GET'), ('/api/pace/garmin/', 'GET'), ('/api/pace/%67armin', 'GET'), ('/api/pace/garmin/refresh', 'GET'), ('/api/pace/garmin/refresh?force=true', 'POST'), ('/api/pace/garmin/refresh/', 'POST'), ('/api/pace/community?owner=x','GET'), ('/api/pace/community/','GET'), ('/api/pace/community','POST'), ('/api/pace/community/action','GET'), ('/api/pace/community/action?x=1','POST'), ('/api/collections/pace_clubs/records','POST'), ('/api/pace/garmin/status?x=1','GET'), ('/api/pace/garmin/status/','GET'), ('/api/pace/garmin/%73tatus','GET'), ('/api/pace/garmin/status','POST')]
             for path, method in denied:
                 before = len(Backend.calls)
                 status, data, _ = request(method, path)

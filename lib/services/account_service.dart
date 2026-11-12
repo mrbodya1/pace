@@ -141,7 +141,10 @@ class AccountService extends ChangeNotifier {
     return result;
   }
 
-  Future<Map<String, dynamic>> requestGarmin({required String owner}) async {
+  Future<Map<String, dynamic>> requestGarmin({
+    required String owner,
+    bool statusOnly = false,
+  }) async {
     final token = _token;
     if (progressOwner != owner || token == null) {
       throw const AccountError('Аккаунт изменился. Войди снова.');
@@ -151,7 +154,7 @@ class AccountService extends ChangeNotifier {
       {},
       token: token,
       method: 'GET',
-      customPath: '/api/pace/garmin',
+      customPath: statusOnly ? '/api/pace/garmin/status' : '/api/pace/garmin',
     );
     if (progressOwner != owner || _token != token) {
       throw const AccountError('Аккаунт изменился. Повтори синхронизацию.');
@@ -297,8 +300,8 @@ class AccountService extends ChangeNotifier {
       id: current.id,
       email: current.email,
       name: record['name'] as String,
-      profile: current.profile,
-      supportsProfile: current.supportsProfile,
+      profile: account!.profile,
+      supportsProfile: account!.supportsProfile,
     );
     notifyListeners();
   }
@@ -334,7 +337,7 @@ class AccountService extends ChangeNotifier {
     account = PaceAccount(
       id: current.id,
       email: current.email,
-      name: current.name,
+      name: account!.name,
       profile: Map<String, dynamic>.unmodifiable(profile),
       supportsProfile: true,
     );

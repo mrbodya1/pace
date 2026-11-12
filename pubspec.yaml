@@ -1,5 +1,5 @@
 name: sport_platform
-description: "A new Flutter project."
+description: "PACE: workouts, progress and sports community."
 # The following line prevents the package from being accidentally published to
 # pub.dev using `flutter pub publish`. This is preferred for private packages.
 publish_to: 'none' # Remove this line if you wish to publish to pub.dev

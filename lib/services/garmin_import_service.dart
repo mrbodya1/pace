@@ -139,17 +139,23 @@ abstract final class GarminImportService {
     }
     if (refresh) {
       // First read is cheap: unlinked users must never start the shared collector.
-      final linked = await accounts.requestGarmin(owner: owner);
+      final linked = await accounts.requestGarmin(
+        owner: owner,
+        statusOnly: true,
+      );
       if (linked['available'] != true) return (imported: 0, conflicts: 0);
       await accounts.requestGarminRefresh(owner: owner, force: force);
     }
-    var response = await accounts.requestGarmin(owner: owner);
+    var response = await accounts.requestGarmin(
+      owner: owner,
+      statusOnly: refresh,
+    );
     for (
       var poll = 0;
       refresh && (response['refresh'] as Map?)?['phase'] == 'running';
       poll++
     ) {
-      if (poll >= 45) {
+      if (poll >= 90) {
         throw const AccountError(
           'Garmin ещё обновляется. Повтори обновление позже.',
         );
@@ -161,11 +167,13 @@ abstract final class GarminImportService {
       if (shouldContinue != null && !shouldContinue()) {
         return (imported: 0, conflicts: 0);
       }
-      response = await accounts.requestGarmin(owner: owner);
+      response = await accounts.requestGarmin(owner: owner, statusOnly: true);
     }
     if (refresh && (response['refresh'] as Map?)?['phase'] == 'error') {
       throw const AccountError('Не удалось обновить Garmin. Повтори позже.');
     }
+    if (response['available'] != true) return (imported: 0, conflicts: 0);
+    if (refresh) response = await accounts.requestGarmin(owner: owner);
     if (response['available'] != true) return (imported: 0, conflicts: 0);
     final since = DateTime.parse(response['sinceUtc'] as String).toUtc();
     final raw = response['activities'] as List;

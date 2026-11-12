@@ -1,11 +1,11 @@
 {
-    "name": "sport_platform",
-    "short_name": "sport_platform",
+    "name": "PACE",
+    "short_name": "PACE",
     "start_url": ".",
     "display": "standalone",
-    "background_color": "#0175C2",
-    "theme_color": "#0175C2",
-    "description": "A new Flutter project.",
+    "background_color": "#080B10",
+    "theme_color": "#080B10",
+    "description": "PACE: workouts, progress and sports community.",
     "orientation": "portrait-primary",
     "prefer_related_applications": false,
     "icons": [

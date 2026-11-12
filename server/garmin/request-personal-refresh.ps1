@@ -18,10 +18,12 @@ try {
             if (($state.phase -eq 'running' -or $state.phase -eq 'starting') -and ($now-$started).TotalSeconds -lt 300) {
                 Write-Output '{"phase":"running"}'; exit 0
             }
-            if ($state.phase -eq 'ready') {
+            if ($state.phase -eq 'ready' -or $state.phase -eq 'error') {
                 $completed = [DateTimeOffset]::Parse($state.completedAt)
                 $minimum = if ($ForceRefresh) { 10 } else { 300 }
-                if (($now-$completed).TotalSeconds -lt $minimum) { Write-Output '{"phase":"ready"}'; exit 0 }
+                if (($now-$completed).TotalSeconds -lt $minimum) {
+                    Write-Output ('{"phase":"' + $state.phase + '"}'); exit 0
+                }
             }
         } catch { }
     }
@@ -32,7 +34,7 @@ try {
     $temporary = $stateFile + '.launch.tmp'
     $utf8 = New-Object System.Text.UTF8Encoding($false)
     [IO.File]::WriteAllText($temporary,($state | ConvertTo-Json -Compress),$utf8)
-    if (Test-Path -LiteralPath $stateFile) { [IO.File]::Replace($temporary,$stateFile,$null) }
+    if (Test-Path -LiteralPath $stateFile) { [IO.File]::Replace($temporary,$stateFile,[NullString]::Value) }
     else { [IO.File]::Move($temporary,$stateFile) }
     $log = Join-Path $private ('refresh-' + (Get-Date -Format 'yyyyMMdd-HHmmssfff') + '.log')
     $child = Start-Process -FilePath $python -ArgumentList @('"' + $collector + '"', '--refresh') -WindowStyle Hidden -PassThru -RedirectStandardOutput $log -RedirectStandardError ($log+'.stderr')

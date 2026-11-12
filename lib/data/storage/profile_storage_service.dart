@@ -7,12 +7,17 @@ import '../../services/account_service.dart';
 import '../../models/participant_sex.dart';
 
 class ProfileStorageService {
-  ProfileStorageService({AccountService? accounts})
-    : accounts = accounts ?? AccountService.instance;
+  ProfileStorageService({
+    AccountService? accounts,
+    Future<SharedPreferences> Function()? preferences,
+  }) : accounts = accounts ?? AccountService.instance,
+       _preferences = preferences ?? SharedPreferences.getInstance;
   final AccountService accounts;
+  final Future<SharedPreferences> Function() _preferences;
   String get _owner => "${accounts.baseUrl}|${accounts.account!.id}";
   static const _key = 'pace_profile_data';
   static Future<void>? _pending;
+  static bool _claimNeedsReload = false;
 
   Future<Map<String, dynamic>> load() async {
     await accounts.initialize();
@@ -30,7 +35,11 @@ class ProfileStorageService {
   }
 
   Future<Map<String, dynamic>> _read() async {
-    final prefs = await SharedPreferences.getInstance();
+    final prefs = await _preferences();
+    if (_claimNeedsReload) {
+      await prefs.reload();
+      _claimNeedsReload = false;
+    }
     final account = accounts.account;
     if (account != null) {
       if (account.profile != null) {
@@ -39,7 +48,32 @@ class ProfileStorageService {
       final owner = prefs.getString('pace_profile_legacy_owner');
       if (owner != null && owner != _owner) return {'name': account.name};
       // Claim the pre-account device profile once; never share it with another account.
-      await prefs.setString('pace_profile_legacy_owner', _owner);
+      if (owner == null) {
+        final expectedOwner = _owner;
+        try {
+          if (!await prefs.setString(
+            'pace_profile_legacy_owner',
+            expectedOwner,
+          )) {
+            throw StateError('Profile owner was not saved');
+          }
+        } catch (_) {
+          // A failed platform write can still change the in-memory preferences.
+          _claimNeedsReload = true;
+          try {
+            await prefs.reload();
+            _claimNeedsReload = false;
+          } catch (_) {
+            /* Retry recovery on the next read. */
+          }
+          rethrow;
+        }
+        if (accounts.account?.id != account.id) {
+          throw const AccountError(
+            'Аккаунт изменился. Повтори загрузку профиля.',
+          );
+        }
+      }
     }
     final raw = prefs.getString(_key);
     if (raw == null) return {};
@@ -91,7 +125,7 @@ class ProfileStorageService {
       await accounts.updateProfile(value);
       return;
     }
-    final prefs = await SharedPreferences.getInstance();
+    final prefs = await _preferences();
     final saved = await prefs.setString(_key, jsonEncode(profile));
     if (!saved) throw StateError('Profile was not saved');
   }

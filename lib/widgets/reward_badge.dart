@@ -152,6 +152,8 @@ class RewardBadge extends StatelessWidget {
     final folder = runningDistance ? 'running-distance' : 'materials';
     final image = Image.asset(
       'assets/images/achievements/$folder/${material.name}.png',
+      cacheWidth: (size * MediaQuery.devicePixelRatioOf(context)).ceil(),
+      cacheHeight: (height * MediaQuery.devicePixelRatioOf(context)).ceil(),
       fit: BoxFit.fill,
       filterQuality: FilterQuality.medium,
       excludeFromSemantics: true,

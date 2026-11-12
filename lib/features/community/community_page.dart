@@ -318,7 +318,13 @@ class _CommunityPageState extends State<CommunityPage> {
             controller: searchInput,
             maxLength: 80,
             onChanged: (value) {
-              setState(() => search = value);
+              // Invalidate the old query immediately, before the debounce fires.
+              generation++;
+              setState(() {
+                search = value;
+                loading = true;
+                error = null;
+              });
               searchDelay?.cancel();
               searchDelay = Timer(
                 const Duration(milliseconds: 400),
@@ -342,6 +348,7 @@ class _CommunityPageState extends State<CommunityPage> {
                 checkmarkColor: lime,
                 labelStyle: TextStyle(color: !mine ? lime : muted),
                 onSelected: (_) {
+                  searchDelay?.cancel();
                   setState(() => mine = false);
                   unawaited(_load());
                 },
@@ -353,6 +360,7 @@ class _CommunityPageState extends State<CommunityPage> {
                 checkmarkColor: lime,
                 labelStyle: TextStyle(color: mine ? lime : muted),
                 onSelected: (_) {
+                  searchDelay?.cancel();
                   setState(() => mine = true);
                   unawaited(_load());
                 },
@@ -378,7 +386,7 @@ class _CommunityPageState extends State<CommunityPage> {
               ),
             ),
           const SizedBox(height: 10),
-          if (data.isEmpty)
+          if (data.isEmpty && !loading)
             GlassPanel(
               child: Column(
                 children: [
