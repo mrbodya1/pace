@@ -12,12 +12,14 @@ class AchievementsView extends StatefulWidget {
     super.key,
     required this.workouts,
     this.state,
+    this.aggregateProgress,
     this.initialSport,
     this.initialMetric,
     this.selectedId,
   });
   final List<Workout> workouts;
   final AchievementState? state;
+  final AchievementProgress? aggregateProgress;
   final String? initialSport, initialMetric, selectedId;
   @override
   State<AchievementsView> createState() => _AchievementsViewState();
@@ -30,7 +32,8 @@ class _AchievementsViewState extends State<AchievementsView> {
   Widget build(BuildContext context) {
     final state =
         widget.state ?? AchievementEngine.restore(null, widget.workouts);
-    final progress = AchievementProgress(widget.workouts);
+    final progress =
+        widget.aggregateProgress ?? AchievementProgress(widget.workouts);
     final rules = AchievementCatalog.rules
         .where(
           (r) =>

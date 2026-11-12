@@ -5,16 +5,19 @@ import 'package:flutter/material.dart';
 import '../../app/theme/pace_theme.dart';
 import '../../models/personal_record.dart';
 import '../../models/workout.dart';
+import '../../services/personal_record_engine.dart';
 import '../../widgets/glass_widgets.dart';
 
 class RecordsView extends StatefulWidget {
   const RecordsView({
     super.key,
     required this.workouts,
+    this.recordState,
     this.initialSport,
     this.selectedId,
   });
   final List<Workout> workouts;
+  final Map<String, dynamic>? recordState;
   final String? initialSport, selectedId;
   @override
   State<RecordsView> createState() => _RecordsViewState();
@@ -24,7 +27,9 @@ class _RecordsViewState extends State<RecordsView> {
   late String? sport = widget.initialSport;
   @override
   Widget build(BuildContext context) {
-    final best = <String, PersonalRecord>{};
+    final best = widget.recordState == null
+        ? <String, PersonalRecord>{}
+        : PersonalRecordEngine.restore(widget.recordState, []);
     for (final workout in widget.workouts) {
       for (final r in workout.records) {
         if (!best.containsKey(r.id) ||

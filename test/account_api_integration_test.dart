@@ -34,13 +34,18 @@ void main() {
         final port = socket.port;
         await socket.close();
         final url = Uri.parse('http://127.0.0.1:$port');
-        server = await Process.start(executable!, [
-          'serve',
-          '--http=127.0.0.1:$port',
-          '--dir=${temporary.path}${Platform.pathSeparator}data',
-          '--migrationsDir=${Directory.current.path}${Platform.pathSeparator}server${Platform.pathSeparator}pb_migrations',
-          '--hooksDir=${Directory.current.path}${Platform.pathSeparator}server${Platform.pathSeparator}pb_hooks',
-        ], workingDirectory: temporary.path);
+        server = await Process.start(
+          executable!,
+          [
+            'serve',
+            '--http=127.0.0.1:$port',
+            '--dir=${temporary.path}${Platform.pathSeparator}data',
+            '--migrationsDir=${Directory.current.path}${Platform.pathSeparator}server${Platform.pathSeparator}pb_migrations',
+            '--hooksDir=${Directory.current.path}${Platform.pathSeparator}server${Platform.pathSeparator}pb_hooks',
+          ],
+          workingDirectory: temporary.path,
+          environment: {'PACE_ENABLE_LEGACY_API': '1'},
+        );
         // Consume logs without printing bootstrap URLs or authentication material.
         unawaited(server.stdout.drain<void>());
         unawaited(server.stderr.drain<void>());
@@ -101,7 +106,10 @@ void main() {
         expect(recovered['city'], 'Екатеринбург');
         expect(recovered['specializationId'], 'skier');
         expect(recovered['sex'], 'female');
-        final progress = LocalStorageService.forAccount(restored);
+        final progress = LocalStorageService(
+          owner: restored.progressOwner,
+          remote: AccountProgressRemote(restored),
+        );
         await progress.completeWorkout(
           workout: Workout(
             date: DateTime.utc(2026, 11, 10),
@@ -140,7 +148,10 @@ void main() {
           throwsA(isA<AccountError>()),
         );
         SharedPreferences.setMockInitialValues({});
-        final freshProgress = LocalStorageService.forAccount(restored);
+        final freshProgress = LocalStorageService(
+          owner: restored.progressOwner,
+          remote: AccountProgressRemote(restored),
+        );
         await freshProgress.synchronize();
         expect((await freshProgress.loadProgress())!['xp'], 610);
         expect(

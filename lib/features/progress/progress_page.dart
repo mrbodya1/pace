@@ -11,6 +11,8 @@ import 'achievements_view.dart';
 import '../../models/sport_catalog.dart';
 import '../../widgets/common_widgets.dart';
 import '../workouts/workout_details_page.dart';
+import '../workouts/paged_workout_history.dart';
+import '../../data/storage/local_storage_service.dart';
 
 class ProgressPage extends StatefulWidget {
   const ProgressPage({
@@ -23,6 +25,9 @@ class ProgressPage extends StatefulWidget {
     this.syncStatus,
     this.onSync,
     this.syncing = false,
+    this.storage,
+    this.aggregateProgress,
+    this.recordState,
   });
   final int xp, level;
   final List<Workout> workouts;
@@ -31,6 +36,9 @@ class ProgressPage extends StatefulWidget {
   final String? syncStatus;
   final Future<void> Function()? onSync;
   final bool syncing;
+  final LocalStorageService? storage;
+  final AchievementProgress? aggregateProgress;
+  final Map<String, dynamic>? recordState;
 
   @override
   State<ProgressPage> createState() => _ProgressPageState();
@@ -41,19 +49,23 @@ class _ProgressPageState extends State<ProgressPage> {
 
   @override
   Widget build(BuildContext context) {
-    final totalDistance = widget.workouts.fold<double>(
-      0,
-      (sum, w) => sum + w.distance,
-    );
-    final totalDuration = widget.workouts.fold<Duration>(
-      Duration.zero,
-      (sum, w) => sum + w.duration,
-    );
+    final totalDistance =
+        widget.aggregateProgress?.totalsFor()[2] ??
+        widget.workouts.fold<double>(0, (sum, w) => sum + w.distance);
+    final totalDuration = widget.aggregateProgress == null
+        ? widget.workouts.fold<Duration>(
+            Duration.zero,
+            (sum, w) => sum + w.duration,
+          )
+        : Duration(
+            seconds: (widget.aggregateProgress!.totalsFor()[1] * 3600).round(),
+          );
     final sports =
-        widget.workouts
-            .map((w) => SportCatalog.displayName(w.sport))
-            .toSet()
-            .toList()
+        widget.aggregateProgress?.sportNames ??
+              widget.workouts
+                  .map((w) => SportCatalog.displayName(w.sport))
+                  .toSet()
+                  .toList()
           ..sort();
     final filtered = widget.workouts
         .where(
@@ -124,7 +136,7 @@ class _ProgressPageState extends State<ProgressPage> {
                     const SizedBox(height: 12),
                     statCard(
                       'ТРЕНИРОВКИ',
-                      '${widget.workouts.length}',
+                      '${widget.aggregateProgress?.totalsFor()[0].toInt() ?? widget.workouts.length}',
                       Icons.directions_run_rounded,
                     ),
                     const SizedBox(height: 12),
@@ -142,57 +154,69 @@ class _ProgressPageState extends State<ProgressPage> {
                     ),
                   ],
                 ),
-                ListView(
-                  key: const PageStorageKey('progress-history'),
-                  padding: const EdgeInsets.fromLTRB(22, 24, 22, 140),
-                  children: [
-                    if (sports.isNotEmpty) ...[
-                      DropdownButtonFormField<String>(
-                        initialValue: sport ?? '',
-                        isExpanded: true,
-                        decoration: const InputDecoration(
-                          labelText: 'Вид спорта',
-                        ),
-                        items: [
-                          const DropdownMenuItem(
-                            value: '',
-                            child: Text('Все виды спорта'),
+                if (widget.storage?.pagedHistory == true)
+                  PagedWorkoutHistory(
+                    storage: widget.storage!,
+                    sports: sports,
+                    updates: widget.historyUpdates,
+                  )
+                else
+                  ListView(
+                    key: const PageStorageKey('progress-history'),
+                    padding: const EdgeInsets.fromLTRB(22, 24, 22, 140),
+                    children: [
+                      if (sports.isNotEmpty) ...[
+                        DropdownButtonFormField<String>(
+                          initialValue: sport ?? '',
+                          isExpanded: true,
+                          decoration: const InputDecoration(
+                            labelText: 'Вид спорта',
                           ),
-                          for (final name in sports)
-                            DropdownMenuItem(value: name, child: Text(name)),
-                        ],
-                        onChanged: (value) =>
-                            setState(() => sport = value == '' ? null : value),
-                      ),
-                      const SizedBox(height: 20),
-                    ],
-                    if (filtered.isEmpty)
-                      emptyCard('Здесь появятся твои записанные тренировки.')
-                    else
-                      for (final w in filtered)
-                        Semantics(
-                          button: true,
-                          label: 'Открыть тренировку ${w.sport}',
-                          child: GestureDetector(
-                            onTap: () => Navigator.of(context).push<void>(
-                              MaterialPageRoute(
-                                builder: (_) => WorkoutDetailsPage(
-                                  workout: w,
-                                  history: widget.workouts,
-                                  historyUpdates: widget.historyUpdates,
+                          items: [
+                            const DropdownMenuItem(
+                              value: '',
+                              child: Text('Все виды спорта'),
+                            ),
+                            for (final name in sports)
+                              DropdownMenuItem(value: name, child: Text(name)),
+                          ],
+                          onChanged: (value) => setState(
+                            () => sport = value == '' ? null : value,
+                          ),
+                        ),
+                        const SizedBox(height: 20),
+                      ],
+                      if (filtered.isEmpty)
+                        emptyCard('Здесь появятся твои записанные тренировки.')
+                      else
+                        for (final w in filtered)
+                          Semantics(
+                            button: true,
+                            label: 'Открыть тренировку ${w.sport}',
+                            child: GestureDetector(
+                              onTap: () => Navigator.of(context).push<void>(
+                                MaterialPageRoute(
+                                  builder: (_) => WorkoutDetailsPage(
+                                    workout: w,
+                                    history: widget.workouts,
+                                    historyUpdates: widget.historyUpdates,
+                                  ),
                                 ),
                               ),
+                              child: workoutCard(w),
                             ),
-                            child: workoutCard(w),
                           ),
-                        ),
-                  ],
-                ),
+                    ],
+                  ),
                 AchievementsView(
+                  aggregateProgress: widget.aggregateProgress,
                   workouts: widget.workouts,
                   state: widget.achievements,
                 ),
-                RecordsView(workouts: widget.workouts),
+                RecordsView(
+                  workouts: widget.workouts,
+                  recordState: widget.recordState,
+                ),
               ],
             ),
           ),

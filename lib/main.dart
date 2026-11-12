@@ -113,6 +113,8 @@ class _PaceHomeState extends State<PaceHome> with WidgetsBindingObserver {
   int finishedAchievementXp = 0;
   int finishedRecordXp = 0;
   AchievementState achievements = AchievementState();
+  AchievementProgress? aggregateProgress;
+  Map<String, dynamic>? recordState;
   String finishedSport = 'Бег';
   bool finishedWasSaved = false;
 
@@ -231,6 +233,14 @@ class _PaceHomeState extends State<PaceHome> with WidgetsBindingObserver {
           data?['achievements'],
           savedWorkouts,
         );
+        aggregateProgress = data?['totals'] is Map
+            ? AchievementProgress.fromJson(
+                Map<String, dynamic>.from(data!['totals'] as Map),
+              )
+            : null;
+        recordState = data?['records'] is Map
+            ? Map<String, dynamic>.from(data!['records'] as Map)
+            : null;
         workouts
           ..clear()
           ..addAll(savedWorkouts);
@@ -334,6 +344,14 @@ class _PaceHomeState extends State<PaceHome> with WidgetsBindingObserver {
           data?['achievements'],
           history,
         );
+        aggregateProgress = data?['totals'] is Map
+            ? AchievementProgress.fromJson(
+                Map<String, dynamic>.from(data!['totals'] as Map),
+              )
+            : null;
+        recordState = data?['records'] is Map
+            ? Map<String, dynamic>.from(data!['records'] as Map)
+            : null;
         workouts
           ..clear()
           ..addAll(history);
@@ -789,6 +807,16 @@ class _PaceHomeState extends State<PaceHome> with WidgetsBindingObserver {
         if (!mounted) return;
         xp = result.xp;
         achievements = result.achievements;
+        final current = await _storageService.loadProgress();
+        if (!mounted) return;
+        aggregateProgress = current?['totals'] is Map
+            ? AchievementProgress.fromJson(
+                Map<String, dynamic>.from(current!['totals'] as Map),
+              )
+            : null;
+        recordState = current?['records'] is Map
+            ? Map<String, dynamic>.from(current!['records'] as Map)
+            : null;
         committed = result.workouts
             .where((w) => w.sessionId == workoutSessionId)
             .single;
@@ -913,6 +941,8 @@ class _PaceHomeState extends State<PaceHome> with WidgetsBindingObserver {
   Widget build(BuildContext context) {
     final pages = [
       HomePage(
+        aggregateProgress: aggregateProgress,
+        storage: _storageService.pagedHistory ? _storageService : null,
         xp: xp,
         level: level,
         levelStart: levelStart,
@@ -923,6 +953,9 @@ class _PaceHomeState extends State<PaceHome> with WidgetsBindingObserver {
       ),
       CommunityPage(accounts: accounts, active: tab == 1),
       ProgressPage(
+        storage: _storageService.pagedHistory ? _storageService : null,
+        aggregateProgress: aggregateProgress,
+        recordState: recordState,
         xp: xp,
         level: level,
         workouts: workouts,
@@ -985,6 +1018,8 @@ class _PaceHomeState extends State<PaceHome> with WidgetsBindingObserver {
                       finishedWorkout: finishedWorkout,
                       history: workouts,
                       achievementState: achievements,
+                      aggregateProgress: aggregateProgress,
+                      recordState: recordState,
                       finishedAchievementXp: finishedAchievementXp,
                       finishedRecordXp: finishedRecordXp,
                       elevationGain: elevation.gain,

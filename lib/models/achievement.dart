@@ -1939,6 +1939,50 @@ class AchievementProgress {
   }
   final _totals = <String, List<double>>{};
   final _sports = <String>{};
+  AchievementProgress.fromJson(Map<String, dynamic> data) {
+    if (data['version'] != 1) {
+      throw const FormatException('Invalid aggregate version');
+    }
+    for (final entry in (data['totals'] as Map? ?? {}).entries) {
+      final values = (entry.value as List)
+          .map((v) => (v as num).toDouble())
+          .toList();
+      if (values.length != 6 || values.any((v) => !v.isFinite || v < 0)) {
+        throw const FormatException('Invalid totals');
+      }
+      _totals[entry.key as String] = values;
+    }
+    _sports.addAll(List<String>.from(data['sports'] as List? ?? []));
+  }
+  Map<String, dynamic> toJson() => {
+    'version': 1,
+    'totals': {
+      for (final e in _totals.entries) e.key: List<double>.from(e.value),
+    },
+    'sports': _sports.toList()..sort(),
+  };
+  List<double> totalsFor([String sport = 'Все виды']) =>
+      List<double>.from(_totals[sport] ?? [0, 0, 0, 0, 0, 0]);
+  List<String> get sportNames => _sports.toList()..sort();
+  AchievementProgress plus(Workout workout) {
+    final result = AchievementProgress.fromJson(toJson()),
+        added = AchievementProgress([workout]);
+    for (final entry in added._totals.entries) {
+      final values = result._totals.putIfAbsent(
+        entry.key,
+        () => [0, 0, 0, 0, 0, 0],
+      );
+      for (var i = 0; i < 4; i++) {
+        values[i] += entry.value[i];
+      }
+      for (var i = 4; i < 6; i++) {
+        if (entry.value[i] > values[i]) values[i] = entry.value[i];
+      }
+    }
+    result._sports.addAll(added._sports);
+    return result;
+  }
+
   double value(AchievementRule rule) {
     final t = _totals[rule.sport] ?? [0.0, 0.0, 0.0, 0.0, 0.0, 0.0];
     return switch (rule.metric) {
@@ -1974,9 +2018,10 @@ abstract final class AchievementEngine {
   static ({AchievementState state, List<AchievementRule> awards, int xp}) apply(
     AchievementState state,
     List<Workout> history,
-    Workout workout,
-  ) {
-    final progress = AchievementProgress([workout, ...history]);
+    Workout workout, {
+    AchievementProgress? aggregated,
+  }) {
+    final progress = aggregated ?? AchievementProgress([workout, ...history]);
     final awards = AchievementCatalog.rules
         .where(
           (r) =>

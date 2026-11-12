@@ -83,6 +83,14 @@ http://:8091 {
 			method GET PUT OPTIONS
 			expression `{http.request.orig_uri} == '/api/pace/progress'`
 		}
+		@workoutState {
+			method GET OPTIONS
+			expression `{http.request.orig_uri} == '/api/pace/v2/state'`
+		}
+		@workoutsV2 {
+			method POST OPTIONS
+			expression `{http.request.orig_uri} == '/api/pace/v2/workouts'`
+		}
 		handle @health {
 			request_body {
 				max_size 64KB
@@ -134,6 +142,18 @@ http://:8091 {
 		handle @progress {
 			request_body {
 				max_size 32MiB
+			}
+			import pace_upstream
+		}
+		handle @workoutState {
+			request_body {
+				max_size 1KB
+			}
+			import pace_upstream
+		}
+		handle @workoutsV2 {
+			request_body {
+				max_size 256KB
 			}
 			import pace_upstream
 		}

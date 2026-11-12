@@ -19,8 +19,12 @@ function validate(data) {
   return ids;
 }
 module.exports = {
-  read: (e) => e.json(200, unpack(find(e.app, e.auth.id))),
+  read: (e) => {
+    if(!require(`${__hooks}/lib/workouts_v2.js`).legacy())throw new ApiError(426,'Обнови PACE: история переведена на отдельное хранилище.');
+    return e.json(200, unpack(find(e.app, e.auth.id)));
+  },
   write: (e) => {
+    if(!require(`${__hooks}/lib/workouts_v2.js`).legacy())throw new ApiError(426,'Обнови PACE: общий снимок больше не принимается.');
     const body = e.requestInfo().body;
     if (!Number.isSafeInteger(body.revision) || body.revision < 0) throw new BadRequestError("Invalid revision");
     const ids = validate(body.data);

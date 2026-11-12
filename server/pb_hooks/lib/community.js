@@ -7,6 +7,8 @@ function text(body, key, max, required = false) {
   return value;
 }
 function xp(app, user) {
+  const storage=require(`${__hooks}/lib/workouts_v2.js`);
+  if(!storage.legacy())return storage.state(app,user).derived.xp;
   const rows = app.findRecordsByFilter('pace_progress', 'owner = {:user}', '', 1, 0, {user});
   if (!rows.length) return 0;
   const value = JSON.parse(rows[0].getString('snapshot')).xp;

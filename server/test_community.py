@@ -1,5 +1,5 @@
 """Community permissions/lifecycle using a fresh isolated PocketBase, no real users."""
-import json, secrets, socket, subprocess, tempfile, time
+import os,json, secrets, socket, subprocess, tempfile, time
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
 from urllib.request import Request, urlopen
@@ -15,7 +15,7 @@ with tempfile.TemporaryDirectory(prefix='pace-community-') as folder:
  temp=Path(folder)
  with socket.socket() as sock:sock.bind(('127.0.0.1',0));port=sock.getsockname()[1]
  log=(temp/'pb.log').open('wb')
- proc=subprocess.Popen([str(ROOT/'server/runtime/pocketbase.exe'),'serve',f'--http=127.0.0.1:{port}',f'--dir={temp/"data"}',f'--migrationsDir={ROOT/"server/pb_migrations"}',f'--hooksDir={ROOT/"server/pb_hooks"}'],stdout=log,stderr=log,creationflags=getattr(subprocess,'CREATE_NO_WINDOW',0))
+ proc=subprocess.Popen([str(ROOT/'server/runtime/pocketbase.exe'),'serve',f'--http=127.0.0.1:{port}',f'--dir={temp/"data"}',f'--migrationsDir={ROOT/"server/pb_migrations"}',f'--hooksDir={ROOT/"server/pb_hooks"}'],env={**os.environ,'PACE_ENABLE_LEGACY_API':'1'},stdout=log,stderr=log,creationflags=getattr(subprocess,'CREATE_NO_WINDOW',0))
  def req(method,path,body=None,token=None):
   headers={'Content-Type':'application/json'}
   if body and 'identity' in body:

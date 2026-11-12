@@ -1,5 +1,5 @@
 """Real isolated PocketBase scoring tests. SQL only shifts synthetic fixture dates."""
-import json,secrets,socket,sqlite3,subprocess,tempfile,time
+import os,json,secrets,socket,sqlite3,subprocess,tempfile,time
 from contextlib import closing
 from pathlib import Path
 from datetime import datetime,timedelta,timezone
@@ -16,7 +16,7 @@ with tempfile.TemporaryDirectory(prefix='pace-competition-') as folder:
  temp=Path(folder).resolve();dbpath=temp/'data/data.db';assert dbpath.is_relative_to(temp)
  with socket.socket() as sock:sock.bind(('127.0.0.1',0));port=sock.getsockname()[1]
  log=(temp/'server.log').open('wb')
- proc=subprocess.Popen([str(ROOT/'server/runtime/pocketbase.exe'),'serve',f'--http=127.0.0.1:{port}',f'--dir={temp/"data"}',f'--migrationsDir={ROOT/"server/pb_migrations"}',f'--hooksDir={ROOT/"server/pb_hooks"}'],stdout=log,stderr=log,creationflags=getattr(subprocess,'CREATE_NO_WINDOW',0))
+ proc=subprocess.Popen([str(ROOT/'server/runtime/pocketbase.exe'),'serve',f'--http=127.0.0.1:{port}',f'--dir={temp/"data"}',f'--migrationsDir={ROOT/"server/pb_migrations"}',f'--hooksDir={ROOT/"server/pb_hooks"}'],env={**os.environ,'PACE_ENABLE_LEGACY_API':'1'},stdout=log,stderr=log,creationflags=getattr(subprocess,'CREATE_NO_WINDOW',0))
  def req(method,path,body=None,token=None):
   headers={'Content-Type':'application/json'}
   if token:headers['Authorization']=token

@@ -7,6 +7,16 @@ import 'package:http/http.dart' as http;
 
 class ProgressConflict implements Exception {}
 
+class WorkoutSyncConflict implements Exception {
+  const WorkoutSyncConflict(this.reason);
+  final String reason;
+}
+
+class _WorkoutRateLimited implements Exception {
+  const _WorkoutRateLimited(this.retryAfter);
+  final int? retryAfter;
+}
+
 class AccountError implements Exception {
   const AccountError(this.message, {this.accountCreated = false});
   final String message;
@@ -186,6 +196,46 @@ class AccountService extends ChangeNotifier {
   }
 
   String get _server => baseUrl.toString().replaceFirst(RegExp(r'/+$'), '');
+  Future<Map<String, dynamic>> requestWorkoutsV2({
+    required String owner,
+    Map<String, dynamic>? action,
+  }) async {
+    final token = _token;
+    if (owner != progressOwner || token == null) {
+      throw const AccountError('Аккаунт изменился. Войди снова.');
+    }
+    Map<String, dynamic>? result;
+    for (var attempt = 0; attempt < 5; attempt++) {
+      if (owner != progressOwner || token != _token) {
+        throw const AccountError('Аккаунт изменился. Повтори синхронизацию.');
+      }
+      try {
+        result = await _request(
+          'workouts-v2',
+          action ?? {},
+          token: token,
+          method: action == null ? 'GET' : 'POST',
+          customPath: action == null
+              ? '/api/pace/v2/state'
+              : '/api/pace/v2/workouts',
+        );
+        break;
+      } on _WorkoutRateLimited catch (e) {
+        if (attempt == 4) {
+          throw const AccountError(
+            'Сервер занят. Тренировки сохранены на устройстве; повтори обновление позже.',
+          );
+        }
+        await Future<void>.delayed(
+          Duration(seconds: (e.retryAfter ?? (1 << attempt)).clamp(1, 20)),
+        );
+      }
+    }
+    if (owner != progressOwner || token != _token) {
+      throw const AccountError('Аккаунт изменился. Повтори синхронизацию.');
+    }
+    return result!;
+  }
 
   Future<void> initialize() {
     if (initialized) return Future.value();
@@ -423,6 +473,30 @@ class AccountService extends ChangeNotifier {
         action == 'records'
             ? 'Нет ответа сервера. Если аккаунт уже создан, попробуй войти.'
             : 'Нет связи с сервером. Проверь интернет и повтори попытку.',
+      );
+    }
+    if (action == 'workouts-v2' && response.statusCode == 429) {
+      throw _WorkoutRateLimited(
+        int.tryParse(response.headers['retry-after'] ?? ''),
+      );
+    }
+    if (action == 'workouts-v2' && response.statusCode == 409) {
+      var reason = 'revision';
+      try {
+        reason =
+            jsonDecode(utf8.decode(response.bodyBytes))['data']['reason']
+                as String;
+      } catch (_) {}
+      throw WorkoutSyncConflict(reason);
+    }
+    if (action == 'workouts-v2' && response.statusCode == 404) {
+      throw const AccountError(
+        'Сервер ещё не обновлён для нового хранилища тренировок.',
+      );
+    }
+    if (response.statusCode == 426) {
+      throw const AccountError(
+        'Обнови PACE: история переведена на новое хранилище.',
       );
     }
     if (action == 'progress' && response.statusCode == 409) {

@@ -4,6 +4,8 @@ import '../../services/personal_record_engine.dart';
 
 import 'dart:convert';
 
+import 'sqlite_workout_storage.dart';
+
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../models/workout.dart';
@@ -20,14 +22,35 @@ class LocalStorageService {
     if (accounts.progressOwner == null) {
       throw const AccountError('Сначала войди в аккаунт.');
     }
-    return LocalStorageService(
-      owner: accounts.progressOwner,
-      remote: AccountProgressRemote(accounts),
-    );
+    return SqliteWorkoutStorage(accounts: accounts);
   }
   final String? owner;
   final ProgressRemote? remote;
   bool get supportsSync => remote != null;
+  bool get pagedHistory => false;
+  Future<List<Workout>> loadHistory({
+    int limit = 20,
+    int offset = 0,
+    String? sport,
+  }) async {
+    final data = await loadProgress();
+    return (data?['workouts'] as List? ?? [])
+        .map((w) => Workout.fromJson(Map<String, dynamic>.from(w as Map)))
+        .where((w) => sport == null || w.sport == sport)
+        .skip(offset)
+        .take(limit)
+        .toList();
+  }
+
+  Future<Workout?> loadWorkout(String id) async {
+    final data = await loadProgress();
+    return (data?['workouts'] as List? ?? [])
+        .map((w) => Workout.fromJson(Map<String, dynamic>.from(w as Map)))
+        .where((w) => w.sessionId == id)
+        .firstOrNull;
+  }
+
+  Future<bool> hasWorkout(String id) async => (await loadWorkout(id)) != null;
   static final _syncing = <String, Future<void>>{};
   final Future<SharedPreferences> Function() _preferences;
   static const String _legacyKey = 'pace_local_data';

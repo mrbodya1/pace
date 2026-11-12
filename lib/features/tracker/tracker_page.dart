@@ -59,6 +59,8 @@ class TrackerPage extends StatelessWidget {
     this.finishedWorkout,
     this.history = const [],
     this.achievementState,
+    this.aggregateProgress,
+    this.recordState,
     this.recoveredWorkout = false,
   });
 
@@ -70,6 +72,8 @@ class TrackerPage extends StatelessWidget {
   final Workout? finishedWorkout;
   final List<Workout> history;
   final AchievementState? achievementState;
+  final AchievementProgress? aggregateProgress;
+  final Map<String, dynamic>? recordState;
   final bool recoveredWorkout;
   final Duration elapsed, finishedDuration;
   final List<Position> route;
@@ -100,6 +104,7 @@ class TrackerPage extends StatelessWidget {
           body: AchievementsView(
             workouts: _awardHistory,
             state: achievementState,
+            aggregateProgress: aggregateProgress,
             initialSport: rule.sport,
             initialMetric: rule.metric,
             selectedId: rule.id,
@@ -115,6 +120,7 @@ class TrackerPage extends StatelessWidget {
         builder: (_) => PacePageScaffold(
           title: 'Личные рекорды',
           body: RecordsView(
+            recordState: recordState,
             workouts: _awardHistory,
             initialSport: record.sport,
             selectedId: record.id,

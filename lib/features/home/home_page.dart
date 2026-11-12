@@ -7,6 +7,8 @@ import 'package:flutter/material.dart';
 
 import '../../app/theme/pace_theme.dart';
 import '../../models/workout.dart';
+import '../../models/achievement.dart';
+import '../../data/storage/local_storage_service.dart';
 import '../../widgets/common_widgets.dart';
 import '../../widgets/xp_ring.dart';
 import '../workouts/workout_details_page.dart';
@@ -20,6 +22,8 @@ class HomePage extends StatelessWidget {
     required this.levelEnd,
     required this.workouts,
     this.historyUpdates,
+    this.aggregateProgress,
+    this.storage,
     required this.header,
   });
 
@@ -27,6 +31,8 @@ class HomePage extends StatelessWidget {
   final List<Workout> workouts;
   final ValueListenable<List<Workout>>? historyUpdates;
   final Widget header;
+  final AchievementProgress? aggregateProgress;
+  final LocalStorageService? storage;
 
   @override
   Widget build(BuildContext context) {
@@ -45,10 +51,9 @@ class HomePage extends StatelessWidget {
       'ноября',
       'декабря',
     ];
-    final totalDistance = workouts.fold<double>(
-      0,
-      (sum, w) => sum + w.distance,
-    );
+    final totalDistance =
+        aggregateProgress?.totalsFor()[2] ??
+        workouts.fold<double>(0, (sum, w) => sum + w.distance);
     return ListView(
       padding: const EdgeInsets.fromLTRB(22, 20, 22, 132),
       children: [
@@ -84,7 +89,8 @@ class HomePage extends StatelessWidget {
                 child: _Summary(
                   icon: CupertinoIcons.flame,
                   label: 'Тренировки',
-                  value: '${workouts.length}',
+                  value:
+                      '${aggregateProgress?.totalsFor()[0].toInt() ?? workouts.length}',
                 ),
               ),
               const VerticalDivider(width: 24),
@@ -115,6 +121,7 @@ class HomePage extends StatelessWidget {
               onTap: () => Navigator.of(context).push<void>(
                 MaterialPageRoute(
                   builder: (_) => WorkoutDetailsPage(
+                    storage: storage,
                     workout: workouts.first,
                     fromHistory: false,
                     history: workouts,

@@ -190,6 +190,7 @@ abstract final class GarminImportService {
       if (owner != accounts.progressOwner) {
         throw const AccountError('Аккаунт изменился. Повтори синхронизацию.');
       }
+      if (await storage.hasWorkout(workout.sessionId!)) continue;
       final saved = await storage.loadProgress();
       final history = (saved?['workouts'] as List? ?? [])
           .map((v) => Workout.fromJson(Map<String, dynamic>.from(v as Map)))

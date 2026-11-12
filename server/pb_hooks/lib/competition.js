@@ -17,6 +17,9 @@ function sync(app,user,snapshot) {
   }
 }
 function snapshot(app,user) {
+  if(!require(`${__hooks}/lib/workouts_v2.js`).legacy()){
+    return {workouts:app.findRecordsByFilter('pace_v2_workouts','owner={:owner}','revision',0,0,{owner:user}).map(r=>JSON.parse(r.getString('summary')))};
+  }
   const rows=app.findRecordsByFilter('pace_progress','owner = {:user}','',1,0,{user});
   return rows.length?JSON.parse(rows[0].getString('snapshot')):null;
 }

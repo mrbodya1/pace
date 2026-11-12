@@ -1,4 +1,7 @@
 $ErrorActionPreference = 'Stop'
+if ($env:PACE_ENABLE_LEGACY_API) {
+    throw 'PACE_ENABLE_LEGACY_API is reserved for isolated tests. Remove it before starting the working server.'
+}
 $serverRoot = $PSScriptRoot
 $executable = Join-Path $serverRoot 'runtime\pocketbase.exe'
 if (-not (Test-Path -LiteralPath $executable -PathType Leaf)) {

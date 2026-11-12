@@ -129,6 +129,21 @@ def main():
                 assert request('OPTIONS', path, headers={'Origin': 'http://localhost:5050',
                                'Access-Control-Request-Method': method})[0] == 200
                 checked += 1
+            for method, path in [('GET', '/api/pace/v2/state'), ('POST', '/api/pace/v2/workouts')]:
+                for verb in [method, 'OPTIONS']:
+                    status, data, _ = request(verb, path, None if verb == 'GET' else b'{}')
+                    assert status == 200, (verb, path, status)
+                    checked += 1
+                for suffix in ['/', '?owner=x', ';x', '%2f..']:
+                    before = len(Backend.calls)
+                    assert request(method, path + suffix)[0] == 404
+                    assert len(Backend.calls) == before
+                    checked += 1
+                for wrong in ['DELETE', 'PUT', 'PATCH', 'POST' if method == 'GET' else 'GET']:
+                    before = len(Backend.calls)
+                    assert request(wrong, path)[0] == 404
+                    assert len(Backend.calls) == before
+                    checked += 1
             denied = [('/', 'GET'), ('/_/', 'GET'), ('/api/settings', 'GET'),
                       ('/api/backups', 'GET'), ('/api/collections', 'GET'),
                       ('/api/collections/_superusers/auth-with-password', 'POST'),
@@ -160,7 +175,8 @@ def main():
             assert value['xff'] == '203.0.113.20' and value['forwarded'] is None, value
             checked += 1
             for method, path, length in [('POST', '/api/collections/pace_users/records', 65537),
-                                         ('PUT', '/api/pace/progress', 33554433), ('POST', '/api/pace/garmin/refresh', 1025), ('POST','/api/pace/community/action',8193)]:
+                                         ('PUT', '/api/pace/progress', 33554433), ('POST', '/api/pace/garmin/refresh', 1025), ('POST','/api/pace/community/action',8193),
+                                         ('POST', '/api/pace/v2/workouts', 262145), ('GET', '/api/pace/v2/state', 1025)]:
                 status, data, _ = request(method, path, b'x' * length)
                 assert status == 413, (path, status, data)
                 checked += 1
