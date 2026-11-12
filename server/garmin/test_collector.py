@@ -1,7 +1,10 @@
 import copy, io, struct, unittest, zipfile
 from datetime import datetime, timezone, timedelta
 from unittest.mock import patch
-from collect_personal import eligible, activity_packet, collect, decode_messages, ImportProblem, instant
+from collect_personal import eligible, activity_packet, collect, decode_messages, ImportProblem, instant, prune_inbox, read_receipts
+import json, sqlite3, tempfile
+from pathlib import Path
+from contextlib import closing
 from garmin_fit_sdk.crc_calculator import CrcCalculator
 
 SINCE=datetime(2026,11,12,8,30,tzinfo=timezone.utc)
@@ -95,5 +98,65 @@ class CollectorTests(unittest.TestCase):
   self.assertEqual(config['sinceUtc'],SINCE.isoformat())
  def test_wrong_owner_queue_rejected(self):
   with self.assertRaises(ImportProblem):collect(None,{'ownerId':'a'*15,'sinceUtc':SINCE.isoformat()},{'ownerId':'b'*15,'sinceUtc':SINCE.isoformat(),'activities':[]},NOW,lambda v:None)
+ def test_acknowledged_ids_never_download_again_after_pruning(self):
+  class Client:
+   def search(self,*args):return [summary(1)]
+   def download(self,id):raise AssertionError('receipt must skip download')
+  config={'ownerId':'a'*15,'sinceUtc':SINCE.isoformat()}
+  inbox={**config,'activities':[{'externalId':'1','fitSha256':'a'*64}]}
+  saved=[]
+  self.assertEqual(prune_inbox(config,inbox,{'1':'a'*64},lambda v:saved.append(copy.deepcopy(v))),1)
+  self.assertEqual(inbox['activities'],[])
+  self.assertEqual(collect(Client(),config,inbox,NOW,lambda v:None,acknowledged={'1'}),(0,0))
+ def test_prune_hash_mismatch_and_failed_replace_keep_source_packet(self):
+  config={'ownerId':'a'*15,'sinceUtc':SINCE.isoformat()}
+  inbox={**config,'activities':[{'externalId':'1','fitSha256':'a'*64}]}
+  self.assertEqual(prune_inbox(config,inbox,{'1':'b'*64},lambda v:self.fail('changed FIT must remain')),0)
+  original=copy.deepcopy(inbox)
+  def fail(value):raise OSError('simulated atomic replace failure')
+  with self.assertRaises(OSError):prune_inbox(config,inbox,{'1':'a'*64},fail)
+  self.assertEqual(inbox,original)
+  self.assertEqual(prune_inbox(config,inbox,{'1':'a'*64},lambda v:None),1)
+ def test_full_queue_is_ready_to_drain_instead_of_failing_refresh(self):
+  class Client:
+   def search(self,*args):return [summary(999)]
+   def download(self,id):raise AssertionError('must apply backpressure first')
+  config={'ownerId':'a'*15,'sinceUtc':SINCE.isoformat()}
+  inbox={**config,'activities':[{'externalId':str(i)} for i in range(200)]}
+  self.assertEqual(collect(Client(),config,inbox,NOW,lambda v:self.fail('queue must remain')),(0,0))
+ def test_capacity_failure_does_not_append_or_skip_unstored_packet(self):
+  class Client:
+   def search(self,*args):return [summary(999)]
+   def download(self,id):return fit_fixture()
+  config={'ownerId':'a'*15,'sinceUtc':SINCE.isoformat()}
+  inbox={**config,'activities':[{'externalId':'1','padding':'x'*(30*1024*1024-500)}]}
+  self.assertLess(len(json.dumps(inbox,separators=(',',':')).encode()),30*1024*1024)
+  self.assertEqual(collect(Client(),config,inbox,NOW,lambda v:self.fail('over-capacity write')),(0,0))
+  self.assertEqual(len(inbox['activities']),1)
+ def test_scan_resumes_beyond_first_thousand_summaries(self):
+  class Client:
+   def search(self,day,end,offset):return [summary(i+1) for i in range(offset,min(offset+50,1001))]
+   def download(self,id):
+    self_id=id
+    if self_id!='1001':raise AssertionError('acknowledged FIT downloaded')
+    return fit_fixture()
+  config={'ownerId':'a'*15,'sinceUtc':SINCE.isoformat()};inbox={**config,'activities':[]}
+  ack={str(i) for i in range(1,1001)}
+  self.assertEqual(collect(Client(),config,inbox,NOW,lambda v:None,acknowledged=ack),(0,0))
+  self.assertEqual(inbox['scanOffset'],1000)
+  self.assertEqual(collect(Client(),config,inbox,NOW,lambda v:None,acknowledged=ack)[0],1)
+  self.assertEqual(inbox['scanOffset'],0)
+  self.assertEqual(inbox['activities'][0]['externalId'],'1001')
+ def test_receipts_are_scoped_by_owner_epoch_and_cutoff(self):
+  with tempfile.TemporaryDirectory(prefix='pace-garmin-receipts-') as temp:
+   dbpath=Path(temp)/'data.db'
+   with closing(sqlite3.connect(dbpath)) as db, db:
+    db.execute('CREATE TABLE pace_v2_settings(epoch TEXT)');db.execute("INSERT INTO pace_v2_settings VALUES('new')")
+    db.execute('CREATE TABLE pace_garmin_receipts(owner TEXT,epoch TEXT,sinceUtc TEXT,externalId TEXT,fitSha256 TEXT)')
+    for owner,epoch,cutoff,id in [('a'*15,'new',SINCE.isoformat(),'1'),('b'*15,'new',SINCE.isoformat(),'2'),('a'*15,'old',SINCE.isoformat(),'3'),('a'*15,'new',NOW.isoformat(),'4')]:
+     db.execute('INSERT INTO pace_garmin_receipts VALUES(?,?,?,?,?)',(owner,epoch,cutoff,id,'a'*64))
+   self.assertEqual(read_receipts({'ownerId':'a'*15,'sinceUtc':SINCE.isoformat()},dbpath),{'1':'a'*64})
+   with self.assertRaises(ImportProblem):read_receipts({'ownerId':'a'*15,'sinceUtc':SINCE.isoformat()},Path(temp)/'missing.db')
+   self.assertFalse((Path(temp)/'missing.db').exists())
 
 if __name__=='__main__':unittest.main()

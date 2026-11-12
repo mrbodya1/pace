@@ -28,6 +28,8 @@
 
 ## Воспроизведение web SQLite smoke
 
+Доработка очереди Garmin включена12ноября2026 в22:23 после отдельной команды пользователя: [квитанции и освобождение inbox](garmin-queue.md). Указанный ниже прежний предел inbox теперь является лимитом одной партии; подтверждённые пакеты освобождаются. Подробности резервной копии, проверок и применения — в связанном документе.
+
 Создать build/webprobe, скомпилировать `dart compile js -O2 tool/web_sqlite_probe.dart -o build/webprobe/main.js`, скопировать web/sqflite_sw.js и web/sqlite3.wasm в build/webprobe. Записать index.html с body и `<script defer src="main.js"></script>`. `node tool/test_web_sqlite.mjs` запускает локальный HTTP и headless Chrome с временным профилем, проверяет транзакцию, закрытие/повторное открытие и чтение из SQLite. CHROME_EXE позволяет указать другой Chrome. Реальный профиль браузера и рабочие данные не используются.
 
 ## Применение

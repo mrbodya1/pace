@@ -1,12 +1,15 @@
 """New-only collector for one local Garmin account; never logs secrets or payloads."""
 from __future__ import annotations
 import argparse, ctypes, hashlib, io, json, math, os, re, subprocess, sys, time, zipfile
+import sqlite3
+from contextlib import closing
 from datetime import datetime, timezone, timedelta
 from pathlib import Path
 from urllib.parse import urlencode
 
 ROOT = Path(__file__).resolve().parents[2]
-PRIVATE = ROOT.parent / 'Runtime' / 'Garmin'
+PRIVATE = Path(os.environ.get('PACE_GARMIN_RUNTIME', ROOT.parent / 'Runtime' / 'Garmin'))
+DATABASE = Path(os.environ.get('PACE_GARMIN_DATABASE', ROOT / 'server' / 'pb_data' / 'data.db'))
 BASE = 'https://personal.connectapi.garmin.com'
 SPORTS = {'running':'Бег','trail_running':'Трейл','walking':'Ходьба','cycling':'Велосипед',
  'road_cycling':'Велосипед','road_biking':'Велосипед','mountain_biking':'Велосипед',
@@ -161,33 +164,75 @@ def atomic_json(path,value):
     if len(data.encode())>30*1024*1024: raise ImportProblem('inbox_capacity_reached')
     temp.write_text(data,encoding='utf-8'); os.replace(temp,path)
 
-def collect(client,config,inbox,now,save,deadline=None):
+def read_receipts(config, database=DATABASE):
+    # Read only committed server receipts. Never create or edit the PocketBase DB.
+    try:
+        with closing(sqlite3.connect(Path(database).resolve().as_uri()+'?mode=ro',uri=True,timeout=5)) as db:
+            with db:
+                db.execute('BEGIN')
+                epoch=db.execute('SELECT epoch FROM pace_v2_settings LIMIT 1').fetchone()[0]
+                rows=db.execute('SELECT externalId,fitSha256 FROM pace_garmin_receipts WHERE owner=? AND epoch=? AND sinceUtc=?',
+                                (config['ownerId'],epoch,config['sinceUtc'])).fetchall()
+                return dict(rows)
+    except sqlite3.OperationalError as error:
+        # Source files can be updated before the additive backend migration.
+        if 'no such table' in str(error): return {}
+        raise ImportProblem('receipt_store_unavailable') from None
+    except (sqlite3.Error,TypeError,IndexError):
+        raise ImportProblem('receipt_store_unavailable') from None
+
+def prune_inbox(config,inbox,receipts,save):
+    if inbox.get('ownerId')!=config['ownerId'] or inbox.get('sinceUtc')!=config['sinceUtc']:
+        raise ImportProblem('inbox_binding_mismatch')
+    retained=[a for a in inbox['activities'] if a.get('externalId') not in receipts or receipts[a['externalId']]!=a.get('fitSha256')]
+    removed=len(inbox['activities'])-len(retained)
+    if removed:
+        updated={**inbox,'activities':retained}
+        save(updated)  # If replacement fails, leave both in-memory and on-disk queue intact.
+        inbox.update(updated)
+    return removed
+
+def collect(client,config,inbox,now,save,deadline=None,acknowledged=()):
     since=instant(config['sinceUtc'])
     if inbox.get('ownerId')!=config['ownerId'] or instant(inbox['sinceUtc'])!=since: raise ImportProblem('inbox_binding_mismatch')
-    known={a['externalId'] for a in inbox['activities']}; added=0; skipped=0
+    known={a['externalId'] for a in inbox['activities']} | set(acknowledged); added=0; skipped=0
     day=since.astimezone(timezone(timedelta(hours=5))).date().isoformat()
     today=now.astimezone(timezone(timedelta(hours=5))).date().isoformat()
+    offset=inbox.get('scanOffset',0)
+    if not isinstance(offset,int) or offset<0 or offset%50: raise ImportProblem('invalid_scan_cursor')
+    def checkpoint(value):
+        if inbox.get('scanOffset',0)!=value:
+            updated={**inbox,'scanOffset':value}
+            if len(json.dumps(updated,ensure_ascii=True,separators=(',',':')).encode())>30*1024*1024: return False
+            save(updated);inbox.update(updated)
+        return True
     for page in range(20):
         if deadline is not None and time.monotonic()>=deadline: return added,skipped
-        summaries=client.search(day,today,page*50)
+        summaries=client.search(day,today,offset)
         for item in summaries:
             if deadline is not None and time.monotonic()>=deadline: return added,skipped
             if not eligible(item,since,now): skipped+=1; continue
             activity_id=str(item['activityId'])
             if activity_id in known: continue
-            if len(inbox['activities'])>=200: raise ImportProblem('inbox_capacity_reached')
+            # Backpressure is not a failed refresh: let PACE drain the existing batch.
+            if len(inbox['activities'])>=200: return added,skipped
             try:
                 messages,digest=decode_messages(client.download(activity_id))
                 packet=activity_packet(item,messages,since,now,digest)
             except ImportProblem as error:
                 # Keep unsuccessful entries retryable; no IDs or payloads in logs.
                 print('GARMIN_ACTIVITY_SKIPPED='+str(error),flush=True); skipped+=1; continue
-            inbox['activities'].append(packet)
-            save(inbox); known.add(activity_id); added+=1
-        if len(summaries)<50: break
+            updated={**inbox,'activities':[*inbox['activities'],packet]}
+            if len(json.dumps(updated,ensure_ascii=True,separators=(',',':')).encode())>30*1024*1024:
+                return added,skipped
+            save(updated);inbox.update(updated);known.add(activity_id);added+=1
+        if len(summaries)<50:
+            checkpoint(0);break
+        offset+=50
+        if not checkpoint(offset): return added,skipped
     return added,skipped
 
-def run_once(client=None):
+def run_once(client=None, *, prune_only=False, expected_owner=None):
     import msvcrt
     lock=(PRIVATE/'collector.lock').open('a+b')
     try:
@@ -196,10 +241,14 @@ def run_once(client=None):
         except OSError: raise ImportProblem('collector_already_running') from None
         config=json.loads((PRIVATE/'import-config.json').read_text(encoding='utf-8-sig'))
         if config.get('version')!=1 or not re.fullmatch(r'[a-z0-9]{15}',config.get('ownerId','')): raise ImportProblem('invalid_binding')
+        if expected_owner is not None and config['ownerId']!=expected_owner: raise ImportProblem('binding_changed')
         inbox=json.loads((PRIVATE/'inbox.json').read_text(encoding='utf-8-sig'))
+        receipts=read_receipts(config)
+        removed=prune_inbox(config,inbox,receipts,lambda value:atomic_json(PRIVATE/'inbox.json',value))
+        if prune_only: return {'phase':'ready','removed':removed}
         if client is None or time.monotonic()-client.created_at>23*3600:
             client=Garmin(decrypt_key(PRIVATE/'personal-api-key.dpapi'))
-        added,skipped=collect(client,config,inbox,datetime.now(timezone.utc),lambda value:atomic_json(PRIVATE/'inbox.json',value),deadline=time.monotonic()+120)
+        added,skipped=collect(client,config,inbox,datetime.now(timezone.utc),lambda value:atomic_json(PRIVATE/'inbox.json',value),deadline=time.monotonic()+120,acknowledged=receipts)
         print(f'GARMIN_NEW_ONLY_OK added={added} skipped={skipped}',flush=True)
         return client
     finally: lock.close()
@@ -207,7 +256,21 @@ def run_once(client=None):
 if __name__=='__main__':
     parser=argparse.ArgumentParser()
     parser.add_argument('--refresh',action='store_true',help='One requested refresh, never periodic polling')
+    parser.add_argument('--prune-only',action='store_true',help='Drain acknowledged packets, without Garmin network or key')
+    parser.add_argument('--expected-owner')
     args=parser.parse_args()
+    if args.prune_only:
+        try:
+            if not re.fullmatch(r'[a-z0-9]{15}',args.expected_owner or ''): raise ImportProblem('invalid_binding')
+            print(json.dumps(run_once(prune_only=True,expected_owner=args.expected_owner)),flush=True)
+        except ImportProblem as error:
+            if str(error)=='collector_already_running': print('{"phase":"busy","removed":0}',flush=True)
+            else:
+                print('GARMIN_QUEUE_ERROR='+str(error),file=sys.stderr,flush=True)
+                print('{"phase":"error","removed":0}',flush=True);sys.exit(1)
+        except Exception:
+            print('{"phase":"error","removed":0}',flush=True);sys.exit(1)
+        sys.exit(0)
     state=PRIVATE/'refresh-state.json'
     started=utc(datetime.now(timezone.utc))
     atomic_json(state,{'phase':'running','startedAt':started,'pid':os.getpid()})

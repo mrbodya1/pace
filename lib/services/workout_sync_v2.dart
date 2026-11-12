@@ -28,6 +28,13 @@ class WorkoutSyncV2 {
       try {
         await _pull();
         await _push();
+        // Workout commit is already durable. Maintenance may be retried on the
+        // next opening; its failure must not undo a successful upload.
+        try {
+          await _request({'action': 'ackGarmin'});
+        } on AccountError {
+          _check();
+        }
         return;
       } on WorkoutSyncConflict catch (e) {
         if (e.reason == 'collision') {

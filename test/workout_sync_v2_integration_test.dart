@@ -12,6 +12,7 @@ import 'package:sport_platform/data/storage/local_storage_service.dart';
 import 'package:sport_platform/models/workout.dart';
 import 'package:sport_platform/models/progress_v2.dart';
 import 'package:sport_platform/services/account_service.dart';
+import 'package:sport_platform/services/garmin_import_service.dart';
 
 import 'support/account_fakes.dart';
 import 'support/pocketbase_bootstrap.dart';
@@ -21,6 +22,7 @@ class LostCommitClient extends http.BaseClient {
   final http.Client delegate;
   bool loseNext = false;
   bool throttleNext = false;
+  bool failMaintenance = false;
   @override
   Future<http.StreamedResponse> send(http.BaseRequest request) async {
     if (throttleNext && request.url.path.contains('/v2/')) {
@@ -30,6 +32,14 @@ class LostCommitClient extends http.BaseClient {
         429,
         headers: {'retry-after': '0'},
       );
+    }
+    if (failMaintenance &&
+        request is http.Request &&
+        request.method == 'POST' &&
+        request.url.path.endsWith('/v2/workouts') &&
+        (jsonDecode(request.body) as Map)['action'] == 'ackGarmin') {
+      failMaintenance = false;
+      return http.StreamedResponse(Stream.value(utf8.encode('{}')), 503);
     }
     final response = await delegate.send(request);
     if (loseNext &&
@@ -103,14 +113,24 @@ void main() {
         final socket = await ServerSocket.bind(InternetAddress.loopbackIPv4, 0);
         final port = socket.port;
         await socket.close();
+        final private = await Directory('${temp.path}/private').create();
         await preparePocketBaseTest(executable!, temp);
-        server = await Process.start(executable, [
-          'serve',
-          '--http=127.0.0.1:$port',
-          '--dir=${temp.path}/data',
-          '--migrationsDir=${Directory.current.path}/server/pb_migrations',
-          '--hooksDir=${Directory.current.path}/server/pb_hooks',
-        ]);
+        server = await Process.start(
+          executable,
+          [
+            'serve',
+            '--http=127.0.0.1:$port',
+            '--dir=${temp.path}/data',
+            '--migrationsDir=${Directory.current.path}/server/pb_migrations',
+            '--hooksDir=${Directory.current.path}/server/pb_hooks',
+          ],
+          environment: {
+            'PACE_GARMIN_RUNTIME': private.path,
+            'PACE_GARMIN_DATABASE': '${temp.path}/data/data.db',
+            'PACE_GARMIN_PYTHON':
+                Platform.environment['PACE_TEST_PYTHON'] ?? 'python',
+          },
+        );
         unawaited(server.stdout.drain<void>());
         unawaited(server.stderr.drain<void>());
         final base = Uri.parse('http://127.0.0.1:$port');
@@ -175,8 +195,10 @@ void main() {
           initialWorkouts: [],
         );
         client.throttleNext = true;
+        client.failMaintenance = true;
         await a.synchronize();
         expect(client.throttleNext, isFalse);
+        expect(client.failMaintenance, isFalse);
         await b.synchronize();
         await a.synchronize();
         final expected1 = ProgressV2.append(ProgressV2.empty(), first),
@@ -242,6 +264,73 @@ void main() {
             'phone:collision',
           ))!.route.length,
           1200,
+        );
+        // A source queue is retained if the response is lost after commit. The
+        // next pull acknowledges it locally, then maintenance can drain it.
+        final now = DateTime.now().toUtc();
+        final began = now.subtract(const Duration(hours: 2));
+        final config = {
+          'version': 1,
+          'ownerId': accounts.account!.id,
+          'sinceUtc': now.subtract(const Duration(days: 1)).toIso8601String(),
+        };
+        final source = {
+          'source': 'garmin-personal',
+          'externalId': '98765',
+          'fitSha256': List.filled(64, 'd').join(),
+          'startedAt': began.toIso8601String(),
+          'endedAt': began.add(const Duration(hours: 1)).toIso8601String(),
+          'receivedAt': now.toIso8601String(),
+          'sport': 'Бег',
+          'distanceKm': 17.3,
+          'durationSeconds': 3600,
+          'elevationGain': 30,
+          'route': List.generate(
+            2,
+            (i) => {
+              'latitude': 56.7 + i * .0001,
+              'longitude': 60.6,
+              'timestamp': began.add(Duration(seconds: i)).toIso8601String(),
+              'accuracy': 5,
+              'segment': 0,
+            },
+          ),
+          'heartRateSamples': [
+            {'at': began.toIso8601String(), 'bpm': 140},
+          ],
+        };
+        await File('${private.path}/import-config.json')
+            .writeAsString(jsonEncode(config));
+        final inboxFile = File('${private.path}/inbox.json');
+        await inboxFile.writeAsString(
+          jsonEncode({
+            ...config,
+            'activities': [source],
+          }),
+        );
+        final imported = await GarminImportService.importNew(
+          accounts: accounts,
+          storage: a,
+          profile: {},
+        );
+        expect(imported.imported, 1);
+        client.loseNext = true;
+        await expectLater(a.synchronize(), throwsA(isA<AccountError>()));
+        expect(
+          (jsonDecode(await inboxFile.readAsString()) as Map)['activities'],
+          hasLength(1),
+        );
+        await a.synchronize();
+        expect(await dbA.pending(accounts.progressOwner!), isEmpty);
+        expect(
+          (jsonDecode(await inboxFile.readAsString()) as Map)['activities'],
+          isEmpty,
+        );
+        expect(
+          (await a.loadWorkout('garmin-personal:98765'))!
+              .heartRateSamples
+              .length,
+          1,
         );
       } finally {
         await dbA.close();

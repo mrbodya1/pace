@@ -49,7 +49,8 @@ module.exports = {
       }
       ids.add(a.externalId);
     }
-    return e.json(200, {available: true, sinceUtc: config.sinceUtc, refresh:refreshState(root), activities: inbox.activities});
+    const receipts=require(`${__hooks}/lib/garmin_receipts.js`).acknowledged(e.app,e.auth.id,config.sinceUtc);
+    return e.json(200, {available: true, sinceUtc: config.sinceUtc, refresh:refreshState(root), activities: inbox.activities.filter(a=>!receipts.has(a.externalId)||receipts.get(a.externalId)!==a.fitSha256)});
   }
 };
 function refreshState(root) {

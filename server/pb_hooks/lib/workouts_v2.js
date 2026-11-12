@@ -79,6 +79,7 @@ function commit(e,body){
     const row=new Record(app.findCollectionByNameOrId('pace_v2_workouts'));
     for(const [key,value] of Object.entries({owner,sessionId:s.sessionId,revision,summary:s,fingerprint,manifest:body.manifest}))row.set(key,value);
     app.save(row);
+    require(`${__hooks}/lib/garmin_receipts.js`).issue(app,owner,s,chunks,before.epoch);
     const progress=current(app,owner)||new Record(app.findCollectionByNameOrId('pace_v2_state'));
     progress.set('owner',owner);progress.set('revision',revision);progress.set('derived',body.derived);app.save(progress);
     for(const chunk of chunks){chunk.set('published',true);app.save(chunk);}
@@ -110,5 +111,6 @@ module.exports={state,legacy,empty,action:e=>{
   if(body.action==='stage')return stage(e,body);
   if(body.action==='commit')return commit(e,body);
   if(body.action==='detail')return detail(e,body);
+  if(body.action==='ackGarmin')return require(`${__hooks}/lib/garmin_receipts.js`).prune(e);
   throw new BadRequestError('Неизвестное действие');
 }};
