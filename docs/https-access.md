@@ -59,4 +59,4 @@ server/gateway/make-private.ps1 отключает Funnel на 443 и возвр
 
 Сборка `flutter build apk --debug --no-pub --dart-define=PACE_API_URL=https://bodya1-pc.tail3c1c24.ts.net` завершилась кодом 0. Повторная инкрементальная проверка после потери вывода первой сборки: 10,6 секунды, код 0. APK: D:/Applications/PACE/Project/build/app/outputs/flutter-apk/app-debug.apk; 197773089 байт; SHA-256 `25248f14d0caa30b4091d46cf2eb9901ceaa34c7627726a3b2fe6940b4adccfd`. В kernel_blob.bin подтверждён публичный HTTPS URL, присутствуют AndroidManifest, x86_64 Flutter и все четыре v2 PNG карточек. Установка и реальный вход/синхронизация на телефоне или эмуляторе этим этапом не проверялись. Обе задачи PACE Running, Funnel направлен только на 127.0.0.1:8091.
 
-Изменения документации и скриптов пока локальные; GitHub в этом этапе не обновлялся.
+Документация, скрипты и шлюз опубликованы вместе с UI-этапом 12 ноября 2026 в коммите d40a87b; удалённая main подтверждена после push. Приватные база, копии, runtime и APK не публиковались.
