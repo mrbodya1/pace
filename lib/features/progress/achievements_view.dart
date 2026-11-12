@@ -110,62 +110,53 @@ class _AchievementsViewState extends State<AchievementsView> {
           padding: const EdgeInsets.only(bottom: 12),
           child: GlassPanel(
             key: ValueKey('achievement-${rule.id}'),
-            child: Column(
+            child: Row(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Row(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    RewardBadge.achievement(
-                      rule,
-                      earned: unlock != null,
-                      size: 56,
-                    ),
-                    const SizedBox(width: 12),
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          if (rule.id == widget.selectedId)
-                            const Text(
-                              'Выбранное достижение',
-                              style: TextStyle(color: lime, fontSize: 12),
-                            ),
-                          Text(
-                            '${rule.sport} · ${rule.metric}',
-                            style: const TextStyle(fontWeight: FontWeight.w600),
-                          ),
-                        ],
+                RewardBadge.achievement(rule, earned: unlock != null, size: 56),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      if (rule.id == widget.selectedId)
+                        const Text(
+                          'Выбранное достижение',
+                          style: TextStyle(color: lime, fontSize: 12),
+                        ),
+                      Text(
+                        '${rule.sport} · ${rule.metric}',
+                        style: const TextStyle(fontWeight: FontWeight.w600),
                       ),
-                    ),
-                  ],
+                      const SizedBox(height: 8),
+                      Text(
+                        '${rule.target} · +${rule.xp} XP',
+                        style: const TextStyle(color: lime, fontSize: 17),
+                      ),
+                      const SizedBox(height: 8),
+                      if (unlock == null) ...[
+                        LinearProgressIndicator(
+                          value: (value / rule.threshold).clamp(0, 1),
+                        ),
+                        const SizedBox(height: 6),
+                        Text(
+                          '${value.toStringAsFixed(rule.unit == 'км'
+                              ? 2
+                              : rule.unit == 'ч'
+                              ? 1
+                              : 0).replaceAll('.', ',')} / ${rule.target}',
+                          style: const TextStyle(color: muted),
+                        ),
+                      ] else
+                        Text(
+                          unlock.historical
+                              ? 'Засчитано из истории · XP не пересчитывались'
+                              : 'Получено ${unlock.at.day}.${unlock.at.month.toString().padLeft(2, '0')}.${unlock.at.year} · +${unlock.xp} XP',
+                          style: const TextStyle(color: muted),
+                        ),
+                    ],
+                  ),
                 ),
-                const SizedBox(height: 10),
-                Text(
-                  '${rule.target} · +${rule.xp} XP',
-                  style: const TextStyle(color: lime, fontSize: 17),
-                ),
-                const SizedBox(height: 10),
-                if (unlock == null) ...[
-                  LinearProgressIndicator(
-                    value: (value / rule.threshold).clamp(0, 1),
-                  ),
-                  const SizedBox(height: 6),
-                  Text(
-                    '${value.toStringAsFixed(rule.unit == 'км'
-                        ? 2
-                        : rule.unit == 'ч'
-                        ? 1
-                        : 0).replaceAll('.', ',')} / ${rule.target}',
-                    style: const TextStyle(color: muted),
-                  ),
-                ] else
-                  Text(
-                    unlock.historical
-                        ? 'Засчитано из истории · XP не пересчитывались'
-                        : 'Получено ${unlock.at.day}.${unlock.at.month.toString().padLeft(2, '0')}.${unlock.at.year} · +${unlock.xp} XP',
-                    style: const TextStyle(color: muted),
-                  ),
               ],
             ),
           ),

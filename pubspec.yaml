@@ -62,6 +62,8 @@ flutter:
   # the material Icons class.
   uses-material-design: true
   assets:
+    - assets/images/achievements/materials/
+    - assets/images/achievements/running-distance/
     - assets/images/pace_ambient.jpg
     - assets/images/onboarding/home-v2.png
     - assets/images/onboarding/specializations-v2.png

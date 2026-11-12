@@ -97,6 +97,7 @@ class _RecordsViewState extends State<RecordsView> {
                 Row(
                   children: [
                     RewardBadge.record(
+                      sport: rule.sport,
                       rule.meters,
                       earned: r != null,
                       size: 56,

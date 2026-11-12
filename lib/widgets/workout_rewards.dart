@@ -61,7 +61,7 @@ class WorkoutRewards extends StatelessWidget {
                 for (final r in workout.records)
                   _RewardRow(
                     key: ValueKey('earned-record-${r.id}'),
-                    badge: RewardBadge.record(r.meters),
+                    badge: RewardBadge.record(r.meters, sport: r.sport),
                     title:
                         '${RecordDistance(r.sport, r.meters).label} · ${r.timeLabel}',
                     subtitle: r.improvements == 0

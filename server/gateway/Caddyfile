@@ -1,0 +1,94 @@
+{
+	admin off
+	persist_config off
+	storage file_system {
+		root D:/Applications/HomeServer/Caddy/data
+	}
+	auto_https off
+	servers {
+		trusted_proxies static 127.0.0.1/32
+		trusted_proxies_strict
+		client_ip_headers X-Forwarded-For
+		timeouts {
+			read_header 10s
+			read_body 30s
+			write 35s
+			idle 60s
+		}
+		max_header_size 16KB
+	}
+}
+
+(pace_upstream) {
+	reverse_proxy 127.0.0.1:8090 {
+		# Tailscale v1.104.5 overwrites X-Forwarded-For with the real source IP.
+		# Only the loopback Tailscale proxy is trusted; emit one canonical IP.
+		header_up -Forwarded
+		header_up -True-Client-IP
+		header_up -CF-Connecting-IP
+		header_up -Tailscale-User-Login
+		header_up -Tailscale-User-Name
+		header_up -Tailscale-User-Profile-Pic
+		header_up X-Forwarded-For {client_ip}
+		header_up X-Real-IP {client_ip}
+		header_up X-Forwarded-Proto https
+		transport http {
+			dial_timeout 3s
+			response_header_timeout 20s
+		}
+	}
+}
+
+http://:8091 {
+	bind 127.0.0.1
+	header {
+		-Server
+		Cache-Control "no-store"
+		X-Content-Type-Options "nosniff"
+	}
+	route {
+		@health {
+			method GET OPTIONS
+			expression `{http.request.orig_uri} == '/api/health'`
+		}
+		@auth {
+			method POST OPTIONS
+			expression `{http.request.orig_uri}.matches('^/api/collections/pace_users/(auth-with-password|auth-refresh|records)$')`
+		}
+		@profile {
+			method PATCH OPTIONS
+			expression `{http.request.orig_uri}.matches('^/api/collections/pace_users/records/[a-z0-9]{15}$')`
+		}
+		@progress {
+			method GET PUT OPTIONS
+			expression `{http.request.orig_uri} == '/api/pace/progress'`
+		}
+		handle @health {
+			request_body {
+				max_size 64KB
+			}
+			import pace_upstream
+		}
+		handle @auth {
+			request_body {
+				max_size 64KB
+			}
+			import pace_upstream
+		}
+		handle @profile {
+			request_body {
+				max_size 64KB
+			}
+			import pace_upstream
+		}
+		handle @progress {
+			request_body {
+				max_size 32MiB
+			}
+			import pace_upstream
+		}
+		handle {
+			respond "Not found" 404
+		}
+	}
+}

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../app/theme/pace_theme.dart';
 import '../models/achievement.dart';
+import '../models/sport_catalog.dart';
 
 const recordGold = Color(0xFFF3C879);
 
@@ -37,6 +38,35 @@ enum RewardCategory {
   };
 }
 
+enum BadgeMaterial {
+  wood('Дерево'),
+  iron('Железо'),
+  bronze('Бронза'),
+  silver('Серебро'),
+  gold('Золото'),
+  diamond('Бриллиант');
+
+  const BadgeMaterial(this.label);
+  final String label;
+  Color get ink =>
+      index < 2 ? const Color(0xFFFFF3D6) : const Color(0xFF080B10);
+
+  static BadgeMaterial forAchievement(AchievementRule rule) {
+    // Rank is local to this sport/metric, never inferred from XP or rule IDs.
+    final thresholds =
+        AchievementCatalog.rules
+            .where((r) => r.sport == rule.sport && r.metric == rule.metric)
+            .map((r) => r.threshold)
+            .toSet()
+            .toList()
+          ..sort();
+    final index = thresholds.indexOf(rule.threshold);
+    if (index < 0 || thresholds.length < 2) return wood;
+    return values[(index * (values.length - 1) / (thresholds.length - 1))
+        .round()];
+  }
+}
+
 class RewardBadge extends StatelessWidget {
   const RewardBadge({
     super.key,
@@ -45,6 +75,8 @@ class RewardBadge extends StatelessWidget {
     required this.unit,
     this.earned = true,
     this.size = 68,
+    this.sport = 'Все виды',
+    this.material = BadgeMaterial.wood,
   });
   factory RewardBadge.achievement(
     AchievementRule rule, {
@@ -58,12 +90,15 @@ class RewardBadge extends StatelessWidget {
       unit: number.unit,
       earned: earned,
       size: size,
+      sport: rule.sport,
+      material: BadgeMaterial.forAchievement(rule),
     );
   }
   factory RewardBadge.record(
     double meters, {
     bool earned = true,
     double size = 68,
+    String sport = 'Все виды',
   }) {
     final number = displayNumber(meters / 1000, 'км');
     return RewardBadge(
@@ -72,12 +107,22 @@ class RewardBadge extends StatelessWidget {
       unit: number.unit,
       earned: earned,
       size: size,
+      sport: sport,
+      // Records repeat indefinitely: do not invent a final improvement tier.
+      material: BadgeMaterial.gold,
     );
   }
   final RewardCategory category;
-  final String value, unit;
+  final String value, unit, sport;
   final bool earned;
   final double size;
+  final BadgeMaterial material;
+
+  IconData get sportIcon {
+    final index = SportCatalog.names.indexOf(SportCatalog.displayName(sport));
+    return index < 0 ? Icons.bolt_rounded : SportCatalog.icons[index];
+  }
+
   static ({String value, String unit}) displayNumber(
     double value,
     String unit,
@@ -101,132 +146,124 @@ class RewardBadge extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final accent = earned
-        ? (category == RewardCategory.record ? recordGold : lime)
-        : muted;
+    final height = size + 12;
+    final runningDistance =
+        sport == 'Бег' && category == RewardCategory.sportDistance;
+    final folder = runningDistance ? 'running-distance' : 'materials';
+    final image = Image.asset(
+      'assets/images/achievements/$folder/${material.name}.png',
+      fit: BoxFit.fill,
+      filterQuality: FilterQuality.medium,
+      excludeFromSemantics: true,
+    );
+    final ink = earned ? material.ink : const Color(0xFFE0E2EA);
     return Semantics(
-      label: '${category.label}: $value $unit',
+      label:
+          '$sport, ${category.label}: $value $unit, ${material.label}, ${earned ? 'получено' : 'не получено'}',
       child: ExcludeSemantics(
         child: SizedBox(
           width: size,
-          height: size + 12,
-          child: CustomPaint(
-            painter: _BadgePainter(category, accent),
-            child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 9),
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Icon(category.icon, size: 16, color: accent),
-                  const SizedBox(height: 4),
-                  Expanded(
-                    child: Center(
-                      child: FittedBox(
-                        fit: BoxFit.scaleDown,
-                        child: Text(
-                          value,
-                          textScaler: TextScaler.noScaling,
-                          style: TextStyle(
-                            fontSize: 23,
-                            height: 1,
-                            fontWeight: FontWeight.w700,
-                            color: earned ? Colors.white : muted,
-                          ),
-                        ),
-                      ),
+          height: height,
+          child: Stack(
+            fit: StackFit.expand,
+            children: [
+              if (earned)
+                image
+              else
+                Opacity(
+                  opacity: .4,
+                  child: ColorFiltered(
+                    colorFilter: const ColorFilter.matrix([
+                      .2126,
+                      .7152,
+                      .0722,
+                      0,
+                      0,
+                      .2126,
+                      .7152,
+                      .0722,
+                      0,
+                      0,
+                      .2126,
+                      .7152,
+                      .0722,
+                      0,
+                      0,
+                      0,
+                      0,
+                      0,
+                      1,
+                      0,
+                    ]),
+                    child: image,
+                  ),
+                ),
+              if (!runningDistance) ...[
+                Positioned(
+                  top: height * .13,
+                  left: size * .3,
+                  right: size * .3,
+                  child: Icon(sportIcon, color: ink, size: height * .2),
+                ),
+                Positioned(
+                  bottom: height * .12,
+                  left: size * .3,
+                  right: size * .3,
+                  child: Icon(category.icon, color: ink, size: height * .17),
+                ),
+              ],
+              Positioned(
+                top: height * .34,
+                height: height * .27,
+                left: size * .15,
+                right: size * .15,
+                child: FittedBox(
+                  fit: BoxFit.scaleDown,
+                  child: Text(
+                    value,
+                    textScaler: TextScaler.noScaling,
+                    style: TextStyle(
+                      fontSize: size * .43,
+                      height: 1,
+                      fontWeight: FontWeight.w800,
+                      color: ink,
                     ),
                   ),
-                  Text(
+                ),
+              ),
+              Positioned(
+                top: height * .62,
+                height: height * .09,
+                left: size * .2,
+                right: size * .2,
+                child: FittedBox(
+                  fit: BoxFit.scaleDown,
+                  child: Text(
                     unit,
                     textScaler: TextScaler.noScaling,
-                    maxLines: 1,
-                    style: const TextStyle(
-                      color: muted,
-                      fontSize: 11,
-                      height: 1.1,
+                    style: TextStyle(
+                      fontSize: size * .15,
+                      height: 1,
+                      fontWeight: FontWeight.w700,
+                      color: ink,
                     ),
                   ),
-                ],
+                ),
               ),
-            ),
+              if (!earned)
+                Positioned(
+                  right: 0,
+                  bottom: 1,
+                  child: Icon(
+                    Icons.lock_rounded,
+                    size: size * .19,
+                    color: muted,
+                  ),
+                ),
+            ],
           ),
         ),
       ),
     );
   }
-}
-
-class _BadgePainter extends CustomPainter {
-  const _BadgePainter(this.category, this.accent);
-  final RewardCategory category;
-  final Color accent;
-  Path _shape(Rect r) {
-    if (category == RewardCategory.record ||
-        category == RewardCategory.totalHours ||
-        category == RewardCategory.sportHours) {
-      return Path()..addOval(r);
-    }
-    final points = category == RewardCategory.sportWorkouts
-        ? const [
-            Offset(.5, 0),
-            Offset(.93, .14),
-            Offset(.88, .66),
-            Offset(.72, .86),
-            Offset(.5, 1),
-            Offset(.28, .86),
-            Offset(.12, .66),
-            Offset(.07, .14),
-          ]
-        : const [
-            Offset(.5, 0),
-            Offset(.94, .24),
-            Offset(.94, .76),
-            Offset(.5, 1),
-            Offset(.06, .76),
-            Offset(.06, .24),
-          ];
-    return Path()..addPolygon(
-      points
-          .map((p) => Offset(r.left + p.dx * r.width, r.top + p.dy * r.height))
-          .toList(),
-      true,
-    );
-  }
-
-  @override
-  void paint(Canvas canvas, Size size) {
-    final rect = Offset.zero & size;
-    final outer = _shape(rect.deflate(2));
-    canvas.drawPath(
-      outer,
-      Paint()
-        ..shader = const LinearGradient(
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-          colors: [Color(0xFF303846), Color(0xFF171B28)],
-        ).createShader(rect),
-    );
-    canvas.drawPath(
-      outer,
-      Paint()
-        ..style = PaintingStyle.stroke
-        ..strokeWidth = 1.7
-        ..shader = LinearGradient(
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-          colors: [accent, accent.withValues(alpha: .25), accent],
-        ).createShader(rect),
-    );
-    canvas.drawPath(
-      _shape(rect.deflate(6)),
-      Paint()
-        ..style = PaintingStyle.stroke
-        ..strokeWidth = .6
-        ..color = accent.withValues(alpha: .16),
-    );
-  }
-
-  @override
-  bool shouldRepaint(_BadgePainter oldDelegate) =>
-      oldDelegate.category != category || oldDelegate.accent != accent;
 }
