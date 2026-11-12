@@ -4,6 +4,9 @@ from pathlib import Path
 from urllib.request import Request,urlopen
 from urllib.error import HTTPError
 ROOT=Path(__file__).resolve().parents[2]
+import sys
+sys.path.insert(0,str(ROOT/'server'))
+from test_support import prepare_test_database
 build=ROOT/'build';build.mkdir(exist_ok=True)
 with tempfile.TemporaryDirectory(prefix='garmin-api-',dir=build) as temporary:
  temp=Path(temporary).resolve();assert temp.is_relative_to(build.resolve())
@@ -15,6 +18,7 @@ with tempfile.TemporaryDirectory(prefix='garmin-api-',dir=build) as temporary:
  import sys
  env['PACE_GARMIN_PYTHON']=sys.executable
  env['PACE_GARMIN_COLLECTOR']=str(fixture)
+ prepare_test_database(ROOT,temp)
  log=(temp/'pb.log').open('wb')
  proc=subprocess.Popen([str(ROOT/'server/runtime/pocketbase.exe'),'serve',f'--http=127.0.0.1:{port}',f'--dir={temp / "data"}',f'--migrationsDir={ROOT / "server/pb_migrations"}',f'--hooksDir={ROOT / "server/pb_hooks"}'],env=env,stdout=log,stderr=log,creationflags=getattr(subprocess,'CREATE_NO_WINDOW',0))
  def req(method,path,body=None,token=None):

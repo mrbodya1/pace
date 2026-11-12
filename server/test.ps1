@@ -45,6 +45,11 @@ function Request($method, $path, $body, $token, $expected) {
 }
 
 try {
+    # Seed a random disposable administrator before serve, avoiding browser installer tabs.
+    $bootstrapPassword = [Guid]::NewGuid().ToString('N') + [Guid]::NewGuid().ToString('N')
+    $bootstrapArgs = @('superuser','create','bootstrap@invalid.example',$bootstrapPassword,"--dir=`"$(Join-Path $testRoot 'data')`"", "--migrationsDir=`"$(Join-Path $PSScriptRoot 'pb_migrations')`"", "--hooksDir=`"$(Join-Path $PSScriptRoot 'pb_hooks')`"")
+    $bootstrap = Start-Process -FilePath $executable -ArgumentList $bootstrapArgs -WorkingDirectory $testRoot -WindowStyle Hidden -PassThru -Wait -RedirectStandardOutput (Join-Path $testRoot 'bootstrap.log') -RedirectStandardError (Join-Path $testRoot 'bootstrap.stderr')
+    if ($bootstrap.ExitCode -ne 0) { throw 'Temporary PocketBase bootstrap failed.' }
     $argsList = @('serve', "--http=127.0.0.1:$port", "--dir=`"$(Join-Path $testRoot 'data')`"", "--migrationsDir=`"$(Join-Path $PSScriptRoot 'pb_migrations')`"", "--hooksDir=`"$(Join-Path $PSScriptRoot 'pb_hooks')`"")
     $process = Start-Process -FilePath $executable -ArgumentList $argsList -WorkingDirectory $testRoot -WindowStyle Hidden -PassThru -RedirectStandardOutput (Join-Path $testRoot 'stdout.log') -RedirectStandardError (Join-Path $testRoot 'stderr.log')
     $ready = $false

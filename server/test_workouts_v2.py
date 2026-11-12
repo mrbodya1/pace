@@ -3,6 +3,7 @@ import json,secrets,socket,subprocess,tempfile,time,hashlib,sqlite3
 from datetime import datetime,timedelta,timezone
 from contextlib import closing
 from pathlib import Path
+from test_support import prepare_test_database
 from urllib.request import Request,urlopen
 from urllib.error import HTTPError
 ROOT=Path(__file__).resolve().parents[1]
@@ -17,6 +18,7 @@ def empty():return {'version':2,'xp':0,'achievements':{'version':1,'unlocked':{}
 with tempfile.TemporaryDirectory(prefix='pace-workouts-v2-') as folder:
  temp=Path(folder)
  with socket.socket() as sock:sock.bind(('127.0.0.1',0));port=sock.getsockname()[1]
+ prepare_test_database(ROOT,temp)
  log=(temp/'server.log').open('wb')
  proc=subprocess.Popen([str(ROOT/'server/runtime/pocketbase.exe'),'serve',f'--http=127.0.0.1:{port}',f'--dir={temp/"data"}',f'--migrationsDir={ROOT/"server/pb_migrations"}',f'--hooksDir={ROOT/"server/pb_hooks"}'],stdout=log,stderr=log,creationflags=getattr(subprocess,'CREATE_NO_WINDOW',0))
  def req(method,path,body=None,token=None):

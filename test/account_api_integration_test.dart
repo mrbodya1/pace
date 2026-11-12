@@ -15,6 +15,7 @@ import 'package:sport_platform/models/participant_sex.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import 'support/account_fakes.dart';
+import 'support/pocketbase_bootstrap.dart';
 
 void main() {
   final executable = Platform.environment['PACE_POCKETBASE_EXE'];
@@ -34,8 +35,9 @@ void main() {
         final port = socket.port;
         await socket.close();
         final url = Uri.parse('http://127.0.0.1:$port');
+        await preparePocketBaseTest(executable!, temporary);
         server = await Process.start(
-          executable!,
+          executable,
           [
             'serve',
             '--http=127.0.0.1:$port',

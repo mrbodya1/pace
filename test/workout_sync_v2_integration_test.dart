@@ -14,6 +14,7 @@ import 'package:sport_platform/models/progress_v2.dart';
 import 'package:sport_platform/services/account_service.dart';
 
 import 'support/account_fakes.dart';
+import 'support/pocketbase_bootstrap.dart';
 
 class LostCommitClient extends http.BaseClient {
   LostCommitClient(this.delegate);
@@ -102,7 +103,8 @@ void main() {
         final socket = await ServerSocket.bind(InternetAddress.loopbackIPv4, 0);
         final port = socket.port;
         await socket.close();
-        server = await Process.start(executable!, [
+        await preparePocketBaseTest(executable!, temp);
+        server = await Process.start(executable, [
           'serve',
           '--http=127.0.0.1:$port',
           '--dir=${temp.path}/data',

@@ -2,6 +2,7 @@
 import os,json,secrets,socket,sqlite3,subprocess,tempfile,time
 from contextlib import closing
 from pathlib import Path
+from test_support import prepare_test_database
 from datetime import datetime,timedelta,timezone
 from urllib.request import Request,urlopen
 from urllib.error import HTTPError
@@ -15,6 +16,7 @@ def iso(value):return value.isoformat().replace('+00:00','Z')
 with tempfile.TemporaryDirectory(prefix='pace-competition-') as folder:
  temp=Path(folder).resolve();dbpath=temp/'data/data.db';assert dbpath.is_relative_to(temp)
  with socket.socket() as sock:sock.bind(('127.0.0.1',0));port=sock.getsockname()[1]
+ prepare_test_database(ROOT,temp)
  log=(temp/'server.log').open('wb')
  proc=subprocess.Popen([str(ROOT/'server/runtime/pocketbase.exe'),'serve',f'--http=127.0.0.1:{port}',f'--dir={temp/"data"}',f'--migrationsDir={ROOT/"server/pb_migrations"}',f'--hooksDir={ROOT/"server/pb_hooks"}'],env={**os.environ,'PACE_ENABLE_LEGACY_API':'1'},stdout=log,stderr=log,creationflags=getattr(subprocess,'CREATE_NO_WINDOW',0))
  def req(method,path,body=None,token=None):

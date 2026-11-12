@@ -2,6 +2,7 @@
 import os,json, secrets, socket, subprocess, tempfile, time
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
+from test_support import prepare_test_database
 from urllib.request import Request, urlopen
 from urllib.error import HTTPError
 ROOT=Path(__file__).resolve().parents[1]
@@ -14,6 +15,7 @@ def check(condition,label):
 with tempfile.TemporaryDirectory(prefix='pace-community-') as folder:
  temp=Path(folder)
  with socket.socket() as sock:sock.bind(('127.0.0.1',0));port=sock.getsockname()[1]
+ prepare_test_database(ROOT,temp)
  log=(temp/'pb.log').open('wb')
  proc=subprocess.Popen([str(ROOT/'server/runtime/pocketbase.exe'),'serve',f'--http=127.0.0.1:{port}',f'--dir={temp/"data"}',f'--migrationsDir={ROOT/"server/pb_migrations"}',f'--hooksDir={ROOT/"server/pb_hooks"}'],env={**os.environ,'PACE_ENABLE_LEGACY_API':'1'},stdout=log,stderr=log,creationflags=getattr(subprocess,'CREATE_NO_WINDOW',0))
  def req(method,path,body=None,token=None):
